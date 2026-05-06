@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "snetor-ai-guidelines",
+  "description": "Snetor internal Claude Code plugins — skills and tools for the Snetor AI team",
+  "owner": {
+    "name": "Snetor",
+    "email": "c.peponnet@snetor.com"
+  },
+  "plugins": [
+    {
+      "name": "snetor-html-slides",
+      "description": "Generate Snetor-branded animated HTML presentation decks using the official Snetor design system (Raleway font, green/navy palette, animated components, logos, hero imagery). Use whenever someone asks for slides, a presentation deck, a COMEX deck, or any Snetor slide deck.",
+      "author": {
+        "name": "Snetor",
+        "email": "c.peponnet@snetor.com"
+      },
+      "source": "./plugins/snetor-html-slides",
+      "category": "productivity",
+      "homepage": "https://github.com/snetor/snetor-ai-guidelines"
+    }
+  ]
+}
