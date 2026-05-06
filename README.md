@@ -22,50 +22,57 @@
 
 ---
 
-## DÉMARRAGE RAPIDE
+## INSTALLATION
 
 ### Prérequis
 
 - [Claude Code](https://claude.ai/code) installé (CLI ou application desktop)
 - Node.js 18+
-- Git
 
-### 1. Cloner le repo
+---
+
+### Plugin snetor-html-slides
+
+#### Via le marketplace (recommandé)
+
+```
+/plugin marketplace add snetor/snetor-ai-guidelines
+/plugin install snetor-html-slides@snetor-ai-guidelines
+```
+
+#### Manuellement
 
 ```bash
-git clone <url-du-repo> snetor-ai-guidelines
-cd snetor-ai-guidelines
+git clone https://github.com/snetor/snetor-ai-guidelines.git
 ```
 
-### 2. Installer la status line
+Puis dans Claude Code : `/plugin install` et sélectionner `plugins/snetor-html-slides`.
 
-La status line affiche en bas de terminal le modèle actif, le répertoire courant, la branche git, l'usage de la fenêtre de contexte et le quota de tokens sur 5h.
+---
+
+### Status line
+
+Affiche modèle actif, branche git, contexte et quota tokens en bas de terminal :
 
 ```
-Claude Sonnet 4.6 | ~/dev/mon-projet | git:main | ctx ████████░░░░ 67% (670k/1M tok) | 5h ████░░░░░░ 40%
+Claude Sonnet 4.6 | ~/dev/mon-projet | git:main | ctx ████████░░ 67% (670k/1M tok) | 5h ████░░ 40%
 ```
 
-Voir [`statusline/README.md`](statusline/README.md) pour les instructions complètes. Résumé rapide sous Windows avec Node.js :
+**Installation automatique (Windows) :**
 
 ```powershell
-# 1. Copier le script dans ~/.claude/
-Copy-Item statusline\statusline-command.js "$env:USERPROFILE\.claude\statusline-command.js"
+.\statusline\install.ps1
 ```
 
-Puis ajouter dans `~/.claude/settings.json` :
+Redémarre Claude Code — la status line est active.
 
-```json
-"statusLine": {
-  "type": "command",
-  "command": "node C:/Users/VOTRE_USER/.claude/statusline-command.js",
-  "padding": 1,
-  "refreshInterval": 5
-}
-```
+> Voir [`statusline/README.md`](statusline/README.md) pour les détails et les variantes Linux/macOS.
 
-### 3. Appliquer CLAUDE.md globalement
+---
 
-Le fichier `CLAUDE.md` est automatiquement lu par Claude Code à l'ouverture de ce répertoire. Pour l'appliquer à tous les projets :
+### CLAUDE.md global
+
+Pour appliquer les conventions Snetor à tous tes projets :
 
 ```powershell
 Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
@@ -93,19 +100,16 @@ Bloc de référence pour `~/.claude/settings.json` :
 {
   "theme": "dark",
   "effortLevel": "medium",
-  "statusLine": {
-    "type": "command",
-    "command": "node C:/Users/VOTRE_USER/.claude/statusline-command.js",
-    "padding": 1,
-    "refreshInterval": 5
-  },
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true,
+    "snetor-html-slides@snetor-ai-guidelines": true
   }
 }
 ```
+
+> La clé `statusLine` est injectée automatiquement par `.\statusline\install.ps1`.
 
 > **Windows uniquement.** Si Git Bash n'est pas dans le PATH système, ajouter :
 > ```json
