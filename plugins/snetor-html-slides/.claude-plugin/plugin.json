@@ -1,0 +1,8 @@
+{
+  "name": "snetor-html-slides",
+  "description": "Generate Snetor-branded HTML presentation slides with the full Snetor design system (colors, fonts, components, animations). Use whenever someone needs a slide deck, presentation, or COMEX deck for Snetor.",
+  "author": {
+    "name": "Snetor",
+    "email": "c.peponnet@snetor.com"
+  }
+}
