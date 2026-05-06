@@ -2,7 +2,7 @@
   <img src="assets/snetor_full_logo.png" alt="Snetor" height="56" />
   <br /><br />
   <p><strong>AI ENGINEERING GUIDELINES</strong></p>
-  <p>Configurations, workflows et bonnes pratiques Claude Code pour les AI Engineers Snetor.</p>
+  <p>Claude Code configurations, workflows and best practices for Snetor AI Engineers.</p>
   <br />
   <img src="https://img.shields.io/badge/Claude_Code-007D36?style=flat-square&logoColor=white" alt="Claude Code" />
   <img src="https://img.shields.io/badge/Superpowers-152B47?style=flat-square&logoColor=white" alt="Superpowers" />
@@ -12,67 +12,67 @@
 
 ---
 
-## CONTENU DU REPO
+## CONTENTS
 
-| Fichier / Dossier | Description |
+| File / Folder | Description |
 |---|---|
-| `CLAUDE.md` | Instructions globales injectées dans chaque session Claude Code |
-| `statusline/` | Status line personnalisée — contexte, rate limit, branche git |
-| `assets/` | Ressources graphiques Snetor |
+| `CLAUDE.md` | Global instructions injected into every Claude Code session |
+| `statusline/` | Custom status line — context usage, rate limit, git branch |
+| `assets/` | Snetor brand assets |
 
 ---
 
 ## INSTALLATION
 
-### Prérequis
+### Prerequisites
 
-- [Claude Code](https://claude.ai/code) installé (CLI ou application desktop)
+- [Claude Code](https://claude.ai/code) installed (desktop app or CLI)
 - Node.js 18+
 
 ---
 
 ### Plugin snetor-html-slides
 
-#### Via le marketplace (recommandé)
+#### Via the marketplace (recommended)
 
 ```
 /plugin marketplace add snetor/snetor-ai-guidelines
 /plugin install snetor-html-slides@snetor-ai-guidelines
 ```
 
-#### Manuellement
+#### Manually
 
 ```bash
 git clone https://github.com/snetor/snetor-ai-guidelines.git
 ```
 
-Puis dans Claude Code : `/plugin install` et sélectionner `plugins/snetor-html-slides`.
+Then in Claude Code: `/plugin install` and select `plugins/snetor-html-slides`.
 
 ---
 
 ### Status line
 
-Affiche modèle actif, branche git, contexte et quota tokens en bas de terminal :
+Displays active model, git branch, context usage and token quota at the bottom of the terminal:
 
 ```
-Claude Sonnet 4.6 | ~/dev/mon-projet | git:main | ctx ████████░░ 67% (670k/1M tok) | 5h ████░░ 40%
+Claude Sonnet 4.6 | ~/dev/my-project | git:main | ctx ████████░░ 67% (670k/1M tok) | 5h ████░░ 40%
 ```
 
-**Installation automatique (Windows) :**
+**Automated install (Windows):**
 
 ```powershell
 .\statusline\install.ps1
 ```
 
-Redémarre Claude Code — la status line est active.
+Restart Claude Code — the status line is active.
 
-> Voir [`statusline/README.md`](statusline/README.md) pour les détails et les variantes Linux/macOS.
+> See [`statusline/README.md`](statusline/README.md) for details and Linux/macOS variants.
 
 ---
 
-### CLAUDE.md global
+### Global CLAUDE.md
 
-Pour appliquer les conventions Snetor à tous tes projets :
+To apply Snetor conventions to all your projects:
 
 ```powershell
 Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
@@ -80,21 +80,21 @@ Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
 
 ---
 
-## PLUGINS RECOMMANDÉS
+## RECOMMENDED PLUGINS
 
-Activer via `/config` dans Claude Code ou directement dans `~/.claude/settings.json`.
+Enable via `/config` in Claude Code or directly in `~/.claude/settings.json`.
 
-| Plugin | Rôle |
+| Plugin | Role |
 |---|---|
-| `superpowers@claude-plugins-official` | Workflows avancés — brainstorming, TDD, debugging, plans, code review |
-| `context7@claude-plugins-official` | Documentation à jour des librairies, injectée directement dans le contexte |
-| `frontend-design@claude-plugins-official` | Génération d'interfaces frontend de qualité production |
+| `superpowers@claude-plugins-official` | Advanced workflows — brainstorming, TDD, debugging, plans, code review |
+| `context7@claude-plugins-official` | Up-to-date library docs injected directly into context |
+| `frontend-design@claude-plugins-official` | Production-quality frontend UI generation |
 
 ---
 
-## CONFIGURATION SETTINGS.JSON
+## SETTINGS.JSON REFERENCE
 
-Bloc de référence pour `~/.claude/settings.json` :
+Reference block for `~/.claude/settings.json`:
 
 ```json
 {
@@ -109,9 +109,9 @@ Bloc de référence pour `~/.claude/settings.json` :
 }
 ```
 
-> La clé `statusLine` est injectée automatiquement par `.\statusline\install.ps1`.
+> The `statusLine` key is injected automatically by `.\statusline\install.ps1`.
 
-> **Windows uniquement.** Si Git Bash n'est pas dans le PATH système, ajouter :
+> **Windows only.** If Git Bash is not in the system PATH, add:
 > ```json
 > "env": { "CLAUDE_CODE_GIT_BASH_PATH": "C:\\...\\Git\\bin\\bash.exe" }
 > ```
@@ -120,46 +120,46 @@ Bloc de référence pour `~/.claude/settings.json` :
 
 ## WORKFLOWS
 
-Les workflows sont gérés par le plugin `superpowers`. Chaque skill s'active automatiquement selon le contexte — aucune commande manuelle requise.
+Workflows are managed by the `superpowers` plugin. Each skill activates automatically based on context — no manual commands required.
 
-| Skill | Déclenchement | Rôle |
+| Skill | Trigger | Role |
 |---|---|---|
-| `superpowers:brainstorming` | Avant toute création de feature | Explore les besoins et le design avant le code |
-| `superpowers:writing-plans` | Tâche multi-étapes | Génère un plan détaillé avant l'implémentation |
-| `superpowers:executing-plans` | Exécution d'un plan existant | Avancement avec checkpoints de review |
-| `superpowers:test-driven-development` | Avant d'écrire du code | Cycle red-green-refactor |
-| `superpowers:systematic-debugging` | Face à un bug | Diagnostic structuré avant correction |
-| `superpowers:requesting-code-review` | Après implémentation | Review multi-agents |
-| `superpowers:verification-before-completion` | Avant de déclarer done | Vérifie le fonctionnement réel avant commit |
+| `superpowers:brainstorming` | Before any feature creation | Explores requirements and design before code |
+| `superpowers:writing-plans` | Multi-step task | Generates a detailed plan before implementation |
+| `superpowers:executing-plans` | Executing an existing plan | Step-by-step execution with review checkpoints |
+| `superpowers:test-driven-development` | Before writing code | Red-green-refactor cycle |
+| `superpowers:systematic-debugging` | When hitting a bug | Structured diagnosis before fixing |
+| `superpowers:requesting-code-review` | After implementation | Multi-agent review |
+| `superpowers:verification-before-completion` | Before declaring done | Verifies actual behavior before commit |
 
 ---
 
 ## CONVENTIONS
 
-### Workflow standard
+### Standard workflow
 
-1. **Plan d'abord.** Pour toute tâche non triviale (3 étapes ou plus), écrire le plan dans `tasks/todo.md` avant de toucher au code.
-2. **Vérification avant done.** Ne jamais marquer une tâche complète sans preuve de fonctionnement.
-3. **Subagents pour la recherche.** Déléguer l'exploration et l'analyse parallèle à des agents dédiés.
-4. **Leçons.** Après toute correction, documenter le pattern dans `tasks/lessons.md`.
+1. **Plan first.** For any non-trivial task (3+ steps), write the plan in `tasks/todo.md` before touching code.
+2. **Verify before done.** Never mark a task complete without proof it works.
+3. **Subagents for research.** Delegate exploration and parallel analysis to dedicated agents.
+4. **Lessons.** After any correction, document the pattern in `tasks/lessons.md`.
 
-### Modèles Claude
+### Claude models
 
-| Modèle | ID | Usage recommandé |
+| Model | ID | Recommended use |
 |---|---|---|
-| Claude Opus 4.7 | `claude-opus-4-7` | Tâches complexes, décisions d'architecture |
-| Claude Sonnet 4.6 | `claude-sonnet-4-6` | Usage quotidien (défaut) |
-| Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | Tâches simples, volume élevé, latence critique |
+| Claude Opus 4.7 | `claude-opus-4-7` | Complex tasks, architecture decisions |
+| Claude Sonnet 4.6 | `claude-sonnet-4-6` | Daily use (default) |
+| Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | Simple tasks, high volume, latency-sensitive |
 
-Changer de modèle en session : `/model`
+Switch model in session: `/model`
 
 ---
 
-## RESSOURCES
+## RESOURCES
 
-- [Claude Code — Documentation officielle](https://docs.anthropic.com/claude/claude-code)
+- [Claude Code — Official documentation](https://docs.anthropic.com/claude/claude-code)
 - [Anthropic API](https://docs.anthropic.com/claude/api)
-- [Plugins officiels Claude Code](https://claude.ai/plugins)
+- [Official Claude Code plugins](https://claude.ai/plugins)
 
 ---
 

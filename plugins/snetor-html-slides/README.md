@@ -13,38 +13,20 @@ When invoked, this skill produces a single self-contained `.html` file with:
 
 ## Installation
 
-### Prerequisites
+### Via the marketplace (recommended)
 
-- Claude Code installed (desktop app or CLI)
-- The `snetor-ai-guidelines` repo cloned locally
+```
+/plugin marketplace add snetor/snetor-ai-guidelines
+/plugin install snetor-html-slides@snetor-ai-guidelines
+```
 
-### Steps
+### Manually
 
-1. **Clone the repo** (if not already done):
-   ```
-   git clone https://github.com/snetor/snetor-ai-guidelines.git
-   ```
+```bash
+git clone https://github.com/snetor/snetor-ai-guidelines.git
+```
 
-2. **Add the Snetor marketplace** in Claude Code:
-   - Open `/plugin` → **Add Marketplace**
-   - Enter the local path to the repo, e.g.:
-     ```
-     C:\path\to\snetor-ai-guidelines
-     ```
-     or on macOS/Linux:
-     ```
-     /path/to/snetor-ai-guidelines
-     ```
-
-3. **Install the plugin** from the Installed tab or by running:
-   ```
-   /plugin install snetor-ai-guidelines/snetor-html-slides
-   ```
-
-4. **Reload plugins**:
-   ```
-   /reload-plugins
-   ```
+Then in Claude Code: `/plugin install` and select `plugins/snetor-html-slides`.
 
 The skill `snetor-html-slides:snetor-html-slides` will now appear in `/skills`.
 
