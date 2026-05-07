@@ -280,6 +280,55 @@ Active step gets `class="on"`.
 
 ---
 
+## Dynamic Chart Card (Chart.js)
+
+For any non-trivial chart (multi-series bar, donut, line trend, radar, area), use the `chart-card` component documented in `references/charts.md`.
+
+```html
+<article class="chart-card animate d1">
+  <div class="eyebrow">Cloud Market 2025</div>
+  <h3>Part de marché</h3>
+  <div class="chart-wrap">
+    <canvas
+      data-chart="donut"
+      data-labels='["Azure","AWS","GCP","Other"]'
+      data-values='[24,31,11,34]'
+      data-suffix="%"
+    ></canvas>
+  </div>
+  <p class="source-note">Source: <a href="URL">Gartner 2025</a></p>
+</article>
+```
+
+Static one-row CSS charts (`.stacked`, `.impact-bars`) remain available for simple cases. See `references/charts.md` for the full bootstrap script and chart type guide.
+
+---
+
+## World Map (jsvectormap)
+
+For implantations / coverage slides:
+
+```html
+<div class="world-map" data-points='[
+  {"name":"HQ Lyon","coords":[45.74,4.84]},
+  {"name":"Madrid","coords":[40.42,-3.70]}
+]'></div>
+```
+
+See `references/charts.md` for the bootstrap script and styling.
+
+---
+
+## Animated Counter Metric
+
+```html
+<span class="metric counter" data-target="88" data-suffix="%" data-duration="1200">0%</span>
+```
+
+Counts up from 0 to `data-target` when the slide becomes active. See `references/charts.md` for the bootstrap and the hook into `show()`.
+
+---
+
 ## Stacked Bar Chart (cloud market share style)
 
 ```html

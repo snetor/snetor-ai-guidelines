@@ -291,6 +291,20 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .fact-card p { font-size:15px; line-height:1.36; }
 .slide.active .fact-card { animation: fadeScale 520ms var(--ease) both; }
 
+/* CHART CARDS (Chart.js wrapper) */
+.chart-card { padding:22px; border:1px solid var(--border); border-radius:6px; background:var(--white); box-shadow:0 2px 6px rgba(21,43,71,.08); display:flex; flex-direction:column; gap:14px; }
+.chart-card h3 { margin:0; }
+.chart-wrap { position:relative; height:240px; }
+.chart-wrap canvas { max-height:100%; }
+.dark .chart-card { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.24); box-shadow:none; }
+.dark .chart-card h3 { color:white; }
+.dark .chart-card .source-note { color:rgba(255,255,255,.7); }
+.dark .chart-card .source-note a { color:var(--pastel); }
+
+/* WORLD MAP (jsvectormap wrapper) */
+.world-map { width:100%; height:340px; }
+.jvm-tooltip { background:var(--navy) !important; color:white !important; padding:8px 12px !important; border-radius:6px !important; font:600 13px Raleway, sans-serif !important; box-shadow:var(--shadow) !important; }
+
 /* SERVICE CHIPS */
 .service-cloud { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; }
 .service-chip { min-height:84px; padding:14px 16px; border-radius:6px; border:1px solid var(--border); background:var(--white); box-shadow:0 2px 6px rgba(21,43,71,.08); }
