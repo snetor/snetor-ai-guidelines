@@ -11,6 +11,15 @@ When invoked, this skill produces a single self-contained `.html` file with:
 - Interactive check-cards for validation slides
 - Progress indicator
 
+## What's new in 1.2
+
+- **21st.dev components** — Snetor-branded marquee, bento grid, animated shiny text, spotlight cards (no dependencies). See `references/external-libs.md`.
+- **Lottie icons** — animated SVG icons on fact-cards via lottie-web CDN.
+- **tsParticles cover** — subtle particle effect on cover slides via `.particles` class.
+- **Presenter mode** — `F` (fullscreen) / `O` (overview grid) / `N` (speaker notes) / `T` (timer) / `?` (shortcuts modal). See `references/presenter-mode.md`.
+- **Speaker notes** — `<aside class="notes">` per slide, hidden by default, revealed via `N`.
+- **Rules updated** — 23 non-negotiable rules now (was 15).
+
 ## What's new in 1.1
 
 - **Multilingual** — auto-detection FR / EN / ES from the request, override via explicit mention. Other languages best-effort with EN UI fallback. See `references/i18n.md`.

@@ -9,7 +9,7 @@
       "name": "snetor-html-slides",
       "source": "./plugins/snetor-html-slides",
       "description": "Generate Snetor-branded animated HTML presentation decks",
-      "version": "1.1.0"
+      "version": "1.2.0"
     }
   ]
 }
