@@ -163,6 +163,8 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 17. **Bento grid** — for "value prop synthesis" / "what we do" slides only. Max 1 bento per deck. 5 cells with mixed `.big` / `.tall` / `.wide` / `.green` / `.dark` modifiers.
 18. **Animated shiny text** — limit to h1 on cover AND/OR 1 big-message per deck. Otherwise overuse kills the effect.
 19. **Spotlight cards** — `.dark` slides only, max 1 row per deck.
+20. **Lottie icons** — fact-cards only (not as decoration). Prefer pre-loaded JSON in `assets/<deck>/lottie/` over remote URLs for stability. See `references/external-libs.md`.
+21. **tsParticles** — only on the cover slide via class `.particles`. Never on content slides (distracting).
 
 ---
 
