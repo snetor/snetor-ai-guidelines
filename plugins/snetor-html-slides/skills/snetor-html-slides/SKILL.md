@@ -129,6 +129,30 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
     <button type="button" id="next" aria-label="{{next_aria}}"></button>
   </nav>
 
+  <!-- Presenter mode overlays — see references/presenter-mode.md -->
+  <div class="overview-grid" id="overview-grid" aria-hidden="true"></div>
+  <div class="shortcuts-modal" id="shortcuts-modal" aria-hidden="true">
+    <div class="panel">
+      <h3>Keyboard shortcuts</h3>
+      <dl>
+        <dt>← →</dt><dd>{{prev_next_shortcut_label}}</dd>
+        <dt>Space</dt><dd>{{next_slide_label}}</dd>
+        <dt>Home / End</dt><dd>{{first_last_label}}</dd>
+        <dt>F</dt><dd>{{fullscreen_label}}</dd>
+        <dt>O</dt><dd>{{overview_label}}</dd>
+        <dt>N</dt><dd>{{notes_label}}</dd>
+        <dt>T</dt><dd>{{timer_label}}</dd>
+        <dt>?</dt><dd>{{help_label}}</dd>
+        <dt>Esc</dt><dd>{{close_label}}</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="notes-overlay" id="notes-overlay" aria-hidden="true">
+    <span class="label">{{presenter_notes_label}}</span>
+    <div class="content"></div>
+  </div>
+  <div class="timer-display" id="timer-display" aria-hidden="true">00:00</div>
+
   <script>
     /* === NAVIGATION JS FROM references/css-system.md === */
     /* Replace DECK_TITLE with the actual title string */
@@ -165,6 +189,8 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 19. **Spotlight cards** — `.dark` slides only, max 1 row per deck.
 20. **Lottie icons** — fact-cards only (not as decoration). Prefer pre-loaded JSON in `assets/<deck>/lottie/` over remote URLs for stability. See `references/external-libs.md`.
 21. **tsParticles** — only on the cover slide via class `.particles`. Never on content slides (distracting).
+22. **Speaker notes** — for any slide whose body text exceeds 30 words, add `<aside class="notes">` with the detail. Presenter accesses via `N` key. See `references/presenter-mode.md`.
+23. **Presenter mode DOM** — every deck must include the 4 overlays (`#overview-grid`, `#shortcuts-modal`, `#notes-overlay`, `#timer-display`) after the `<main class="deck">` block. Bootstrap script from `references/presenter-mode.md` is always included.
 
 ---
 
