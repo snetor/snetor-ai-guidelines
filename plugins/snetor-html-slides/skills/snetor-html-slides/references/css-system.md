@@ -357,6 +357,46 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 #prev::before { transform:rotate(-45deg); }
 #next::before { transform:rotate(135deg); }
 
+/* TABS (interactive) */
+.tab-slide { display:flex; flex-direction:column; gap:18px; }
+.tabs { display:flex; gap:6px; border-bottom:1px solid var(--border); }
+.tab { padding:12px 20px; border:none; background:transparent; color:var(--muted); font:600 15px Raleway, sans-serif; cursor:pointer; border-bottom:3px solid transparent; transition:color 200ms var(--ease), border-color 200ms var(--ease); }
+.tab:hover { color:var(--green); }
+.tab.active { color:var(--green); border-bottom-color:var(--green); }
+.tab-panels { position:relative; min-height:240px; }
+.panel { display:none; }
+.panel.active { display:block; animation:fadeScale 320ms var(--ease) both; }
+.dark .tab { color:rgba(255,255,255,.7); }
+.dark .tab:hover, .dark .tab.active { color:var(--pastel); }
+.dark .tab.active { border-bottom-color:var(--pastel); }
+.dark .tabs { border-bottom-color:rgba(255,255,255,.18); }
+
+/* ACCORDION */
+.accordion { display:grid; gap:8px; }
+.accordion > div { display:flex; flex-direction:column; }
+.acc-trigger { display:flex; justify-content:space-between; align-items:center; width:100%; padding:14px 18px; border:1px solid var(--border); border-radius:6px; background:var(--white); color:var(--navy); font:700 16px Raleway, sans-serif; cursor:pointer; text-align:left; transition:border-color 200ms var(--ease), background 200ms var(--ease); }
+.acc-trigger:hover { border-color:var(--green); background:var(--green-05); }
+.acc-trigger::after { content:""; flex:0 0 auto; width:10px; height:10px; border-right:2px solid var(--green); border-bottom:2px solid var(--green); transform:rotate(45deg); transition:transform 220ms var(--ease); margin-left:14px; }
+.acc-trigger[aria-expanded="true"]::after { transform:rotate(-135deg); }
+.acc-panel { padding:14px 18px; border:1px solid var(--border); border-top:none; border-radius:0 0 6px 6px; background:var(--green-05); color:var(--muted); font-size:15px; line-height:1.5; animation:rise 280ms var(--ease) both; }
+.acc-trigger[aria-expanded="true"] { border-radius:6px 6px 0 0; border-bottom-color:transparent; }
+
+/* HOVER-REVEAL CARDS */
+.card.reveal { position:relative; overflow:hidden; cursor:pointer; }
+.card.reveal .reveal-back { position:absolute; inset:0; padding:22px; background:linear-gradient(135deg, var(--navy), var(--green)); color:white; transform:translateY(100%); transition:transform 320ms var(--ease); display:flex; flex-direction:column; justify-content:center; gap:10px; }
+.card.reveal:hover .reveal-back, .card.reveal:focus-within .reveal-back { transform:translateY(0); }
+.card.reveal .reveal-back h3, .card.reveal .reveal-back p { color:white; }
+.card.reveal::after { content:"+"; position:absolute; top:14px; right:16px; width:24px; height:24px; border-radius:50%; background:var(--green); color:white; display:grid; place-items:center; font-weight:700; font-size:18px; line-height:1; transition:transform 220ms var(--ease); z-index:2; }
+.card.reveal:hover::after { transform:rotate(45deg); background:white; color:var(--green); }
+
+/* TOOLTIPS */
+.has-tooltip { position:relative; border-bottom:1px dotted var(--green); cursor:help; outline:none; }
+.has-tooltip:focus-visible { outline:2px solid var(--green); outline-offset:2px; border-radius:2px; }
+.has-tooltip::after { content:attr(data-tooltip); position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%) translateY(4px); padding:10px 14px; min-width:180px; max-width:300px; background:var(--navy); color:white; font-size:13px; line-height:1.42; font-weight:500; border-radius:6px; box-shadow:var(--shadow); opacity:0; visibility:hidden; transition:opacity 200ms var(--ease), visibility 200ms var(--ease), transform 200ms var(--ease); pointer-events:none; z-index:30; white-space:normal; text-align:left; }
+.has-tooltip::before { content:""; position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--navy); opacity:0; transition:opacity 200ms var(--ease); pointer-events:none; z-index:30; }
+.has-tooltip:hover::after, .has-tooltip:focus::after { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); }
+.has-tooltip:hover::before, .has-tooltip:focus::before { opacity:1; }
+
 /* RESPONSIVE */
 @media (max-width: 980px) {
   body { overflow: auto; }
@@ -366,6 +406,9 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
   h1 { font-size:38px; } h2 { font-size:30px; } p, li { font-size:16px; } .lead { font-size:18px; }
   .grid, .market-facts, .market-strip, .brick-wall, .provider-grid, .check-grid,
   .tradeoff-grid, .path, .timeline, .cost-band, .service-cloud { grid-template-columns: 1fr; }
+  .tabs { flex-wrap:wrap; }
+  .chart-wrap { height:200px; }
+  .world-map { height:240px; }
   .path::before { display:none; }
   .globe { opacity:.25; right:16px; bottom:40px; width:150px; height:150px; }
   .footer { margin-top:24px; }

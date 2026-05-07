@@ -385,6 +385,76 @@ Odd children (1st, 3rd...) get the navy/green-05 style automatically.
 
 ---
 
+## Tabs (interactive — alternative to splitting into 3 slides)
+
+```html
+<div class="tab-slide">
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="opt1" role="tab">Option A</button>
+    <button class="tab" data-tab="opt2" role="tab">Option B</button>
+    <button class="tab" data-tab="opt3" role="tab">Option C</button>
+  </div>
+  <div class="tab-panels">
+    <div class="panel active" id="opt1" role="tabpanel">
+      <!-- content for option A -->
+    </div>
+    <div class="panel" id="opt2" role="tabpanel">
+      <!-- content for option B -->
+    </div>
+    <div class="panel" id="opt3" role="tabpanel">
+      <!-- content for option C -->
+    </div>
+  </div>
+</div>
+```
+
+Bootstrap script in `references/interactivity.md`.
+
+---
+
+## Accordion (details on demand)
+
+```html
+<div class="accordion">
+  <div>
+    <button class="acc-trigger" aria-expanded="false">Risk #1 — Vendor lock-in</button>
+    <div class="acc-panel" hidden>Details about the risk and mitigations.</div>
+  </div>
+  <div>
+    <button class="acc-trigger" aria-expanded="false">Risk #2 — Data residency</button>
+    <div class="acc-panel" hidden>Details.</div>
+  </div>
+</div>
+```
+
+---
+
+## Hover-reveal Card (punchline + reveal)
+
+```html
+<article class="card reveal animate d1">
+  <span class="metric counter" data-target="88" data-suffix="%">0%</span>
+  <h3>Visible label</h3>
+  <p>Short visible context.</p>
+  <div class="reveal-back">
+    <h3>Detail on hover</h3>
+    <p>Extended explanation visible only when hovered.</p>
+  </div>
+</article>
+```
+
+---
+
+## Tooltips (technical terms / acronyms)
+
+```html
+<p>We use <span data-tooltip="Retrieval-Augmented Generation: combine a search index with an LLM to ground answers in your data.">RAG</span> for the knowledge base.</p>
+```
+
+Use sparingly — max 2-3 tooltips per slide. Bootstrap auto-adds `tabindex="0"` for keyboard accessibility.
+
+---
+
 ## Logo Usage in Slides
 
 Assets bundled with the skill live in `skills/snetor-html-slides/assets/`.

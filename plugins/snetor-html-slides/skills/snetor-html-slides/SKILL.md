@@ -157,6 +157,8 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 11. **Charts** — for any non-trivial quantitative comparison (multi-series, donut, line trend, radar, area), use `chart-card` from `references/charts.md`. Do NOT generate raw `<canvas>` or hand-coded SVG bars. The CSS-based `.stacked` and `.impact-bars` remain valid for simple single-row visualizations.
 12. **Counters** — for hero metrics on cover/dark slides or fact-cards, prefer `.metric.counter` with `data-target` over static text.
 13. **CDN libs** — only include Chart.js / jsvectormap when the deck actually uses them. Pin versions per `references/charts.md`.
+14. **Prefer interactivity over text** — if a slide compares 3+ options, use `tab-slide` instead of bullet lists. If a slide has details that interrupt the main message, push them into `accordion` or `tooltip`. Aim for max 30 words of body text per slide outside of statements.
+15. **Hover-reveal cards** — use sparingly (max 1 row per deck) for "punchline + reveal" effects on metric cards. See `references/interactivity.md`.
 
 ---
 
