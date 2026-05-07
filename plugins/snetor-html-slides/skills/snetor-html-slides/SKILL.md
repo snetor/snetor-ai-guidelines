@@ -44,6 +44,12 @@ Identify:
 3. **Key messages** — what the audience must leave with (1–3 decisions or insights)
 4. **Slide count** — default to 4–6 slides; COMEX decks stay at 4–5
 5. **Source material** — vault pages, interview notes, existing wikis to draw from
+6. **Language** — detect from the request following `references/i18n.md`:
+   - User writes in FR → deck FR (default)
+   - User writes in EN → deck EN
+   - User writes in ES → deck ES
+   - Explicit override "in [language]" wins over auto-detection
+   - For other languages: generate content in that language, fall back to EN UI strings
 
 If the request is ambiguous, infer from context in the vault (`index.md`, relevant `02-Wiki/` pages) rather than asking — then confirm the structure before generating HTML.
 
@@ -98,7 +104,7 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 
 ```html
 <!doctype html>
-<html lang="fr">
+<html lang="{{LANG}}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -118,14 +124,19 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
     <!-- Others get class="slide" -->
   </main>
 
-  <nav class="nav" aria-label="Navigation slides">
-    <button type="button" id="prev" aria-label="Slide précédente"></button>
-    <button type="button" id="next" aria-label="Slide suivante"></button>
+  <nav class="nav" aria-label="{{nav_aria}}">
+    <button type="button" id="prev" aria-label="{{prev_aria}}"></button>
+    <button type="button" id="next" aria-label="{{next_aria}}"></button>
   </nav>
 
   <script>
     /* === NAVIGATION JS FROM references/css-system.md === */
     /* Replace DECK_TITLE with the actual title string */
+    /* Append in this order after navigation JS: */
+    /* 1. Interactivity bootstrap from references/interactivity.md (always) */
+    /* 2. Chart.js bootstrap from references/charts.md (only if deck uses charts) */
+    /* 3. Counter animation from references/charts.md (only if deck uses .counter) */
+    /* 4. World map bootstrap from references/charts.md (only if deck uses .world-map) */
   </script>
 </body>
 </html>
@@ -134,7 +145,7 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 ### Non-negotiable rules
 
 1. **Copy the CSS verbatim** from `references/css-system.md`. Do not paraphrase, shorten, or reconstruct from memory. Replace `DECK_NAME` with the actual folder name.
-2. **French language** — all slide content must be in French unless the user asks otherwise.
+2. **Language detection** — detect deck language from the request following `references/i18n.md` rules (FR/EN/ES priority, others best-effort). Set `<html lang="...">` to ISO code. Use the i18n dictionary for UI chrome strings (check-card labels, nav aria-labels, "Sources" footer).
 3. **One cover slide** — always `class="slide cover active"`. Subsequent slides have no `cover` class and no `active` class (JS adds it).
 4. **Eyebrow labels in headers** — every content slide header gets an `<div class="eyebrow">` with a 2–3 word section label.
 5. **Footer on every slide** — include `.footer` with `.sources` (cite vault pages or external URLs) and `.progress`.
