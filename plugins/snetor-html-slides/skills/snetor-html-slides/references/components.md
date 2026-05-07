@@ -455,6 +455,130 @@ Use sparingly — max 2-3 tooltips per slide. Bootstrap auto-adds `tabindex="0"`
 
 ---
 
+## Marquee — infinite logo scroll (21st.dev)
+
+For "ecosystem / partners / clients" slides with **6+ logos**. Pause on hover. Always duplicate the logo set twice in the markup.
+
+See `references/external-libs.md` for the full pattern.
+
+```html
+<div class="marquee animate d1">
+  <div class="marquee-track">
+    <div class="marquee-logo" style="background-image:url('../assets/DECK/azure.png');"></div>
+    <div class="marquee-logo" style="background-image:url('../assets/DECK/aws.png');"></div>
+    <!-- ... rest of logos ... then DUPLICATE ALL OF THEM AGAIN ... -->
+  </div>
+</div>
+```
+
+---
+
+## Bento Grid — asymmetric value prop (21st.dev)
+
+For "what we do / value proposition synthesis" slides. **Max 1 per deck.**
+
+```html
+<div class="bento animate d1">
+  <article class="bento-cell big">
+    <div class="eyebrow">Mission</div>
+    <h3>Headline</h3>
+    <p>Synthesis paragraph.</p>
+  </article>
+  <article class="bento-cell"><span class="metric">12</span><p>Label</p></article>
+  <article class="bento-cell green"><h3>Title</h3><p>Note.</p></article>
+  <article class="bento-cell tall"><h3>Title</h3><p>Note.</p></article>
+  <article class="bento-cell dark"><span class="metric pastel">42%</span><p>Label.</p></article>
+</div>
+```
+
+Cell modifiers: `.big` (col×2 row×2), `.tall` (row×2), `.wide` (col×2), `.green`, `.dark`.
+
+---
+
+## Animated Shiny Text (21st.dev)
+
+For h1 cover headline AND/OR 1 big-message punchline. No more.
+
+```html
+<h1 class="shiny-text">Snetor AI Strategy 2026.</h1>
+```
+
+On light backgrounds use `.shiny-text.dark-bg`.
+
+---
+
+## Spotlight Cards — mouse-following radial (21st.dev)
+
+`.dark` slides only, max 1 row per deck.
+
+```html
+<div class="grid cols-3">
+  <article class="spotlight-card animate d1">
+    <h3>Pillar 1</h3>
+    <p>Description.</p>
+  </article>
+  <article class="spotlight-card animate d2">
+    <h3>Pillar 2</h3>
+    <p>Description.</p>
+  </article>
+  <article class="spotlight-card animate d3">
+    <h3>Pillar 3</h3>
+    <p>Description.</p>
+  </article>
+</div>
+```
+
+Bootstrap script in `references/external-libs.md`.
+
+---
+
+## Lottie Icon on Fact-card
+
+```html
+<article class="fact-card animate d1">
+  <div class="lottie-icon" data-src="https://lottie.host/HASH/icon.json"></div>
+  <span class="metric counter" data-target="42" data-suffix="%">0%</span>
+  <h3>Croissance</h3>
+  <p>Sur 12 mois.</p>
+</article>
+```
+
+Sources for icons: lottie.host community library OR local `assets/DECK/lottie/*.json`. See `references/external-libs.md`.
+
+---
+
+## tsParticles Cover
+
+Add `.particles` to the cover slide class. Bootstrap auto-injects the canvas.
+
+```html
+<section class="slide cover active particles">
+  <!-- normal cover content -->
+</section>
+```
+
+---
+
+## Speaker Notes (presenter mode)
+
+Every slide may include a speaker notes aside, hidden by default and revealed via the `N` key in presenter mode:
+
+```html
+<section class="slide">
+  <header class="brand"><!-- ... --></header>
+  <div class="body"><!-- ... --></div>
+  <aside class="notes">
+    What the presenter should say here. Backstory, numbers, anecdote.
+    Not visible to the audience unless they press N.
+  </aside>
+  <footer class="footer"><!-- ... --></footer>
+</section>
+```
+
+Required for any slide whose body text exceeds 30 words.
+
+---
+
 ## Logo Usage in Slides
 
 Assets bundled with the skill live in `skills/snetor-html-slides/assets/`.

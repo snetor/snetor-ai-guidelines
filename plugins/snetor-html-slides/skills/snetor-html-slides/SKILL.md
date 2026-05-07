@@ -159,6 +159,10 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 13. **CDN libs** — only include Chart.js / jsvectormap when the deck actually uses them. Pin versions per `references/charts.md`.
 14. **Prefer interactivity over text** — if a slide compares 3+ options, use `tab-slide` instead of bullet lists. If a slide has details that interrupt the main message, push them into `accordion` or `tooltip`. Aim for max 30 words of body text per slide outside of statements.
 15. **Hover-reveal cards** — use sparingly (max 1 row per deck) for "punchline + reveal" effects on metric cards. See `references/interactivity.md`.
+16. **Marquee** — for ecosystem / partner / client logo slides with 6+ logos only. ≤5 logos = static row. Duplicate the logo set twice in the markup for seamless infinite scroll. See `references/external-libs.md`.
+17. **Bento grid** — for "value prop synthesis" / "what we do" slides only. Max 1 bento per deck. 5 cells with mixed `.big` / `.tall` / `.wide` / `.green` / `.dark` modifiers.
+18. **Animated shiny text** — limit to h1 on cover AND/OR 1 big-message per deck. Otherwise overuse kills the effect.
+19. **Spotlight cards** — `.dark` slides only, max 1 row per deck.
 
 ---
 
