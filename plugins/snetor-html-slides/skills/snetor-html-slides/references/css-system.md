@@ -383,24 +383,24 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .slide.active .bento-cell:nth-child(4) { animation-delay:310ms; }
 .slide.active .bento-cell:nth-child(5) { animation-delay:380ms; }
 
-/* === 21st.dev — ANIMATED SHINY TEXT === */
-.shiny-text { background:linear-gradient(110deg, currentColor 30%, rgba(255,255,255,.95) 45%, currentColor 60%); background-size:250% 100%; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:white; animation:shinySweep 3.2s linear infinite; }
-.shiny-text.dark-bg { color:var(--navy); background:linear-gradient(110deg, var(--navy) 30%, var(--green) 45%, var(--navy) 60%); background-size:250% 100%; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-@keyframes shinySweep { 0% { background-position:200% 0; } 100% { background-position:-100% 0; } }
-
 /* === 21st.dev — SPOTLIGHT CARD (mouse-following radial) === */
 .spotlight-card { --mx:50%; --my:50%; position:relative; padding:24px; border:1px solid rgba(255,255,255,.18); border-radius:8px; background:rgba(255,255,255,.04); color:white; overflow:hidden; transition:border-color 220ms var(--ease); }
 .spotlight-card::before { content:""; position:absolute; inset:0; background:radial-gradient(420px circle at var(--mx) var(--my), rgba(140,202,174,.22), transparent 45%); pointer-events:none; transition:opacity 220ms var(--ease); }
 .spotlight-card:hover { border-color:rgba(140,202,174,.5); }
 .spotlight-card h3, .spotlight-card p { color:white; position:relative; }
 
-/* === LOTTIE ICONS === */
-.lottie-icon { width:56px; height:56px; flex:0 0 auto; }
-.fact-card .lottie-icon { margin-bottom:8px; }
-
-/* === TS PARTICLES === */
-#tsparticles { position:absolute; inset:0; z-index:0; pointer-events:none; }
-.cover.particles .body, .cover.particles .brand, .cover.particles .footer, .cover.particles .globe { position:relative; z-index:2; }
+/* === PHOSPHOR ICONS (Snetor sizing/color override) ===
+   Default tone = green. Variants: .navy (dark blue), .teal (blue-green/emerald).
+   Mix tones across a deck to add visual rhythm — e.g. green for growth/finance,
+   navy for security/risk, teal for tech/AI. */
+.ph-icon { display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; font-size:32px; color:var(--green); background:var(--green-10); border:1px solid var(--green-20); border-radius:12px; flex:0 0 auto; }
+.ph-icon.large { width:56px; height:56px; font-size:38px; }
+.ph-icon.navy { color:var(--navy); background:rgba(21,43,71,.08); border-color:rgba(21,43,71,.18); }
+.ph-icon.teal { color:var(--blue-green); background:rgba(42,84,88,.08); border-color:rgba(42,84,88,.20); }
+.dark .ph-icon, .cover .ph-icon { color:var(--pastel); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); }
+.dark .ph-icon.navy, .cover .ph-icon.navy { color:var(--white); background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.22); }
+.fact-card .ph-icon { margin-bottom:8px; }
+.bento-cell .ph-icon { width:36px; height:36px; font-size:22px; border-radius:8px; }
 
 /* === PRESENTER MODE === */
 .notes { display:none; }

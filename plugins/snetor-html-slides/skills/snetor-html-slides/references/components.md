@@ -495,18 +495,6 @@ Cell modifiers: `.big` (col×2 row×2), `.tall` (row×2), `.wide` (col×2), `.gr
 
 ---
 
-## Animated Shiny Text (21st.dev)
-
-For h1 cover headline AND/OR 1 big-message punchline. No more.
-
-```html
-<h1 class="shiny-text">Snetor AI Strategy 2026.</h1>
-```
-
-On light backgrounds use `.shiny-text.dark-bg`.
-
----
-
 ## Spotlight Cards — mouse-following radial (21st.dev)
 
 `.dark` slides only, max 1 row per deck.
@@ -532,30 +520,18 @@ Bootstrap script in `references/external-libs.md`.
 
 ---
 
-## Lottie Icon on Fact-card
+## Phosphor Icon on Fact-card
 
 ```html
 <article class="fact-card animate d1">
-  <div class="lottie-icon" data-src="https://lottie.host/HASH/icon.json"></div>
+  <i class="ph ph-trophy ph-icon"></i>
   <span class="metric counter" data-target="42" data-suffix="%">0%</span>
   <h3>Croissance</h3>
   <p>Sur 12 mois.</p>
 </article>
 ```
 
-Sources for icons: lottie.host community library OR local `assets/DECK/lottie/*.json`. See `references/external-libs.md`.
-
----
-
-## tsParticles Cover
-
-Add `.particles` to the cover slide class. Bootstrap auto-injects the canvas.
-
-```html
-<section class="slide cover active particles">
-  <!-- normal cover content -->
-</section>
-```
+Add `<script src="https://unpkg.com/@phosphor-icons/web"></script>` to `<head>`. See `references/external-libs.md` for icon recommendations and weight variants.
 
 ---
 

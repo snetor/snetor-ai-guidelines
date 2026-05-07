@@ -13,12 +13,11 @@ When invoked, this skill produces a single self-contained `.html` file with:
 
 ## What's new in 1.2
 
-- **21st.dev components** — Snetor-branded marquee, bento grid, animated shiny text, spotlight cards (no dependencies). See `references/external-libs.md`.
-- **Lottie icons** — animated SVG icons on fact-cards via lottie-web CDN.
-- **tsParticles cover** — subtle particle effect on cover slides via `.particles` class.
+- **21st.dev components** — Snetor-branded marquee, bento grid, spotlight cards (no dependencies). See `references/external-libs.md`.
+- **Phosphor Icons** — 3000+ icon library via CDN, three Snetor tone variants (green, navy, teal). Replaces previous Lottie experiment.
 - **Presenter mode** — `F` (fullscreen) / `O` (overview grid) / `N` (speaker notes) / `T` (timer) / `?` (shortcuts modal). See `references/presenter-mode.md`.
 - **Speaker notes** — `<aside class="notes">` per slide, hidden by default, revealed via `N`.
-- **Rules updated** — 23 non-negotiable rules now (was 15).
+- **Rules updated** — 21 non-negotiable rules now (was 15).
 
 ## What's new in 1.1
 

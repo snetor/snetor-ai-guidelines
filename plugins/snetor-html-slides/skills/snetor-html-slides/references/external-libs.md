@@ -1,6 +1,6 @@
 # External Libraries & Modern Components
 
-CDN-hosted libraries and code-copied components for v1.2 features. All Snetor-branded.
+CDN-hosted libraries and code-copied components. All Snetor-branded.
 
 ---
 
@@ -9,10 +9,8 @@ CDN-hosted libraries and code-copied components for v1.2 features. All Snetor-br
 1. [21st.dev components — Snetor-branded](#21stdev-components)
    - Marquee
    - Bento grid
-   - Animated shiny text
    - Spotlight card
-2. [Lottie icons](#lottie-icons)
-3. [tsParticles cover](#tsparticles-cover)
+2. [Phosphor Icons — fact-card iconography](#phosphor-icons)
 
 ---
 
@@ -85,18 +83,6 @@ Cell modifiers: `.big` (col-span 2), `.tall` (row-span 2), `.green` (green tint)
 
 ---
 
-### Animated shiny text
-
-For h1 cover headline and 1 big-message punchline per deck. Animate a shimmer that sweeps across text.
-
-```html
-<h1 class="shiny-text">Snetor AI Strategy 2026.</h1>
-```
-
-Pure CSS via `background-clip: text` + animated gradient. Works on both light and dark backgrounds (default = light text on dark; add `.shiny-text.dark-bg` for navy text on light).
-
----
-
 ### Spotlight card — follows mouse
 
 For dark slides only, max 1 row of these per deck. The card has a radial gradient that follows the cursor.
@@ -134,120 +120,69 @@ CSS uses `--mx` / `--my` to position a radial gradient mask.
 
 ---
 
-## Lottie icons
+## Phosphor Icons
 
-For animated icons on `.fact-card` (replacing static emoji or no-icon). Use sparingly — meant to draw attention to the metric, not decorate every slide.
+Lightweight icon library for fact-cards and inline iconography. Web-font, ~3000 icons, six weights (thin / light / regular / bold / fill / duotone). Works under `file://` (no XHR), no CORS, no JSON loading.
 
 ### CDN
 
+Add to `<head>` once if the deck uses any `<i class="ph ...">` icon:
+
 ```html
-<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie_light.min.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 ```
 
-Add only if the deck uses Lottie icons. Light build is ~62 KB gzipped.
+The script auto-loads all six weight stylesheets. Single line, no bootstrap needed.
 
-### Component
+### Component on fact-card
 
 ```html
-<article class="fact-card">
-  <div class="lottie-icon" data-src="https://lottie.host/EXAMPLE_HASH/icon.json" data-loop="true"></div>
+<article class="fact-card animate d1">
+  <i class="ph ph-trophy ph-icon"></i>
   <span class="metric counter" data-target="42" data-suffix="%">0%</span>
   <h3>Croissance</h3>
-  <p>Sur les 12 derniers mois.</p>
+  <p>Sur 12 mois.</p>
 </article>
 ```
 
-Attributes:
-- `data-src` (required) — URL to a Lottie JSON file. Can be a remote URL (LottieFiles, lottie.host) or a relative path to a local copy in `assets/DECK/lottie/`.
-- `data-loop` — `"true"` (default) or `"false"`
-- `data-autoplay` — `"true"` (default) or `"false"`
+Class breakdown:
+- `ph` — base class (required, regular weight by default)
+- `ph-<name>` — icon name (e.g. `ph-trophy`, `ph-shield-check`)
+- `ph-icon` — Snetor sizing/color override (defined in `css-system.md`)
 
-### Bootstrap script
+**Tone variants** (mix across a deck for visual rhythm):
+- default (green) — growth, KPIs, finance
+- `.ph-icon.navy` — security, risk, governance
+- `.ph-icon.teal` — tech, AI, data
+- `.ph-icon.large` — for cover or hero positioning (56×56)
 
-```javascript
-document.querySelectorAll('.lottie-icon').forEach((el) => {
-  if (!window.lottie) return;
-  lottie.loadAnimation({
-    container: el,
-    renderer: 'svg',
-    loop: el.dataset.loop !== 'false',
-    autoplay: el.dataset.autoplay !== 'false',
-    path: el.dataset.src,
-  });
-});
-```
+### Weight variants
 
-### Sourcing icons
+Replace `ph` with one of:
+- `ph-thin` (1px stroke)
+- `ph-light` (1.5px)
+- `ph` (2px, default)
+- `ph-bold` (2.5px)
+- `ph-fill` (solid fill)
+- `ph-duotone` (two-tone)
 
-Recommended sources (in order of preference):
+For Snetor decks, prefer **`ph` (regular)** or **`ph-fill`** for KPI cards (more visual weight).
 
-1. **lottie.host** (LottieFiles CDN) — copy any community icon URL ending in `.json`
-2. **assets/DECK/lottie/** — for guaranteed offline access, download a JSON and reference it by relative path
-3. **Custom** — design via LottieFiles editor or After Effects + bodymovin plugin
+### Recommended icons by topic
 
-When adding a Lottie icon to a deck, prefer to download the JSON to `assets/DECK/lottie/` so the deck remains stable if the source URL changes.
+| Topic | Icon |
+|---|---|
+| Growth / KPI | `ph-trend-up`, `ph-trophy`, `ph-rocket-launch` |
+| Quality / Validation | `ph-check-circle`, `ph-star`, `ph-medal` |
+| Speed | `ph-lightning`, `ph-rocket`, `ph-clock-counter-clockwise` |
+| Security | `ph-shield-check`, `ph-lock`, `ph-fingerprint` |
+| Cloud / IT | `ph-cloud`, `ph-cloud-check`, `ph-database` |
+| Logistics | `ph-truck`, `ph-package`, `ph-globe-hemisphere-east` |
+| AI / Data | `ph-brain`, `ph-cpu`, `ph-graph` |
+| People | `ph-users-three`, `ph-user-circle`, `ph-handshake` |
+| Money | `ph-currency-eur`, `ph-coins`, `ph-chart-line-up` |
 
----
-
-## tsParticles cover
-
-Subtle particle effect on the cover slide. Activated by adding `.particles` to the cover slide class.
-
-### CDN
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@tsparticles/slim@3.5.0/tsparticles.slim.bundle.min.js"></script>
-```
-
-Add only if the deck has a particles cover.
-
-### Activation
-
-```html
-<section class="slide cover active particles">
-  <!-- normal cover content -->
-</section>
-```
-
-The bootstrap script auto-injects a `<div id="tsparticles">` inside any `.slide.particles` and starts the engine when that slide becomes active.
-
-### Bootstrap script
-
-```javascript
-function initParticles() {
-  if (!window.tsParticles) return;
-  document.querySelectorAll('.slide.particles').forEach((slide) => {
-    if (slide.querySelector('#tsparticles')) return;
-    const host = document.createElement('div');
-    host.id = 'tsparticles';
-    slide.insertBefore(host, slide.firstChild);
-  });
-
-  tsParticles.load({
-    id: 'tsparticles',
-    options: {
-      fullScreen: { enable: false },
-      background: { color: 'transparent' },
-      fpsLimit: 60,
-      particles: {
-        color: { value: '#8CCAAE' },
-        links: { enable: true, color: '#8CCAAE', distance: 130, opacity: 0.25, width: 1 },
-        move: { enable: true, direction: 'top', speed: 0.6, outModes: { default: 'out' } },
-        number: { value: 40, density: { enable: true, area: 900 } },
-        opacity: { value: 0.55 },
-        shape: { type: 'circle' },
-        size: { value: { min: 1, max: 3 } },
-      },
-      detectRetina: true,
-    },
-  });
-}
-
-// Call this AFTER the first show(0) so the cover is in DOM
-initParticles();
-```
-
-The particles are visible only on slides with `.particles`. They render behind text content (z-index 0) and above the gradient background (z-index -1 via CSS).
+Browse the full catalog at [phosphoricons.com](https://phosphoricons.com).
 
 ---
 
@@ -265,11 +200,8 @@ When a deck uses several of these libraries, the `<head>` script tags must be in
 <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.4/dist/maps/world.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.4/dist/jsvectormap.min.css" rel="stylesheet">
 
-<!-- 3. Lottie (if icons used) -->
-<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie_light.min.js"></script>
-
-<!-- 4. tsParticles (if particles used) -->
-<script src="https://cdn.jsdelivr.net/npm/@tsparticles/slim@3.5.0/tsparticles.slim.bundle.min.js"></script>
+<!-- 3. Phosphor Icons (if icons used) -->
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 ```
 
 Bootstrap scripts at the end of `<body>` in this order:
@@ -279,5 +211,5 @@ Bootstrap scripts at the end of `<body>` in this order:
 3. Presenter mode (F/O/?/N/T)
 4. Charts + counters + world map (only if used)
 5. Spotlight (only if used)
-6. Lottie (only if used)
-7. tsParticles (only if used)
+
+(Phosphor needs no bootstrap script — it's pure font-icon rendering.)

@@ -37,6 +37,7 @@ document.querySelectorAll('[data-tooltip]').forEach((el) => {
   if (!el.hasAttribute('tabindex')) el.tabIndex = 0;
   el.classList.add('has-tooltip');
 });
+
 ```
 
 Hover-reveal cards are pure CSS — no JS needed.

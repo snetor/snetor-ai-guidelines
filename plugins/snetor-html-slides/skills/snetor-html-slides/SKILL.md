@@ -185,12 +185,10 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 15. **Hover-reveal cards** — use sparingly (max 1 row per deck) for "punchline + reveal" effects on metric cards. See `references/interactivity.md`.
 16. **Marquee** — for ecosystem / partner / client logo slides with 6+ logos only. ≤5 logos = static row. Duplicate the logo set twice in the markup for seamless infinite scroll. See `references/external-libs.md`.
 17. **Bento grid** — for "value prop synthesis" / "what we do" slides only. Max 1 bento per deck. 5 cells with mixed `.big` / `.tall` / `.wide` / `.green` / `.dark` modifiers.
-18. **Animated shiny text** — limit to h1 on cover AND/OR 1 big-message per deck. Otherwise overuse kills the effect.
-19. **Spotlight cards** — `.dark` slides only, max 1 row per deck.
-20. **Lottie icons** — fact-cards only (not as decoration). Prefer pre-loaded JSON in `assets/<deck>/lottie/` over remote URLs for stability. See `references/external-libs.md`.
-21. **tsParticles** — only on the cover slide via class `.particles`. Never on content slides (distracting).
-22. **Speaker notes** — for any slide whose body text exceeds 30 words, add `<aside class="notes">` with the detail. Presenter accesses via `N` key. See `references/presenter-mode.md`.
-23. **Presenter mode DOM** — every deck must include the 4 overlays (`#overview-grid`, `#shortcuts-modal`, `#notes-overlay`, `#timer-display`) after the `<main class="deck">` block. Bootstrap script from `references/presenter-mode.md` is always included.
+18. **Spotlight cards** — `.dark` slides only, max 1 row per deck.
+19. **Phosphor icons** — for fact-card iconography and inline iconography. Use class `<i class="ph ph-<name> ph-icon">`. Prefer regular weight by default, `ph-fill` for KPI cards needing more visual weight. Tone variants: default (green), `.navy`, `.teal`. See `references/external-libs.md`.
+20. **Speaker notes** — for any slide whose body text exceeds 30 words, add `<aside class="notes">` with the detail. Presenter accesses via `N` key. See `references/presenter-mode.md`.
+21. **Presenter mode DOM** — every deck must include the 4 overlays (`#overview-grid`, `#shortcuts-modal`, `#notes-overlay`, `#timer-display`) after the `<main class="deck">` block. Bootstrap script from `references/presenter-mode.md` is always included.
 
 ---
 
@@ -235,6 +233,8 @@ The skill maintainer (Clément Peponnet) can commit improvements back to `snetor
 `powerbi.png` · `sharepoint.png` · `copilot.png` · `copilot-studio.png` · `copilot-cowork.png` · `power-automate.png`
 `sap.png` · `sap-b1.png` · `sap-concur.png` · `s4-hana.png` · `opentext.png`
 `kantox.png` · `xeneta.png` · `buyco.png` · `datasur.png` · `alpega-tms.png`
+
+**Iconography:** use [Phosphor Icons](https://phosphoricons.com) via CDN — see `references/external-libs.md` for the recommended icon set per topic and weight variants. No copy needed; the script tag pulls all weights.
 
 All asset files live in this skill's `assets/branding/` and `assets/logos/` subdirectories.
 Copy them to `03-Outputs/assets/<deck-slug>/` before referencing them from the HTML.
