@@ -1,6 +1,6 @@
 {
   "name": "snetor-html-slides",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Generate Snetor-branded animated HTML presentation decks using the official Snetor design system (Raleway font, green/navy palette, animated components, logos, hero imagery).",
   "author": {
     "name": "Snetor",

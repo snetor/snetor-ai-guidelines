@@ -11,6 +11,15 @@ When invoked, this skill produces a single self-contained `.html` file with:
 - Interactive check-cards for validation slides
 - Progress indicator
 
+## What's new in 1.1
+
+- **Multilingual** — auto-detection FR / EN / ES from the request, override via explicit mention. Other languages best-effort with EN UI fallback. See `references/i18n.md`.
+- **Dynamic charts** — Chart.js integration with Snetor theme (`bar`, `line`, `donut`, `radar`, `area`) via the `chart-card` component. See `references/charts.md`.
+- **Animated counters** — `.metric.counter` with `data-target`, counts up on slide activation.
+- **World map** — `world-map` component for implantations / coverage slides (jsvectormap, Snetor-themed).
+- **Interactive components** — `tab-slide`, `accordion`, hover-reveal cards (`.card.reveal`), and `data-tooltip`. See `references/interactivity.md`.
+- **Less text mandate** — new rule 14: max 30 words of body per slide outside statements; push detail into accordions and tooltips.
+
 ## Installation
 
 ### Via the marketplace (recommended)
