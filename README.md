@@ -17,6 +17,7 @@
 | File / Folder | Description |
 |---|---|
 | `CLAUDE.md` | Global instructions injected into every Claude Code session |
+| `scripts/` | DSI deployment scripts — onboard a collaborator in one run |
 | `statusline/` | Custom status line — context usage, rate limit, git branch |
 | `assets/` | Snetor brand assets |
 
@@ -24,7 +25,19 @@
 
 ## INSTALLATION
 
-### Prerequisites
+### DSI deployment (recommended)
+
+For a full automated setup on a collaborator's PC — Claude Desktop, Claude Code, M365 connector, and Snetor config — run:
+
+```powershell
+.\scripts\deploy-claude.ps1
+```
+
+One UAC prompt. Everything else is automatic. See [`scripts/README.md`](scripts/README.md) for details.
+
+---
+
+### Prerequisites (manual install)
 
 - [Claude Code](https://claude.ai/code) installed (desktop app or CLI)
 - Node.js 18+
