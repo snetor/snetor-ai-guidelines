@@ -49,6 +49,10 @@ Write-Host "  Collab  : $TargetUser" -ForegroundColor Cyan
 Write-Host "  Profil  : $TargetProfile" -ForegroundColor Cyan
 Write-Host ""
 
+# Pointer les variables d'env vers le profil du collab (pas celui de l'admin élevé)
+$env:USERPROFILE = $TargetProfile
+$env:APPDATA     = "$TargetProfile\AppData\Roaming"
+
 $phaseResults = [ordered]@{
     'Node.js'        = '⏳'
     'Claude Desktop' = '⏳'
@@ -175,7 +179,6 @@ function Invoke-Phase3-CoWork {
     # Pointer le prefix npm vers le profil du collab (pas celui de l'admin)
     $npmPrefix = "$TargetProfile\AppData\Roaming\npm"
     New-Item -ItemType Directory -Path $npmPrefix -Force | Out-Null
-    $env:APPDATA = "$TargetProfile\AppData\Roaming"
     & npm config set prefix $npmPrefix 2>$null
 
     # Vérifier si déjà installé
@@ -190,11 +193,21 @@ function Invoke-Phase3-CoWork {
     & npm install -g '@anthropic-ai/claude-code'
     if ($LASTEXITCODE -ne 0) { throw "npm install a échoué (code $LASTEXITCODE)" }
 
-    # Ajouter le prefix npm au PATH utilisateur persistant
-    $currentUserPath = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
-    if ($currentUserPath -notlike "*$npmPrefix*") {
-        [System.Environment]::SetEnvironmentVariable('PATH', "$currentUserPath;$npmPrefix", 'User')
-        Write-Info "PATH utilisateur mis à jour : +$npmPrefix"
+    # Ajouter le prefix npm au PATH du collab via son hive registre
+    # (SetEnvironmentVariable('User') ciblerait l'admin élevé, pas le collab)
+    try {
+        $sid     = (New-Object System.Security.Principal.NTAccount($TargetUser)).Translate(
+                       [System.Security.Principal.SecurityIdentifier]).Value
+        $regPath = "Registry::HKEY_USERS\$sid\Environment"
+        $currentUserPath = (Get-ItemProperty -Path $regPath -Name PATH -ErrorAction SilentlyContinue).PATH
+        if ($currentUserPath -notlike "*$npmPrefix*") {
+            $newPath = if ($currentUserPath) { "$currentUserPath;$npmPrefix" } else { $npmPrefix }
+            Set-ItemProperty -Path $regPath -Name PATH -Value $newPath
+            Write-Info "PATH du collab mis à jour : +$npmPrefix"
+        }
+    } catch {
+        Write-Warn "Impossible de mettre à jour le PATH du collab : $_"
+        Write-Info "Action manuelle : ajouter $npmPrefix au PATH utilisateur"
     }
 
     Write-Ok "Claude Code installé"
