@@ -134,9 +134,13 @@ Use `a.metric` when the stat comes from a citable external source. Link to the s
 
 ## Loss / Problem Hero (left big panel + right problem list)
 
+> ⚠️ **Layout pitfall**: placing `loss-item` elements inside a nested `display:grid` that is itself a flex or grid item can cause text to wrap word-by-word in some browsers (the inner `1fr` column collapses to 0px). Avoid nesting `loss-item` inside a second-level `display:grid` column. Use the `market-facts` pattern below instead when you have exactly 4 problems — it is bulletproof.
+
+Use this pattern only when you have fewer than 4 items and the `loss-hero` drama panel is essential:
+
 ```html
-<div style="display:grid; grid-template-columns:.9fr 1.1fr; gap:22px; align-items:stretch;">
-  <article class="loss-hero animate d1">
+<div style="display:flex; gap:22px; align-items:stretch; width:100%;">
+  <article class="loss-hero animate d1" style="flex:0 0 42%;">
     <div>
       <span class="label">Cost / Risk</span>
       <strong>Bold problem headline</strong>
@@ -144,14 +148,56 @@ Use `a.metric` when the stat comes from a citable external source. Link to the s
     </div>
     <div class="mini-note">Important nuance or caveat to keep honest.</div>
   </article>
-  <div class="animate d2" style="display:grid; gap:12px;">
-    <div class="loss-item"><div><strong>Problem name</strong><span>Short explanation.</span></div></div>
-    <div class="loss-item"><div><strong>Problem name</strong><span>Short explanation.</span></div></div>
-    <div class="loss-item"><div><strong>Problem name</strong><span>Short explanation.</span></div></div>
-    <div class="loss-item"><div><strong>Problem name</strong><span>Short explanation.</span></div></div>
-    <div class="big-message animate d4">Key decision or call to action for the audience.</div>
+  <div class="animate d2" style="flex:1; display:flex; flex-direction:column; gap:12px; min-width:0;">
+    <div class="loss-item">
+      <div></div>
+      <div><strong>Problem name</strong><p style="margin:4px 0 0; font-size:16px; color:var(--muted);">Short explanation in a block-level p, not a span.</p></div>
+    </div>
+    <div class="loss-item">
+      <div></div>
+      <div><strong>Problem name</strong><p style="margin:4px 0 0; font-size:16px; color:var(--muted);">Short explanation.</p></div>
+    </div>
+    <div class="loss-item">
+      <div></div>
+      <div><strong>Problem name</strong><p style="margin:4px 0 0; font-size:16px; color:var(--muted);">Short explanation.</p></div>
+    </div>
   </div>
 </div>
+```
+
+**Rules for safe `loss-item` use:**
+- Always use `<p>` (block element), never `<span>`, for the description text inside `.loss-item`
+- The parent container must use `display:flex` (not `display:grid`) to avoid the `1fr` collapse bug
+- Add `min-width:0` to the flex child that wraps the loss-items
+
+## 4-Layer Problem / Debt Map (preferred alternative to loss-hero + loss-list)
+
+When you have exactly 4 problems / debt layers / steps, prefer `market-facts` — it avoids all nested-grid layout bugs and renders correctly in all browsers:
+
+```html
+<div class="market-facts animate d2">
+  <article class="fact-card">
+    <i class="ph ph-broom ph-icon navy"></i>
+    <h3>1 · Layer name</h3>
+    <p>Short description. Keep under 25 words.</p>
+  </article>
+  <article class="fact-card">
+    <i class="ph ph-link ph-icon teal"></i>
+    <h3>2 · Layer name</h3>
+    <p>Short description.</p>
+  </article>
+  <article class="fact-card">
+    <i class="ph ph-robot ph-icon"></i>
+    <h3>3 · Layer name</h3>
+    <p>Short description.</p>
+  </article>
+  <article class="fact-card">
+    <i class="ph ph-shield-check ph-icon navy"></i>
+    <h3>4 · Layer name</h3>
+    <p>Short description.</p>
+  </article>
+</div>
+<div class="big-message animate d4">Key decision or call to action for the audience.</div>
 ```
 
 ---
