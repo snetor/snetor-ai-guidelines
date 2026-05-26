@@ -60,6 +60,18 @@
 
 ---
 
+## 6. Think Before Coding
+
+- State your assumptions explicitly before implementing. If uncertain, ask.
+
+- If multiple interpretations exist, present them – don't pick one silently.
+
+- If a simpler approach exists, say so. Push back when warranted.
+
+- If something is unclear, stop and name what's confusing before continuing.
+
+---
+
 # Autonomous Bug Fixing
 
 - When given a bug report: just fix it. Don't ask for hand-holding
@@ -86,13 +98,15 @@
 
 - **Capture Lessons:** Update `tasks/lessons.md` after corrections
 
+- **Success Criteria First:** Transform each task into a verifiable goal — "fix the bug" → "write a test that reproduces it, then make it pass." For multi-step tasks, state a brief plan with a verify check per step.
+
 ---
 
 # Core Principles
 
-- **Simplicity First:** Make every change as simple as possible. Impact minimal code.
+- **Simplicity First:** No features beyond what was asked. No abstractions for single-use code. No unasked configurability. If 50 lines could replace 200, rewrite.
+
+- **Surgical Changes:** Touch only what's necessary for the task. Don't improve adjacent code, comments, or formatting. Match existing style. If you notice unrelated dead code, mention it — clean it in a dedicated separate commit, never mixed silently into the current change.
 
 - **No Laziness:** Find root causes. No temporary fixes. Senior developer standards.
-
-- **Minimal Impact:** Changes should only touch what's necessary. Avoid introducing bugs.
  
