@@ -9,18 +9,21 @@ Une seule exécution, **une seule boite UAC**, tout le reste est automatique.
 |---|---|
 | 0 | Auto-élévation admin (1 UAC) — profil collab préservé |
 | 1 | Node.js LTS — détecte la version courante et installe silencieusement si absent |
-| 2 | Claude Desktop — télécharge et installe (Squirrel + fallback MSIX) |
-| 3 | Claude Code (Cowork) — `npm install -g @anthropic-ai/claude-code` dans le profil du collab |
-| 4 | Config Snetor — CLAUDE.md global, settings.json (plugins), status line |
-| 5 | M365 MCP — pré-configure `claude_desktop_config.json` (résolution chemin MSIX réelle) |
-| 6 | Récapitulatif coloré + checklist des actions manuelles |
+| 2 | Git for Windows — installe le dernier release officiel (GitHub `git-for-windows`) si absent |
+| 3 | Claude Desktop — MSIX officiel signé, provisioning machine-wide (`Add-AppxProvisionedPackage`) |
+| 4 | Claude Code (Cowork) — `npm install -g @anthropic-ai/claude-code` dans le profil du collab |
+| 5 | Config Snetor — CLAUDE.md global, settings.json (plugins), status line |
+| 6 | M365 MCP — pré-configure `claude_desktop_config.json` (résolution chemin MSIX réelle) |
+| 7 | Récapitulatif coloré + checklist des actions manuelles |
 
 ## Prérequis
 
 - Windows 10/11 x64
-- PowerShell 5.1+
-- Connexion internet (téléchargements Node.js, Claude Desktop, Claude Code)
+- Windows PowerShell 5.1 (le script force TLS 1.2 et s'exécute sous `powershell.exe`)
+- Connexion internet (téléchargements Node.js, Git, Claude Desktop, Claude Code)
 - Credentials admin DSI (pour approuver la boite UAC)
+
+> Git est installé automatiquement (Phase 2) s'il est absent du poste.
 
 ## Utilisation
 
@@ -58,14 +61,17 @@ Cette étape est nécessaire une seule fois — elle débloque l'autorisation po
 
 | Symptôme | Solution |
 |---|---|
-| Phase 2 ⚠️ "vérification manuelle" | Télécharger manuellement sur `https://claude.ai/download` |
+| Phase 3 ⚠️ "vérification manuelle" | Télécharger manuellement le MSIX sur `https://claude.com/download` |
 | `npm` introuvable après Phase 1 | Fermer le terminal, relancer le script — Node.js s'est installé mais PATH pas encore rafraîchi |
-| `claude` command non reconnue après Phase 3 | Ouvrir un nouveau terminal — PATH utilisateur mis à jour au redémarrage du shell |
+| `claude` command non reconnue après Phase 4 | Ouvrir un nouveau terminal — PATH utilisateur mis à jour au redémarrage du shell |
+| Claude Desktop absent du menu Démarrer | Provisioning machine-wide : il apparaît à la **prochaine ouverture de session Windows** du collab |
 | Extensions M365 absent dans Claude Desktop | Vérifier que le compte claude.ai est sur un plan Teams/Enterprise |
-| Config M365 chemin ⚠️ secours | Bug MSIX connu — ouvrir Claude Desktop au moins une fois pour créer le bon répertoire, relancer Phase 5 manuellement |
+| Config M365 chemin ⚠️ secours | Ouvrir Claude Desktop au moins une fois (crée le bon répertoire), puis relancer la Phase 6 manuellement |
 
 ## Notes techniques
 
 - **Profil cible** : le script capture `$env:USERPROFILE` avant l'élévation et passe le chemin en paramètre à la session admin. Tous les writes user-profile (settings.json, CLAUDE.md, status line, M365 config) vont dans le profil du **collab**, pas de l'admin DSI.
-- **Chemin config M365** : Anthropic Claude Desktop MSIX lit depuis `%LOCALAPPDATA%\Packages\Claude_*\LocalCache\Roaming\Claude\` (pas `%APPDATA%\Claude\`). Le script résout ce chemin dynamiquement via `Get-AppxPackage`.
+- **PowerShell 5.1** : le script active TLS 1.2 explicitement (5.1 négocie TLS 1.0/1.1 par défaut, refusé par nodejs.org / GitHub / claude.ai) et écrit les JSON en UTF-8 **sans BOM** (le `-Encoding UTF8` natif de 5.1 ajoute un BOM qui casse les parseurs).
+- **Claude Desktop (MSIX)** : installé via `Add-AppxProvisionedPackage -Online` (provisioning machine-wide). Comme le script tourne en admin élevé, un `Add-AppxPackage` per-user ne ciblerait que l'admin — le provisioning enregistre Claude pour le collab à sa prochaine ouverture de session.
+- **Chemin config M365** : le MSIX lit depuis `%LOCALAPPDATA%\Packages\<PackageFamilyName>\LocalCache\Roaming\Claude\` (pas `%APPDATA%\Claude\`). Le script résout le `<PackageFamilyName>` via `Get-AppxPackage -AllUsers`, puis par dérivation depuis le package provisionné, sinon retombe sur `%APPDATA%\Claude\`.
 - **npm prefix** : le prefix npm est fixé à `$TargetProfile\AppData\Roaming\npm` pour éviter que Claude Code s'installe dans le profil admin.

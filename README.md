@@ -27,7 +27,7 @@
 
 ### DSI deployment (recommended)
 
-For a full automated setup on a collaborator's PC — Claude Desktop, Claude Code, M365 connector, and Snetor config — run:
+For a full automated setup on a collaborator's PC — Node.js, Git, Claude Desktop, Claude Code, M365 connector, and Snetor config — run:
 
 ```powershell
 .\scripts\deploy-claude.ps1

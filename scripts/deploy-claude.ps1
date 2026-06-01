@@ -21,6 +21,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# TLS 1.2 obligatoire : Windows PowerShell 5.1 négocie TLS 1.0/1.1 par défaut, ce que
+# nodejs.org / api.github.com / claude.ai refusent → tous les téléchargements échoueraient.
+[Net.ServicePointManager]::SecurityProtocol = `
+    [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+
 # ─── Helpers console ─────────────────────────────────────────────────────────
 function Write-Step { param($msg) Write-Host "`n▶  $msg" -ForegroundColor Cyan }
 function Write-Ok   { param($msg) Write-Host "   ✅ $msg" -ForegroundColor Green }
@@ -39,7 +44,8 @@ if (-not $isAdmin) {
     $escapedUser    = $TargetUser    -replace '"', '\"'
     $escapedProfile = $TargetProfile -replace '"', '\"'
     $psArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$escapedScript`" -TargetUser `"$escapedUser`" -TargetProfile `"$escapedProfile`""
-    Start-Process powershell -Verb RunAs -ArgumentList $psArgs
+    # 'powershell.exe' = Windows PowerShell 5.1 (jamais pwsh 7, absent du parc Snetor)
+    Start-Process powershell.exe -Verb RunAs -ArgumentList $psArgs
     exit 0
 }
 
@@ -55,6 +61,7 @@ $env:APPDATA     = "$TargetProfile\AppData\Roaming"
 
 $phaseResults = [ordered]@{
     'Node.js'        = '⏳'
+    'Git'            = '⏳'
     'Claude Desktop' = '⏳'
     'Claude Code'    = '⏳'
     'Config Snetor'  = '⏳'
@@ -80,6 +87,24 @@ function Refresh-PATH {
     $m = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine')
     $u = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
     $env:PATH = "$m;$u"
+}
+
+# Écrit du JSON en UTF-8 SANS BOM. En PS 5.1, 'Set-Content -Encoding UTF8' ajoute un BOM
+# qui casse certains parseurs (Claude Desktop, npm) → on passe par .NET sans BOM.
+function Set-JsonFile {
+    param([object]$Object, [string]$Path)
+    $json = $Object | ConvertTo-Json -Depth 10
+    [System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+# Résout le dernier asset d'une release GitHub. L'API exige un User-Agent (sinon 403).
+function Get-GitHubLatestAsset {
+    param([string]$Repo, [string]$NamePattern)
+    $api = "https://api.github.com/repos/$Repo/releases/latest"
+    $rel = Invoke-RestMethod -Uri $api -UseBasicParsing -Headers @{ 'User-Agent' = 'snetor-deploy-claude' }
+    $asset = $rel.assets | Where-Object { $_.name -match $NamePattern } | Select-Object -First 1
+    if (-not $asset) { throw "Aucun asset '$NamePattern' dans la dernière release de $Repo" }
+    return [PSCustomObject]@{ Name = $asset.name; Url = $asset.browser_download_url }
 }
 
 # ─── Phase 1 : Node.js LTS ────────────────────────────────────────────────────
@@ -119,57 +144,81 @@ function Invoke-Phase1-NodeJS {
     $script:phaseResults['Node.js'] = "✅ $v"
 }
 
-# ─── Phase 2 : Claude Desktop ─────────────────────────────────────────────────
-function Invoke-Phase2-Claude {
+# ─── Phase 2 : Git for Windows ────────────────────────────────────────────────
+function Invoke-Phase2-Git {
     param([string]$Tmp)
-    Write-Step "Phase 2 — Claude Desktop"
+    Write-Step "Phase 2 — Git for Windows"
 
-    $existing = Get-AppxPackage -Name '*Claude*' -ErrorAction SilentlyContinue
+    # Déjà présent et fonctionnel ?
+    try {
+        $v = & git --version 2>$null
+        if ($v -match 'git version') {
+            Write-Ok "$v déjà installé — skip"
+            $script:phaseResults['Git'] = "✅ déjà présent ($($v -replace 'git version ',''))"
+            return
+        }
+    } catch { }
+
+    Write-Info "Résolution de la dernière release via api.github.com/git-for-windows ..."
+    $asset   = Get-GitHubLatestAsset -Repo 'git-for-windows/git' -NamePattern '^Git-.*-64-bit\.exe$'
+    $exePath = Join-Path $Tmp 'git-setup.exe'
+
+    Invoke-Download $asset.Url $exePath
+
+    Write-Info "Installation silencieuse de $($asset.Name) ..."
+    $gitArgs = '/VERYSILENT /NORESTART /SUPPRESSMSGBOXES /NOCANCEL /SP- /CLOSEAPPLICATIONS /NORESTARTAPPLICATIONS'
+    $proc = Start-Process $exePath -ArgumentList $gitArgs -Wait -PassThru
+    if ($proc.ExitCode -ne 0) { throw "L'installeur Git a retourné le code $($proc.ExitCode)" }
+
+    Refresh-PATH
+
+    $v = & git --version 2>$null
+    Write-Ok "$v installé"
+    $script:phaseResults['Git'] = "✅ $($v -replace 'git version ','')"
+}
+
+# ─── Phase 3 : Claude Desktop ─────────────────────────────────────────────────
+function Invoke-Phase3-Claude {
+    param([string]$Tmp)
+    Write-Step "Phase 3 — Claude Desktop"
+
+    # Déjà provisionné machine-wide ? (contexte admin : on interroge le provisioning,
+    # pas Get-AppxPackage qui ne verrait que les packages de l'admin élevé)
+    $existing = Get-AppxProvisionedPackage -Online |
+                Where-Object { $_.DisplayName -like '*Claude*' } | Select-Object -First 1
     if ($existing) {
-        Write-Ok "Claude Desktop déjà installé (v$($existing.Version)) — skip"
+        Write-Ok "Claude Desktop déjà provisionné (v$($existing.Version)) — skip"
         $script:phaseResults['Claude Desktop'] = "✅ déjà présent v$($existing.Version)"
         return
     }
 
-    # Squirrel exe (format principal distribué par Anthropic)
-    $exeUrl  = 'https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup.exe'
-    $exePath = Join-Path $Tmp 'Claude-Setup.exe'
+    # MSIX officiel signé Anthropic — l'endpoint redirige vers la dernière version (parc Snetor = x64).
+    $msixUrl  = 'https://claude.ai/api/desktop/win32/x64/msix/latest/redirect'
+    $msixPath = Join-Path $Tmp 'Claude.msix'
 
-    Invoke-Download $exeUrl $exePath
+    Invoke-Download $msixUrl $msixPath
 
-    Write-Info "Installation de Claude Desktop (Squirrel) ..."
-    Start-Process $exePath -ArgumentList '--silent' -Wait
-    # Squirrel installe en arrière-plan après le processus parent — attendre
-    Write-Info "En attente de la fin de l'installation Squirrel ..."
-    $deadline = (Get-Date).AddSeconds(60)
-    while ((Get-Date) -lt $deadline) {
-        Start-Sleep -Seconds 5
-        if (Get-AppxPackage -Name '*Claude*' -ErrorAction SilentlyContinue) { break }
-        # Squirrel peut aussi installer sans package Appx (exe dans AppData)
-        $claudeExe = Join-Path $TargetProfile 'AppData\Local\AnthropicClaude\claude.exe'
-        if (Test-Path $claudeExe) { break }
-    }
+    # Provisioning machine-wide : Claude est enregistré pour TOUS les utilisateurs du poste
+    # (modèle DSI). Le collab l'obtient à sa prochaine ouverture de session Windows.
+    Write-Info "Provisioning machine-wide du MSIX (Add-AppxProvisionedPackage) ..."
+    Add-AppxProvisionedPackage -Online -PackagePath $msixPath -SkipLicense -Regions 'all' | Out-Null
 
-    $installed = Get-AppxPackage -Name '*Claude*' -ErrorAction SilentlyContinue
-    $claudeExe = Join-Path $TargetProfile 'AppData\Local\AnthropicClaude\claude.exe'
-
+    $installed = Get-AppxProvisionedPackage -Online |
+                 Where-Object { $_.DisplayName -like '*Claude*' } | Select-Object -First 1
     if ($installed) {
-        Write-Ok "Claude Desktop v$($installed.Version) installé"
-        $script:phaseResults['Claude Desktop'] = "✅ v$($installed.Version)"
-    } elseif (Test-Path $claudeExe) {
-        Write-Ok "Claude Desktop installé (Squirrel — $claudeExe)"
-        $script:phaseResults['Claude Desktop'] = '✅ Squirrel'
+        Write-Ok "Claude Desktop v$($installed.Version) provisionné (dispo à la prochaine session du collab)"
+        $script:phaseResults['Claude Desktop'] = "✅ v$($installed.Version) (provisionné)"
     } else {
-        Write-Warn "Installation non vérifiable — vérifier manuellement"
-        Write-Info "URL : https://claude.ai/download"
+        Write-Warn "Provisioning non vérifiable — vérifier manuellement"
+        Write-Info "URL : https://claude.com/download"
         $script:phaseResults['Claude Desktop'] = '⚠️ vérification manuelle'
     }
 }
 
-# ─── Phase 3 : Claude Code (Cowork) ──────────────────────────────────────────
-function Invoke-Phase3-CoWork {
+# ─── Phase 4 : Claude Code (Cowork) ──────────────────────────────────────────
+function Invoke-Phase4-CoWork {
     param([string]$Tmp)
-    Write-Step "Phase 3 — Claude Code (Cowork)"
+    Write-Step "Phase 4 — Claude Code (Cowork)"
 
     Refresh-PATH
 
@@ -214,10 +263,10 @@ function Invoke-Phase3-CoWork {
     $script:phaseResults['Claude Code'] = '✅'
 }
 
-# ─── Phase 4 : Config Snetor ──────────────────────────────────────────────────
-function Invoke-Phase4-Snetor {
+# ─── Phase 5 : Config Snetor ──────────────────────────────────────────────────
+function Invoke-Phase5-Snetor {
     param([string]$Tmp)
-    Write-Step "Phase 4 — Configuration Snetor"
+    Write-Step "Phase 5 — Configuration Snetor"
 
     $claudeDir = "$TargetProfile\.claude"
     New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null
@@ -287,7 +336,7 @@ function Invoke-Phase4-Snetor {
         $cfg.enabledPlugins | Add-Member -MemberType NoteProperty -Name $plugin -Value $true -Force
     }
 
-    $cfg | ConvertTo-Json -Depth 10 | Set-Content $settingsPath -Encoding UTF8
+    Set-JsonFile -Object $cfg -Path $settingsPath
     Write-Ok "settings.json configuré (plugins Snetor activés)"
 
     # 3. Status line
@@ -303,20 +352,37 @@ function Invoke-Phase4-Snetor {
     $script:phaseResults['Config Snetor'] = '✅'
 }
 
-# ─── Phase 5 : M365 MCP Config ────────────────────────────────────────────────
-function Invoke-Phase5-M365 {
+# ─── Phase 6 : M365 MCP Config ────────────────────────────────────────────────
+function Invoke-Phase6-M365 {
     param([string]$Tmp)
-    Write-Step "Phase 5 — Connecteur Microsoft 365 MCP"
+    Write-Step "Phase 6 — Connecteur Microsoft 365 MCP"
 
-    # Résoudre le chemin réel du config (bug MSIX : %APPDATA%\Claude != chemin réel)
-    $claudePkg = Get-AppxPackage -Name '*Claude*' -ErrorAction SilentlyContinue
+    # Le MSIX lit sa config dans %LOCALAPPDATA%\Packages\<PFN>\LocalCache\Roaming\Claude.
+    # On résout <PackageFamilyName> par ordre de fiabilité décroissante :
+    $pfn = $null
 
-    if ($claudePkg) {
-        $configDir = "$TargetProfile\AppData\Local\Packages\$($claudePkg.PackageFamilyName)\LocalCache\Roaming\Claude"
+    # 1) Package enregistré pour un utilisateur du poste (-AllUsers visible en admin)
+    $claudePkg = Get-AppxPackage -AllUsers -Name '*Claude*' -ErrorAction SilentlyContinue |
+                 Select-Object -First 1
+    if ($claudePkg) { $pfn = $claudePkg.PackageFamilyName }
+
+    # 2) Pas encore enregistré (collab pas reconnecté) : dériver le PFN du package
+    #    provisionné — PackageName 'AnthropicClaude_<ver>_x64__<hash>' → '<Name>_<hash>'
+    if (-not $pfn) {
+        $prov = Get-AppxProvisionedPackage -Online |
+                Where-Object { $_.DisplayName -like '*Claude*' } | Select-Object -First 1
+        if ($prov -and $prov.PackageName -match '^([^_]+)_[^_]+_[^_]+__(.+)$') {
+            $pfn = "$($Matches[1])_$($Matches[2])"
+        }
+    }
+
+    if ($pfn) {
+        $configDir = "$TargetProfile\AppData\Local\Packages\$pfn\LocalCache\Roaming\Claude"
     } else {
-        # Squirrel ou vérification manuelle — utiliser le chemin de secours
+        # 3) Dernier recours — le chemin réel se résoudra à la 1re ouverture de Claude Desktop
         $configDir = "$TargetProfile\AppData\Roaming\Claude"
-        Write-Warn "Package Appx Claude non détecté — chemin de secours : $configDir"
+        Write-Warn "Package Claude non résolu — chemin de secours : $configDir"
+        Write-Info "Si Claude ne lit pas la config M365, ouvrir Claude Desktop une fois puis relancer cette phase."
     }
 
     New-Item -ItemType Directory -Path $configDir -Force | Out-Null
@@ -351,13 +417,13 @@ function Invoke-Phase5-M365 {
         Write-Ok "Entrée microsoft365 ajoutée"
     }
 
-    $config | ConvertTo-Json -Depth 10 | Set-Content $configPath -Encoding UTF8
+    Set-JsonFile -Object $config -Path $configPath
     Write-Info "Config écrite dans : $configPath"
     $script:phaseResults['M365 MCP'] = '✅ pré-configuré'
 }
 
-# ─── Phase 6 : Récapitulatif ──────────────────────────────────────────────────
-function Invoke-Phase6-Summary {
+# ─── Phase 7 : Récapitulatif ──────────────────────────────────────────────────
+function Invoke-Phase7-Summary {
     param([System.Collections.Specialized.OrderedDictionary]$Results)
 
     Write-Host "`n╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
@@ -370,6 +436,7 @@ function Invoke-Phase6-Summary {
     }
 
     Write-Host "`n📋 Actions manuelles restantes (à faire par le collab) :" -ForegroundColor Yellow
+    Write-Host "  0. Claude Desktop a été provisionné — il apparaît à la prochaine ouverture de session Windows"
     Write-Host "  1. Ouvrir Claude Desktop → Se connecter avec le compte @snetor.com"
     Write-Host "  2. Dans Claude Desktop : Paramètres → Extensions → Microsoft 365 → Autoriser"
     Write-Host "  3. Dans un terminal : taper [claude] → s'authentifier via le navigateur"
@@ -385,12 +452,13 @@ function Invoke-Phase6-Summary {
 $tmp = Get-TempDir
 
 try { Invoke-Phase1-NodeJS  $tmp } catch { Write-Fail "Phase 1 échouée : $_"; $phaseResults['Node.js']        = '❌' }
-try { Invoke-Phase2-Claude  $tmp } catch { Write-Fail "Phase 2 échouée : $_"; $phaseResults['Claude Desktop'] = '❌' }
-try { Invoke-Phase3-CoWork  $tmp } catch { Write-Fail "Phase 3 échouée : $_"; $phaseResults['Claude Code']    = '❌' }
-try { Invoke-Phase4-Snetor  $tmp } catch { Write-Fail "Phase 4 échouée : $_"; $phaseResults['Config Snetor'] = '❌' }
-try { Invoke-Phase5-M365    $tmp } catch { Write-Fail "Phase 5 échouée : $_"; $phaseResults['M365 MCP']       = '❌' }
+try { Invoke-Phase2-Git     $tmp } catch { Write-Fail "Phase 2 échouée : $_"; $phaseResults['Git']            = '❌' }
+try { Invoke-Phase3-Claude  $tmp } catch { Write-Fail "Phase 3 échouée : $_"; $phaseResults['Claude Desktop'] = '❌' }
+try { Invoke-Phase4-CoWork  $tmp } catch { Write-Fail "Phase 4 échouée : $_"; $phaseResults['Claude Code']    = '❌' }
+try { Invoke-Phase5-Snetor  $tmp } catch { Write-Fail "Phase 5 échouée : $_"; $phaseResults['Config Snetor'] = '❌' }
+try { Invoke-Phase6-M365    $tmp } catch { Write-Fail "Phase 6 échouée : $_"; $phaseResults['M365 MCP']       = '❌' }
 
-Invoke-Phase6-Summary $phaseResults
+Invoke-Phase7-Summary $phaseResults
 
 Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 
