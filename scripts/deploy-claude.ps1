@@ -1,21 +1,26 @@
-﻿#Requires -Version 5.1
+#Requires -Version 5.1
+
 <#
 .SYNOPSIS
     Déploiement complet Claude (Desktop + Code + M365 + Snetor) pour un collab Snetor.
 .DESCRIPTION
-    À exécuter depuis la session Windows du collab. Une seule boite UAC.
-    L'admin DSI approuve l'élévation — le script écrit ensuite dans le profil
-    du collab (pas celui de l'admin).
+    Compatible avec deux modes d'exécution :
+      - Session Windows du collab (UAC classique, une seule boite d'élévation)
+      - Déploiement NinjaOne (script lancé en SYSTEM, détection auto du collab connecté)
+
+    Dans les deux cas, l'installation s'écrit dans le profil du collab.
 .PARAMETER TargetUser
-    Nom d'utilisateur du collab (auto-détecté depuis la session courante).
+    Nom d'utilisateur du collab. Auto-détecté depuis la session interactive (NinjaOne)
+    ou depuis la session courante.
 .PARAMETER TargetProfile
-    Chemin vers le profil Windows du collab (auto-détecté depuis la session courante).
+    Chemin vers le profil Windows du collab. Auto-détecté si absent.
 .EXAMPLE
     .\deploy-claude.ps1
 #>
+
 param(
-    [string]$TargetUser    = $env:USERNAME,
-    [string]$TargetProfile = $env:USERPROFILE
+    [string]$TargetUser    = '',
+    [string]$TargetProfile = ''
 )
 
 Set-StrictMode -Version Latest
@@ -33,7 +38,93 @@ function Write-Warn { param($msg) Write-Host "   ⚠️  $msg" -ForegroundColor 
 function Write-Fail { param($msg) Write-Host "   ❌ $msg" -ForegroundColor Red }
 function Write-Info { param($msg) Write-Host "      $msg" -ForegroundColor Gray }
 
-# ─── Phase 0 : Auto-élévation ─────────────────────────────────────────────────
+# ─── Detection de l'utilisateur interactif (contexte SYSTEM NinjaOne) ────────
+# Quand NinjaOne exécute ce script, le processus tourne en SYSTEM.
+# On détecte la session console active pour écrire dans le bon profil et
+# afficher les notifications GUI dans la bonne session Windows.
+$script:TargetUserFull = $null   # 'DOMAINE\user' — utilisé par Invoke-AsLoggedInUser
+
+$isSystem = [Security.Principal.WindowsIdentity]::GetCurrent().IsSystem
+
+if ($isSystem) {
+    Write-Host "  Contexte SYSTEM detecte (NinjaOne) — detection de la session interactive ..." -ForegroundColor DarkGray
+
+    # Methode 1 : query user — renvoie la session console/RDP active
+    try {
+        $quserLines = & query user 2>$null
+        if ($quserLines) {
+            # Ligne active : commence par '>' ou contient 'Active'
+            $activeLine = $quserLines | Where-Object { $_ -match 'Active' } | Select-Object -First 1
+            if ($activeLine -and $activeLine -match '^\s*>?\s*(\S+)') {
+                $detectedShort = $Matches[1].TrimStart('>')
+
+                # Résoudre le profil via la base de registre ProfileList
+                $profileListKey = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList'
+                foreach ($p in (Get-ChildItem $profileListKey -ErrorAction SilentlyContinue)) {
+                    $pPath = (Get-ItemProperty $p.PSPath -Name ProfileImagePath -ErrorAction SilentlyContinue).ProfileImagePath
+                    if ($pPath -and ((Split-Path $pPath -Leaf) -ieq $detectedShort)) {
+                        if (-not $TargetProfile) { $TargetProfile = $pPath }
+                        break
+                    }
+                }
+
+                if (-not $TargetUser) { $TargetUser = $detectedShort }
+
+                # Tenter de résoudre le domaine pour Invoke-AsLoggedInUser
+                try {
+                    $account = New-Object System.Security.Principal.NTAccount($detectedShort)
+                    $sid = $account.Translate([System.Security.Principal.SecurityIdentifier])
+                    # Retrouver 'DOMAINE\user' depuis le SID
+                    $script:TargetUserFull = $account.Value
+                } catch {
+                    $script:TargetUserFull = $detectedShort
+                }
+            }
+        }
+    } catch {
+        Write-Warn "query user a echoue : $_"
+    }
+
+    # Methode 2 fallback : Win32_ComputerSystem.UserName ('DOMAINE\user')
+    if (-not $script:TargetUserFull) {
+        try {
+            $cs = Get-CimInstance Win32_ComputerSystem -ErrorAction SilentlyContinue
+            if ($cs -and $cs.UserName) {
+                $script:TargetUserFull = $cs.UserName
+                $shortName = $cs.UserName -replace '^.*\\', ''
+                if (-not $TargetUser) { $TargetUser = $shortName }
+
+                if (-not $TargetProfile) {
+                    $profileListKey = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList'
+                    foreach ($p in (Get-ChildItem $profileListKey -ErrorAction SilentlyContinue)) {
+                        $pPath = (Get-ItemProperty $p.PSPath -Name ProfileImagePath -ErrorAction SilentlyContinue).ProfileImagePath
+                        if ($pPath -and ((Split-Path $pPath -Leaf) -ieq $shortName)) {
+                            $TargetProfile = $pPath
+                            break
+                        }
+                    }
+                }
+            }
+        } catch {
+            Write-Warn "Win32_ComputerSystem.UserName indisponible : $_"
+        }
+    }
+
+    if ($script:TargetUserFull) {
+        Write-Host "  Utilisateur interactif : $script:TargetUserFull" -ForegroundColor DarkGray
+    } else {
+        Write-Warn "Aucune session interactive detectee — les notifications GUI seront ignorees"
+    }
+} else {
+    # Session normale (non-SYSTEM) : l'utilisateur courant est le collab
+    $script:TargetUserFull = "$env:USERDOMAIN\$env:USERNAME"
+}
+
+# Valeurs par défaut si non renseignées et non-SYSTEM
+if (-not $TargetUser)    { $TargetUser    = $env:USERNAME }
+if (-not $TargetProfile) { $TargetProfile = $env:USERPROFILE }
+
+# ─── Phase 0 : Auto-élévation (ignorée en contexte SYSTEM NinjaOne) ──────────
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
     [Security.Principal.WindowsBuiltInRole]::Administrator
 )
@@ -105,6 +196,181 @@ function Get-GitHubLatestAsset {
     $asset = $rel.assets | Where-Object { $_.name -match $NamePattern } | Select-Object -First 1
     if (-not $asset) { throw "Aucun asset '$NamePattern' dans la dernière release de $Repo" }
     return [PSCustomObject]@{ Name = $asset.name; Url = $asset.browser_download_url }
+}
+
+# ─── Notifications GUI dans la session du collab ──────────────────────────────
+# Construit puis affiche une boite de dialogue WinForms (style Snetor) DANS la
+# session interactive du collab, via Invoke-AsLoggedInUser (cmdlet NinjaOne).
+# En session non-SYSTEM, Invoke-AsLoggedInUser n'existe pas — on tombe en catch.
+# Les jetons __XXX__ sont remplacés avant encodage Base64/UTF16 (les symboles
+# unicode sont donc préservés).
+function Show-SnetorDialog {
+    param(
+        [string]$Title,
+        [string]$IconChar,                  # ex : '0x26A0' (avertissement), '0x2713' (coche)
+        [int]$IconR, [int]$IconG, [int]$IconB,
+        [string]$BodyBlock,                 # lignes PowerShell : $body.AppendText(...) / $body.SelectionFont
+        [string]$ButtonText = "J'ai compris",
+        [int]$TimeoutSec    = 18
+    )
+    if (-not $script:TargetUserFull) {
+        Write-Warn "Aucun utilisateur interactif - notification ignoree"
+        return
+    }
+
+    $template = @'
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+$form = New-Object System.Windows.Forms.Form
+$form.Text            = "Deploiement Claude AI - Snetor DSI"
+$form.Size            = New-Object System.Drawing.Size(660, 495)
+$form.StartPosition   = 'CenterScreen'
+$form.BackColor       = [System.Drawing.Color]::FromArgb(15, 30, 60)
+$form.FormBorderStyle = 'FixedDialog'
+$form.MaximizeBox     = $false
+$form.MinimizeBox     = $false
+$form.TopMost         = $true
+
+# Bande verte en haut
+$header           = New-Object System.Windows.Forms.Panel
+$header.Size      = New-Object System.Drawing.Size(660, 8)
+$header.Location  = New-Object System.Drawing.Point(0, 0)
+$header.BackColor = [System.Drawing.Color]::FromArgb(0, 200, 120)
+$form.Controls.Add($header)
+
+# Icone
+$icon           = New-Object System.Windows.Forms.Label
+$icon.Text      = [char]__ICONCHAR__
+$icon.Font      = New-Object System.Drawing.Font("Segoe UI", 46, [System.Drawing.FontStyle]::Regular)
+$icon.ForeColor = [System.Drawing.Color]::FromArgb(__ICONR__, __ICONG__, __ICONB__)
+$icon.Size      = New-Object System.Drawing.Size(88, 88)
+$icon.Location  = New-Object System.Drawing.Point(33, 33)
+$form.Controls.Add($icon)
+
+# Titre
+$title           = New-Object System.Windows.Forms.Label
+$title.Text      = "__TITLE__"
+$title.Font      = New-Object System.Drawing.Font("Segoe UI", 18, [System.Drawing.FontStyle]::Bold)
+$title.ForeColor = [System.Drawing.Color]::White
+$title.Size      = New-Object System.Drawing.Size(506, 44)
+$title.Location  = New-Object System.Drawing.Point(127, 39)
+$form.Controls.Add($title)
+
+# Sous-titre
+$sub           = New-Object System.Windows.Forms.Label
+$sub.Text      = "Service DSI Snetor"
+$sub.Font      = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Regular)
+$sub.ForeColor = [System.Drawing.Color]::FromArgb(0, 200, 120)
+$sub.Size      = New-Object System.Drawing.Size(506, 26)
+$sub.Location  = New-Object System.Drawing.Point(127, 84)
+$form.Controls.Add($sub)
+
+# Separateur
+$sep           = New-Object System.Windows.Forms.Panel
+$sep.Size      = New-Object System.Drawing.Size(594, 1)
+$sep.Location  = New-Object System.Drawing.Point(33, 132)
+$sep.BackColor = [System.Drawing.Color]::FromArgb(50, 70, 100)
+$form.Controls.Add($sep)
+
+# Corps du message (RichTextBox pour le gras partiel)
+$body             = New-Object System.Windows.Forms.RichTextBox
+$body.BackColor   = [System.Drawing.Color]::FromArgb(15, 30, 60)
+$body.ForeColor   = [System.Drawing.Color]::FromArgb(200, 215, 235)
+$body.BorderStyle = 'None'
+$body.ReadOnly    = $true
+$body.ScrollBars  = 'None'
+$body.Size        = New-Object System.Drawing.Size(594, 220)
+$body.Location    = New-Object System.Drawing.Point(33, 149)
+
+$fontNormal = New-Object System.Drawing.Font("Segoe UI", 13, [System.Drawing.FontStyle]::Regular)
+$fontBold   = New-Object System.Drawing.Font("Segoe UI", 13, [System.Drawing.FontStyle]::Bold)
+
+__BODYBLOCK__
+$form.Controls.Add($body)
+
+# Bouton
+$btn                           = New-Object System.Windows.Forms.Button
+$btn.Text                      = "__BUTTON__"
+$btn.Font                      = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
+$btn.ForeColor                 = [System.Drawing.Color]::White
+$btn.BackColor                 = [System.Drawing.Color]::FromArgb(0, 160, 95)
+$btn.FlatStyle                 = 'Flat'
+$btn.FlatAppearance.BorderSize = 0
+$btn.Size                      = New-Object System.Drawing.Size(176, 46)
+$btn.Location                  = New-Object System.Drawing.Point(231, 405)
+$btn.Add_Click({ $form.Close() })
+$form.Controls.Add($btn)
+$form.AcceptButton = $btn
+
+$form.ShowDialog() | Out-Null
+'@
+
+    $dlg = $template.
+        Replace('__ICONCHAR__', $IconChar).
+        Replace('__ICONR__', "$IconR").Replace('__ICONG__', "$IconG").Replace('__ICONB__', "$IconB").
+        Replace('__TITLE__',  $Title).
+        Replace('__BUTTON__', $ButtonText).
+        Replace('__BODYBLOCK__', $BodyBlock)
+
+    try {
+        # Invoke-AsLoggedInUser est fourni par l'agent NinjaOne (contexte SYSTEM).
+        # En session utilisateur classique, la commande n'existe pas → catch silencieux.
+        Invoke-AsLoggedInUser -Command $dlg -TimeoutSec $TimeoutSec | Out-Null
+        Write-Ok "Notification affichee a $script:TargetUserFull : $Title"
+    } catch {
+        Write-Warn "Impossible d'afficher la notification GUI : $_"
+    }
+}
+
+# Notification 1 — debut de deploiement
+function Show-UserWarning {
+    $bodyBlock = @'
+$body.SelectionFont = $fontNormal
+$body.AppendText("L'installation comprend :`n")
+$body.AppendText("   -  Claude Desktop`n")
+$body.AppendText("   -  Claude Code (CLI)`n")
+$body.AppendText("   -  Configuration Snetor`n")
+$body.AppendText("   -  Connecteur Microsoft 365`n`n")
+$body.AppendText("Duree estimee : 5 a 10 minutes.`n")
+$body.SelectionFont = $fontBold
+$body.AppendText("Merci de ne pas eteindre votre ordinateur.`n")
+$body.AppendText("Ne pas tenter d'ouvrir l'application pendant ce delai.")
+'@
+    Show-SnetorDialog -Title 'Installation en cours sur votre poste' `
+        -IconChar '0x26A0' -IconR 0 -IconG 200 -IconB 120 `
+        -BodyBlock $bodyBlock -ButtonText "J'ai compris" -TimeoutSec 18
+}
+
+# Notification 2 — fin de deploiement (verte si OK, orange si avertissements)
+function Show-UserComplete {
+    param([bool]$HadFailure)
+
+    if ($HadFailure) {
+        $title    = 'Installation terminee avec avertissements'
+        $iconChar = '0x26A0'; $r = 255; $g = 170; $b = 40
+    } else {
+        $title    = 'Installation terminee avec succes'
+        $iconChar = '0x2713'; $r = 0; $g = 200; $b = 120
+    }
+
+    $bodyBlock = @'
+$body.SelectionFont = $fontNormal
+$body.AppendText("Claude AI est installe sur votre poste.`n`n")
+$body.SelectionFont = $fontBold
+$body.AppendText("Pour commencer :`n")
+$body.SelectionFont = $fontNormal
+$body.AppendText("   1. Ouvrir Claude Desktop et se connecter`n")
+$body.AppendText("      avec votre compte @snetor.com`n")
+$body.AppendText("   2. Autoriser le connecteur Microsoft 365`n")
+$body.AppendText("      (Parametres -> Extensions)`n")
+$body.AppendText("   3. Dans un terminal : taper la commande  claude`n`n")
+$body.SelectionFont = $fontBold
+$body.AppendText("En cas de souci : contacter le service DSI.")
+'@
+    Show-SnetorDialog -Title $title `
+        -IconChar $iconChar -IconR $r -IconG $g -IconB $b `
+        -BodyBlock $bodyBlock -ButtonText 'Fermer' -TimeoutSec 30
 }
 
 # ─── Phase 1 : Node.js LTS ────────────────────────────────────────────────────
@@ -463,6 +729,9 @@ function Invoke-Phase7-Summary {
 # ─── Exécution principale ─────────────────────────────────────────────────────
 $tmp = Get-TempDir
 
+# Notifier le collab que l'installation démarre (non bloquant — timeout 18 s)
+Show-UserWarning
+
 try { Invoke-Phase1-NodeJS  $tmp } catch { Write-Fail "Phase 1 échouée : $_"; $phaseResults['Node.js']        = '❌' }
 try { Invoke-Phase2-Git     $tmp } catch { Write-Fail "Phase 2 échouée : $_"; $phaseResults['Git']            = '❌' }
 try { Invoke-Phase3-Claude  $tmp } catch { Write-Fail "Phase 3 échouée : $_"; $phaseResults['Claude Desktop'] = '❌' }
@@ -472,10 +741,14 @@ try { Invoke-Phase6-M365    $tmp } catch { Write-Fail "Phase 6 échouée : $_"; 
 
 Invoke-Phase7-Summary $phaseResults
 
+# Notifier le collab que l'installation est terminée
+$hadFailure = $phaseResults.Values -contains '❌'
+Show-UserComplete -HadFailure $hadFailure
+
 Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 
-# Maintenir la fenêtre ouverte si lancée en double-clic
-if ($Host.Name -eq 'ConsoleHost' -and -not $psISE) {
+# Maintenir la fenêtre ouverte si lancée en double-clic (hors NinjaOne)
+if ($Host.Name -eq 'ConsoleHost' -and -not $psISE -and -not $isSystem) {
     Write-Host "Appuyez sur une touche pour fermer ..." -ForegroundColor DarkGray
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
 }
