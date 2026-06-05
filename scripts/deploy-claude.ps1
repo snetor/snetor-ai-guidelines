@@ -508,6 +508,19 @@ function Invoke-Phase4-CoWork {
     & npm install -g '@anthropic-ai/claude-code'
     if ($LASTEXITCODE -ne 0) { throw "npm install a échoué (code $LASTEXITCODE)" }
 
+    # npm sur Windows écrit parfois un BOM UTF-8 (EF BB BF) en tête des wrappers .ps1.
+    # PowerShell 5.1 interprète ce BOM comme un nom de commande → CommandNotFoundException
+    # au premier lancement de 'claude'. On réécrit sans BOM tous les .ps1 du prefix.
+    $noBom = New-Object System.Text.UTF8Encoding($false)
+    Get-ChildItem -Path $npmPrefix -Filter '*.ps1' -ErrorAction SilentlyContinue | ForEach-Object {
+        $raw = [System.IO.File]::ReadAllText($_.FullName)
+        # Supprimer le BOM si présent (U+FEFF en tête)
+        if ($raw.StartsWith([char]0xFEFF)) {
+            [System.IO.File]::WriteAllText($_.FullName, $raw.TrimStart([char]0xFEFF), $noBom)
+            Write-Info "BOM supprimé : $($_.Name)"
+        }
+    }
+
     # Ajouter le prefix npm au PATH du collab via son hive registre
     # (SetEnvironmentVariable('User') ciblerait l'admin élevé, pas le collab)
     try {
