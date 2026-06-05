@@ -49,6 +49,15 @@ $isSystem = [Security.Principal.WindowsIdentity]::GetCurrent().IsSystem
 if ($isSystem) {
     Write-Host "  Contexte SYSTEM detecte (NinjaOne) — detection de la session interactive ..." -ForegroundColor DarkGray
 
+    # Résout le profil Windows à partir d'un SID via ProfileList dans le registre.
+    # C'est la seule méthode fiable : le nom de dossier peut différer du nom de session.
+    function Resolve-ProfileFromSid {
+        param([string]$Sid)
+        $key = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$Sid"
+        $prop = Get-ItemProperty $key -Name ProfileImagePath -ErrorAction SilentlyContinue
+        return $prop.ProfileImagePath
+    }
+
     # Methode 1 : query user — renvoie la session console/RDP active
     try {
         $quserLines = & query user 2>$null
@@ -57,25 +66,18 @@ if ($isSystem) {
             $activeLine = $quserLines | Where-Object { $_ -match 'Active' } | Select-Object -First 1
             if ($activeLine -and $activeLine -match '^\s*>?\s*(\S+)') {
                 $detectedShort = $Matches[1].TrimStart('>')
-
-                # Résoudre le profil via la base de registre ProfileList
-                $profileListKey = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList'
-                foreach ($p in (Get-ChildItem $profileListKey -ErrorAction SilentlyContinue)) {
-                    $pPath = (Get-ItemProperty $p.PSPath -Name ProfileImagePath -ErrorAction SilentlyContinue).ProfileImagePath
-                    if ($pPath -and ((Split-Path $pPath -Leaf) -ieq $detectedShort)) {
-                        if (-not $TargetProfile) { $TargetProfile = $pPath }
-                        break
-                    }
-                }
-
                 if (-not $TargetUser) { $TargetUser = $detectedShort }
 
-                # Tenter de résoudre le domaine pour Invoke-AsLoggedInUser
+                # Résoudre le SID du compte, puis le profil via ProfileList
                 try {
                     $account = New-Object System.Security.Principal.NTAccount($detectedShort)
-                    $sid = $account.Translate([System.Security.Principal.SecurityIdentifier])
-                    # Retrouver 'DOMAINE\user' depuis le SID
+                    $userSid = $account.Translate([System.Security.Principal.SecurityIdentifier]).Value
                     $script:TargetUserFull = $account.Value
+
+                    if (-not $TargetProfile) {
+                        $resolved = Resolve-ProfileFromSid $userSid
+                        if ($resolved) { $TargetProfile = $resolved }
+                    }
                 } catch {
                     $script:TargetUserFull = $detectedShort
                 }
@@ -95,14 +97,12 @@ if ($isSystem) {
                 if (-not $TargetUser) { $TargetUser = $shortName }
 
                 if (-not $TargetProfile) {
-                    $profileListKey = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList'
-                    foreach ($p in (Get-ChildItem $profileListKey -ErrorAction SilentlyContinue)) {
-                        $pPath = (Get-ItemProperty $p.PSPath -Name ProfileImagePath -ErrorAction SilentlyContinue).ProfileImagePath
-                        if ($pPath -and ((Split-Path $pPath -Leaf) -ieq $shortName)) {
-                            $TargetProfile = $pPath
-                            break
-                        }
-                    }
+                    try {
+                        $account = New-Object System.Security.Principal.NTAccount($cs.UserName)
+                        $userSid = $account.Translate([System.Security.Principal.SecurityIdentifier]).Value
+                        $resolved = Resolve-ProfileFromSid $userSid
+                        if ($resolved) { $TargetProfile = $resolved }
+                    } catch { }
                 }
             }
         } catch {
