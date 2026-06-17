@@ -601,6 +601,177 @@ Required for any slide whose body text exceeds 30 words.
 
 ---
 
+## Method Flow (icon nodes on a connected line)
+
+Richer alternative to the 4-step `.path` for a "how it works / our method" slide. Big circular Phosphor icons over an animated connector — more elaborate than plain stacked cards.
+
+```html
+<div class="flow">
+  <div class="flow-node">
+    <i class="ph ph-microphone-stage ph-icon teal"></i>
+    <h3>1 · Capter</h3>
+    <p>Short description of step one.</p>
+  </div>
+  <div class="flow-node">
+    <i class="ph ph-tree-structure ph-icon"></i>
+    <h3>2 · Structurer</h3>
+    <p>Short description.</p>
+  </div>
+  <div class="flow-node">
+    <i class="ph ph-robot ph-icon navy"></i>
+    <h3>3 · Augmenter</h3>
+    <p>Short description.</p>
+  </div>
+  <div class="flow-node">
+    <i class="ph ph-package ph-icon"></i>
+    <h3>4 · Livrer</h3>
+    <p>Short description.</p>
+  </div>
+</div>
+```
+
+Pair with a `big-message` band underneath for the "so what / takeaway".
+
+---
+
+## Value × Complexity Bubble Matrix (Chart.js)
+
+Prioritization output (use cases, initiatives, risks) plotted on a value × complexity grid, colored by category. See `references/charts.md` for the `buildMatrix()` script, category colors, axis labels and the lazy-init pattern (charts MUST be built when their slide becomes active — otherwise tooltips mis-align).
+
+```html
+<div class="two-col left-wide">
+  <article class="chart-card animate d2">
+    <div class="eyebrow" style="margin-bottom:0;">Valeur métier × complexité</div>
+    <div class="chart-wrap" style="height:330px;">
+      <canvas id="matrixMain"></canvas>
+    </div>
+    <p class="source-note">Survolez une bulle pour le détail · taille = valeur · Source : ...</p>
+  </article>
+  <div class="animate d3" style="display:flex; flex-direction:column; gap:18px; justify-content:center;">
+    <div class="cat-legend">
+      <div class="cat-row"><span class="cat-dot qw"></span><div><span class="n">20</span> <span class="l">Quick wins — valeur haute, faible complexité</span></div></div>
+      <div class="cat-row"><span class="cat-dot ps"></span><div><span class="n">16</span> <span class="l">Projets structurants — fort impact</span></div></div>
+      <div class="cat-row"><span class="cat-dot exp"></span><div><span class="n">4</span> <span class="l">Expérimentations</span></div></div>
+      <div class="cat-row"><span class="cat-dot ac"></span><div><span class="n">1</span> <span class="l">À challenger</span></div></div>
+    </div>
+  </div>
+</div>
+```
+
+Each data point should carry a short `ex` (concrete example) field so the tooltip can show name + example + axes — much more useful than coordinates alone.
+
+---
+
+## Product Preview Cards (clickable, with screenshot)
+
+For an app / product portfolio slide. Each card shows a screenshot that zooms on hover, a tag, title, one-liner and a status/CTA. Wrap in `<a>` for live products. Use 3 cards by default, or 4 with an inline `grid-template-columns:repeat(4,minmax(0,1fr))`.
+
+```html
+<div class="product-grid">
+  <a class="product-card" href="https://app.example.com" target="_blank" rel="noreferrer">
+    <div class="shot-wrap"><img class="shot" src="../assets/DECK_NAME/preview-app.png" alt="App"></div>
+    <div class="pbody">
+      <span class="ptag"><i class="ph-fill ph-compass"></i>Catégorie</span>
+      <strong>Nom du produit</strong>
+      <p>Une phrase de description.</p>
+      <span class="open">Découvrir <i class="ph-bold ph-arrow-up-right"></i></span>
+    </div>
+  </a>
+  <div class="product-card">
+    <div class="shot-wrap"><img class="shot" src="../assets/DECK_NAME/preview-b.png" alt="B"></div>
+    <div class="pbody">
+      <span class="ptag"><i class="ph-fill ph-flask"></i>MVP</span>
+      <strong>Produit en test</strong>
+      <p>Description.</p>
+      <span class="open">MVP en cours <i class="ph-bold ph-flask"></i></span>
+    </div>
+  </div>
+</div>
+```
+
+Copy the screenshots into `03-Outputs/assets/<deck-slug>/` like any other asset. Crop is handled by `object-fit:cover; object-position:top`.
+
+---
+
+## Foundation Strip (full-width gradient base band)
+
+For a "the common platform / foundation everything sits on" band — typically placed **below** a product grid to read as the base layer. Holds an icon, a text block and 1-3 white logo chips.
+
+```html
+<div class="foundation animate d4">
+  <i class="ph-fill ph-stack ph-icon large"></i>
+  <div class="f-txt">
+    <div class="eyebrow">La fondation</div>
+    <strong>Landing Zone Azure — le socle commun</strong>
+    <p>Une phrase sur ce que le socle apporte et ce qui s'y déploie.</p>
+  </div>
+  <div class="f-logos">
+    <div class="chip" style="background-image:url('../assets/DECK_NAME/azure.png');"></div>
+    <div class="chip" style="background-image:url('../assets/DECK_NAME/microsoft_fabric.png');"></div>
+  </div>
+</div>
+```
+
+---
+
+## Gantt Roadmap (timeline)
+
+Preferred for a roadmap slide when phases overlap across time — richer than the 4-step `.path`. Column 1 = labels, columns 2..N = time buckets. Place each label and bar with explicit `grid-row`; span time with `grid-column:start/end`. Bar status: `.done` (green), `.prog` (navy), `.plan` (hatched). Add `.g-today` for a dashed "now" line. A chantier can have several segments on the same row (e.g. MVP → Scale → Prod).
+
+```html
+<div class="gantt animate d2">
+  <div class="g-corner"></div>
+  <div class="g-head" style="grid-column:2;">Avr</div>
+  <div class="g-head" style="grid-column:3;">Mai</div>
+  <div class="g-head" style="grid-column:4;">Juin</div>
+  <div class="g-head" style="grid-column:5;">Juil</div>
+  <div class="g-head" style="grid-column:6;">Août</div>
+  <div class="g-head" style="grid-column:7;">Sept</div>
+  <div class="g-head" style="grid-column:8;">Q4</div>
+  <div class="g-today" style="grid-column:5;"></div>
+
+  <div class="g-label" style="grid-row:2;"><i class="ph-fill ph-magnifying-glass"></i>Audit</div>
+  <div class="g-bar done" style="grid-row:2; grid-column:2 / 5;">Réalisé</div>
+
+  <div class="g-label" style="grid-row:3;"><i class="ph-fill ph-address-book"></i>Produit (MVP→prod)</div>
+  <div class="g-bar prog" style="grid-row:3; grid-column:3 / 6;">MVP</div>
+  <div class="g-bar plan" style="grid-row:3; grid-column:6 / 7;">Scale</div>
+  <div class="g-bar plan" style="grid-row:3; grid-column:7 / 9;">Prod groupe</div>
+</div>
+```
+
+`grid-template-columns` is `190px repeat(7, 1fr)` by default — adjust the repeat count to match your number of time buckets, and place `.g-today` at the column that starts "now".
+
+---
+
+## Journey Stepper (premium closing milestone bar)
+
+For a closing / status slide — a polished alternative to `readiness-rail`. 5 nodes on a connector: `.done` filled green, `.current` pulsing ring ("we are here"), plain = future.
+
+```html
+<div class="journey animate d3">
+  <div class="j-step done"><div class="j-ic"><i class="ph-fill ph-magnifying-glass"></i></div><strong>Audit</strong><span>Fait</span></div>
+  <div class="j-step done"><div class="j-ic"><i class="ph-fill ph-compass"></i></div><strong>Vision</strong><span>Fait</span></div>
+  <div class="j-step done"><div class="j-ic"><i class="ph-fill ph-stack"></i></div><strong>Socle</strong><span>Fait</span></div>
+  <div class="j-step current"><div class="j-ic"><i class="ph-fill ph-rocket-launch"></i></div><strong>Projets</strong><span>Nous sommes ici</span></div>
+  <div class="j-step"><div class="j-ic"><i class="ph-fill ph-trend-up"></i></div><strong>Échelle</strong><span>À venir</span></div>
+</div>
+```
+
+Add `<div class="deco-shapes" aria-hidden="true"></div>` on the slide for a subtle branded backdrop.
+
+---
+
+## Annex Tag
+
+Marks appendix slides kept after the main deck (full data, detailed charts) — surfaced only if the audience digs deeper.
+
+```html
+<span class="annex-tag animate d1"><i class="ph-fill ph-paperclip"></i>Annexe A</span>
+```
+
+---
+
 ## Logo Usage in Slides
 
 Assets bundled with the skill live in `skills/snetor-html-slides/assets/`.
