@@ -44,13 +44,16 @@ One UAC prompt. Everything else is automatic. See [`scripts/README.md`](scripts/
 
 ---
 
-### Plugin snetor-html-slides
+### Plugin snetor-skills
+
+Snetor-branded visuals — two skills: **`snetor-html-slides`** (animated HTML decks) and
+**`snetor-excalidraw-diagrams`** (architecture diagrams with embedded service icons).
 
 #### Via the marketplace (recommended)
 
 ```
 /plugin marketplace add snetor/snetor-ai-guidelines
-/plugin install snetor-html-slides@snetor-ai-guidelines
+/plugin install snetor-skills@snetor-ai-guidelines
 ```
 
 #### Manually
@@ -59,7 +62,7 @@ One UAC prompt. Everything else is automatic. See [`scripts/README.md`](scripts/
 git clone https://github.com/snetor/snetor-ai-guidelines.git
 ```
 
-Then in Claude Code: `/plugin install` and select `plugins/snetor-html-slides`.
+Then in Claude Code: `/plugin install` and select `plugins/snetor-skills`.
 
 ---
 
@@ -117,7 +120,7 @@ Reference block for `~/.claude/settings.json`:
     "superpowers@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
-    "snetor-html-slides@snetor-ai-guidelines": true
+    "snetor-skills@snetor-ai-guidelines": true
   }
 }
 ```
