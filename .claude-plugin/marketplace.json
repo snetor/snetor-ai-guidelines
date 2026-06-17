@@ -6,10 +6,10 @@
   },
   "plugins": [
     {
-      "name": "snetor-html-slides",
-      "source": "./plugins/snetor-html-slides",
-      "description": "Generate Snetor-branded animated HTML presentation decks",
-      "version": "1.2.0"
+      "name": "snetor-skills",
+      "source": "./plugins/snetor-skills",
+      "description": "Snetor-branded visuals: animated HTML presentation decks and Excalidraw architecture diagrams",
+      "version": "1.3.0"
     }
   ]
 }
