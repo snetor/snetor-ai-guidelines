@@ -1,0 +1,22 @@
+{
+  "name": "snetor-skills",
+  "version": "1.3.0",
+  "description": "Snetor-branded visuals using the official Snetor design system (Raleway, green/navy palette, logos): animated HTML presentation decks AND Excalidraw architecture diagrams with embedded service icons.",
+  "author": {
+    "name": "Snetor",
+    "email": "c.peponnet@snetor.com",
+    "url": "https://www.snetor.com"
+  },
+  "repository": "https://github.com/snetor/snetor-ai-guidelines",
+  "license": "MIT",
+  "keywords": [
+    "snetor",
+    "slides",
+    "presentation",
+    "html",
+    "excalidraw",
+    "diagram",
+    "architecture",
+    "design-system"
+  ]
+}

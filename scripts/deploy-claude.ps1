@@ -302,7 +302,7 @@ function Invoke-Phase5-Snetor {
     $snetorPlugins   = [ordered]@{
         'superpowers@claude-plugins-official'     = $true
         'context7@claude-plugins-official'        = $true
-        'snetor-html-slides@snetor-ai-guidelines' = $true
+        'snetor-skills@snetor-ai-guidelines'     = $true
     }
     $snetorDefaults  = [ordered]@{
         theme        = 'dark'
