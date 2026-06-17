@@ -36,6 +36,17 @@ Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.plugins.legend.labels.padding = 14;
 ```
 
+> **⚠️ Tooltip gotcha (REQUIRED for any chart with hover tooltips).** The global
+> `Chart.defaults.animation` override above freezes the tooltip's opacity animation: on hover
+> the tooltip becomes *active* (`getActiveElements().length === 1`, correct title) but its
+> `opacity` stays stuck at ~0.02 — **active but invisible, so tooltips look broken**. Setting
+> `plugins.tooltip.animation` does NOT fix it; you must override the chart's own animation.
+> The reliable fix is **`animation: false` in the chart's `options`** (see `buildMatrix` /
+> `buildCharges` below) — entrance flair is already provided by the slide's CSS `animate`
+> classes, so disabling Chart.js's internal animation costs nothing visually. Symptom is
+> invisible only at runtime: verify with a trusted CDP hover and read back `chart.tooltip.opacity`
+> (expect `1`), not a static screenshot.
+
 ---
 
 ## chart-card component
@@ -291,6 +302,7 @@ function buildMatrix(canvasId, rows) {
     type: 'bubble',
     data: { datasets },
     options: {
+      animation: false, // REQUIRED: see tooltip gotcha above — keeps hover tooltips visible
       responsive: true, maintainAspectRatio: false, layout: { padding: 6 },
       plugins: {
         legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, font:{family:'Raleway',weight:'600'} } },
@@ -327,7 +339,7 @@ function buildCharges(canvasId) {
       label: 'j-h / mois', data: rows.map(d => d.jh),
       backgroundColor: rows.map(d => CAT[d.cat].bg), borderColor: rows.map(d => CAT[d.cat].border),
       borderWidth: 1, borderRadius: 4 }] },
-    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    options: { animation: false, /* see tooltip gotcha above */ indexAxis: 'y', responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display:false } },
       scales: { x: { beginAtZero:true, grid:{color:'#E0E5DF'} }, y: { grid:{display:false}, ticks:{color:'#152B47', font:{size:11, weight:'600'}} } } }
   });
