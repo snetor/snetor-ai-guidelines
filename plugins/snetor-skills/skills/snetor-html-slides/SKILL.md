@@ -218,7 +218,7 @@ This skill improves over time. After generating a deck:
 - If color or layout adjustments improve readability for a specific slide type, document them in `references/css-system.md` as an addendum.
 - If slide structure patterns emerge per audience type, add them to the plan-the-slide-structure section above.
 
-The skill maintainer (Clément Peponnet) can commit improvements back to `snetor-ai-guidelines/plugins/snetor-html-slides/` for the org.
+The skill maintainer (Clément Peponnet) can commit improvements back to `snetor-ai-guidelines/plugins/snetor-skills/` for the org.
 
 ---
 
