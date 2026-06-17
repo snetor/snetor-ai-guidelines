@@ -55,6 +55,7 @@ to match the actual relative path from the output file to the assets folder.
   --logo-reversed: url("../assets/DECK_NAME/snetor_full_logo_reversed.png");
   --globe: url("../assets/DECK_NAME/snetor_globe.png");
   --hero: url("../assets/DECK_NAME/Hero-banner-abstrait.jpg");
+  --shapes: url("../assets/DECK_NAME/snetor_shapes.png");
 }
 
 * { box-sizing: border-box; }
@@ -471,6 +472,114 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .has-tooltip:hover::after, .has-tooltip:focus::after { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); }
 .has-tooltip:hover::before, .has-tooltip:focus::before { opacity:1; }
 
+/* === TWO-COLUMN HELPERS === */
+.two-col { display:grid; gap:24px; align-items:start; }
+.two-col.left-wide { grid-template-columns:1.35fr .65fr; }
+.two-col.even { grid-template-columns:1fr 1fr; }
+
+/* === METHOD FLOW (icon nodes on a connected line) ===
+   Richer alternative to the 4-step .path for a "how it works / method" slide.
+   Big circular Phosphor icons over an animated connector. */
+.flow { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:18px; position:relative; }
+.flow::before { content:""; position:absolute; left:11%; right:11%; top:38px; height:2px; background:var(--green-20); transform-origin:left center; z-index:0; }
+.slide.active .flow::before { animation: growLine 900ms var(--ease) 220ms both; }
+.flow-node { position:relative; z-index:1; text-align:center; padding:0 6px; }
+.flow-node .ph-icon { margin:0 auto 14px; width:76px; height:76px; font-size:40px; border-radius:50%; box-shadow:0 6px 18px rgba(21,43,71,.10); background:var(--white); }
+.flow-node h3 { font-size:18px; margin-bottom:6px; }
+.flow-node p { font-size:14px; line-height:1.4; }
+.slide.active .flow-node { animation: rise 560ms var(--ease) both; }
+.slide.active .flow-node:nth-child(1){animation-delay:120ms}
+.slide.active .flow-node:nth-child(2){animation-delay:230ms}
+.slide.active .flow-node:nth-child(3){animation-delay:340ms}
+.slide.active .flow-node:nth-child(4){animation-delay:450ms}
+
+/* === CATEGORY LEGEND (counts with colored dots) ===
+   Pairs well with a Chart.js bubble matrix. Dot colors match the matrix categories. */
+.cat-legend { display:grid; gap:12px; }
+.cat-row { display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:center; }
+.cat-dot { width:18px; height:18px; border-radius:50%; flex:0 0 auto; box-shadow:0 0 0 4px rgba(0,0,0,.04); }
+.cat-dot.qw { background:var(--green); } .cat-dot.ps { background:var(--navy); } .cat-dot.exp { background:var(--blue-green); } .cat-dot.ac { background:#b43232; }
+.cat-row .n { color:var(--navy); font-weight:800; font-size:22px; line-height:1; }
+.cat-row .l { color:var(--muted); font-size:13px; font-weight:600; }
+
+/* === PRODUCT PREVIEW CARDS (clickable, with screenshot) ===
+   For a product / app portfolio slide. Each card shows a screenshot thumbnail that
+   zooms on hover, a tag, a title, a one-liner and a status/CTA. Wrap in an <a> for live links.
+   Use 3 cards (cols-3, default) or set grid-template-columns:repeat(4,...) inline for 4. */
+.product-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; }
+.product-card { display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff; box-shadow:0 2px 8px rgba(21,43,71,.08); text-decoration:none; transition:transform .24s var(--ease), box-shadow .24s var(--ease); }
+.product-card:hover { transform:translateY(-5px); box-shadow:var(--shadow); }
+.product-card .shot-wrap { height:152px; overflow:hidden; background:var(--navy); position:relative; }
+.product-card .shot { width:100%; height:100%; object-fit:cover; object-position:top center; transition:transform .5s var(--ease); display:block; }
+.product-card:hover .shot { transform:scale(1.06); }
+.product-card .shot-wrap::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 60%, rgba(21,43,71,.18)); }
+.product-card .pbody { padding:14px 16px 16px; display:flex; flex-direction:column; gap:6px; }
+.product-card .ptag { display:inline-flex; align-items:center; gap:8px; color:var(--green); font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.product-card .pbody strong { color:var(--navy); font-size:18px; }
+.product-card .pbody p { font-size:13px; line-height:1.4; color:var(--muted); }
+.product-card .open { margin-top:2px; color:var(--green); font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:6px; }
+.slide.active .product-card { animation: fadeScale 560ms var(--ease) both; }
+.slide.active .product-card:nth-child(1){animation-delay:200ms}
+.slide.active .product-card:nth-child(2){animation-delay:300ms}
+.slide.active .product-card:nth-child(3){animation-delay:400ms}
+.slide.active .product-card:nth-child(4){animation-delay:480ms}
+
+/* === FOUNDATION STRIP (full-width gradient base band) ===
+   For a "the common foundation / platform everything sits on" band, typically placed
+   below a product grid. Holds an icon, a short text block, and 1-3 logo chips. */
+.foundation { position:relative; padding:20px 26px; border-radius:12px; color:#fff; overflow:hidden;
+  background:linear-gradient(120deg, var(--navy), var(--blue-green) 62%, var(--green)); box-shadow:var(--shadow);
+  display:flex; align-items:center; gap:20px; }
+.foundation::after { content:""; position:absolute; right:-40px; top:-30px; width:360px; height:200px; background:var(--shapes) right center / contain no-repeat; opacity:.16; pointer-events:none; }
+.foundation .ph-icon { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.22); color:#fff; }
+.foundation .f-txt { position:relative; z-index:1; }
+.foundation .f-txt .eyebrow { color:var(--pastel); margin-bottom:6px; }
+.foundation .f-txt .eyebrow::before { background:var(--pastel); }
+.foundation .f-txt strong { display:block; font-size:21px; margin-bottom:4px; color:#fff; }
+.foundation .f-txt p { color:rgba(255,255,255,.85); font-size:14px; line-height:1.4; max-width:640px; }
+.foundation .f-logos { position:relative; z-index:1; margin-left:auto; display:flex; gap:10px; flex:0 0 auto; }
+.foundation .f-logos .chip { width:58px; height:44px; border-radius:8px; background:#fff center / 38px no-repeat; box-shadow:0 4px 10px rgba(0,0,0,.18); }
+
+/* === GANTT (roadmap timeline) ===
+   Grid-based Gantt for a roadmap slide. Column 1 = labels, columns 2..N = time buckets.
+   Place each label and bar with explicit grid-row; place bars across time with grid-column:start/end.
+   Bar status: .done (green), .prog (navy), .plan (hatched). Optional .g-today dashed "now" line. */
+.gantt { display:grid; grid-template-columns:190px repeat(7, 1fr); gap:9px 6px; position:relative; align-items:center; }
+.gantt .g-corner { grid-column:1; grid-row:1; }
+.gantt .g-head { grid-row:1; font-size:12px; font-weight:800; color:var(--subtle); text-transform:uppercase; letter-spacing:.05em; text-align:center; padding-bottom:4px; border-bottom:2px solid var(--border); }
+.gantt .g-label { grid-column:1; font-size:14px; font-weight:700; color:var(--navy); display:flex; align-items:center; gap:8px; }
+.gantt .g-label i { font-size:18px; color:var(--green); }
+.gantt .g-bar { height:32px; border-radius:8px; display:flex; align-items:center; padding:0 14px; color:#fff; font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; box-shadow:0 2px 8px rgba(21,43,71,.14); transform-origin:left center; }
+.slide.active .gantt .g-bar { animation: growBar 760ms var(--ease) both; }
+.gantt .g-bar.done { background:linear-gradient(90deg, var(--green), var(--emerald)); }
+.gantt .g-bar.prog { background:linear-gradient(90deg, var(--navy), var(--blue-green)); }
+.gantt .g-bar.plan { background:repeating-linear-gradient(45deg, var(--green-10), var(--green-10) 8px, #fff 8px, #fff 16px); color:var(--green-dark); border:1px solid var(--green-20); box-shadow:none; }
+.gantt .g-today { grid-row:2 / -1; width:0; border-left:2px dashed #b43232; justify-self:start; position:relative; z-index:3; pointer-events:none; }
+.gantt .g-today::after { content:"Aujourd'hui"; position:absolute; top:-22px; left:50%; transform:translateX(-50%); white-space:nowrap; font-size:11px; font-weight:800; color:#b43232; }
+
+/* === JOURNEY STEPPER (premium horizontal milestone bar) ===
+   For a closing / status slide. 5 nodes over a connector line: .done filled green,
+   .current pulsing ring (= "we are here"), plain = future. */
+.journey { display:flex; align-items:flex-start; justify-content:space-between; position:relative; margin-top:14px; padding:0 2%; }
+.journey::before { content:""; position:absolute; left:9%; right:9%; top:30px; height:3px; background:var(--green-20); z-index:0; }
+.slide.active .journey::before { animation: growLine 900ms var(--ease) 240ms both; transform-origin:left center; }
+.j-step { position:relative; z-index:1; flex:1; text-align:center; padding:0 6px; }
+.j-step .j-ic { width:60px; height:60px; border-radius:50%; margin:0 auto 12px; display:grid; place-items:center; font-size:28px; background:#fff; border:3px solid var(--green-20); color:var(--subtle); }
+.j-step.done .j-ic { background:linear-gradient(135deg, var(--green), var(--emerald)); border-color:transparent; color:#fff; box-shadow:0 8px 18px rgba(0,125,54,.22); }
+.j-step.current .j-ic { border-color:var(--green); color:var(--green); box-shadow:0 0 0 7px var(--green-10); animation:pulseDot 1600ms var(--ease) infinite; }
+.j-step strong { display:block; color:var(--navy); font-size:15px; line-height:1.2; }
+.j-step span { display:block; margin-top:3px; color:var(--subtle); font-size:12px; font-weight:600; }
+.slide.active .j-step { animation: rise 560ms var(--ease) both; }
+.slide.active .j-step:nth-child(1){animation-delay:120ms}
+.slide.active .j-step:nth-child(2){animation-delay:220ms}
+.slide.active .j-step:nth-child(3){animation-delay:320ms}
+.slide.active .j-step:nth-child(4){animation-delay:420ms}
+.slide.active .j-step:nth-child(5){animation-delay:520ms}
+
+/* === DECORATIVE SHAPES + ANNEX TAG === */
+.deco-shapes { position:absolute; right:0; bottom:0; width:420px; height:300px; background:var(--shapes) right bottom / contain no-repeat; opacity:.10; z-index:0; pointer-events:none; }
+.annex-tag { display:inline-flex; align-items:center; gap:8px; padding:4px 12px; border-radius:999px; background:var(--navy); color:#fff; font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+
 /* RESPONSIVE */
 @media (max-width: 980px) {
   body { overflow: auto; }
@@ -489,6 +598,13 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
   .overview-grid { padding:18px; }
   .overview-grid.active { grid-template-columns:repeat(2, 1fr); }
   .path::before { display:none; }
+  .flow, .product-grid, .two-col, .two-col.left-wide, .two-col.even { grid-template-columns:1fr; }
+  .flow::before, .journey::before { display:none; }
+  .journey { flex-wrap:wrap; gap:16px; }
+  .j-step { flex:0 0 30%; }
+  .foundation { flex-direction:column; align-items:flex-start; }
+  .foundation .f-logos { margin-left:0; }
+  .gantt { grid-template-columns:120px repeat(7,1fr); }
   .globe { opacity:.25; right:16px; bottom:40px; width:150px; height:150px; }
   .footer { margin-top:24px; }
   .nav { display:none; }
