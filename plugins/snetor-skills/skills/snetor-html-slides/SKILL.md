@@ -79,6 +79,11 @@ And the primary component:
 - `check-grid` + `timeline` — validation / prerequisites slides
 - `brick-wall` — feature/capability lists
 - `path` — roadmap / 4-step sequence
+- `flow` — "how it works / our method" sequence (big icon nodes, richer than `path`)
+- `gantt` — roadmap when phases overlap across time (bars + `.g-today` marker)
+- `product-grid` + `foundation` — app/product portfolio with clickable screenshots, over a base platform band
+- bubble matrix + `cat-legend` — value × complexity prioritization (see `references/charts.md`)
+- `journey` — premium closing milestone bar ("we are here")
 - `provider-grid` — technology comparison (2–3 providers)
 - `grid cols-2` with `card` — paired concepts
 - `tradeoff-grid` — pros/cons, good/watch
@@ -161,6 +166,7 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
     /* 2. Chart.js bootstrap from references/charts.md (only if deck uses charts) */
     /* 3. Counter animation from references/charts.md (only if deck uses .counter) */
     /* 4. World map bootstrap from references/charts.md (only if deck uses .world-map) */
+    /* 5. Lazy-init charts on slide activation (charts.md) — REQUIRED for correct tooltips */
   </script>
 </body>
 </html>
@@ -189,6 +195,10 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 19. **Phosphor icons** — for fact-card iconography and inline iconography. Use class `<i class="ph ph-<name> ph-icon">`. Prefer regular weight by default, `ph-fill` for KPI cards needing more visual weight. Tone variants: default (green), `.navy`, `.teal`. See `references/external-libs.md`.
 20. **Speaker notes** — for any slide whose body text exceeds 30 words, add `<aside class="notes">` with the detail. Presenter accesses via `N` key. See `references/presenter-mode.md`.
 21. **Presenter mode DOM** — every deck must include the 4 overlays (`#overview-grid`, `#shortcuts-modal`, `#notes-overlay`, `#timer-display`) after the `<main class="deck">` block. Bootstrap script from `references/presenter-mode.md` is always included.
+22. **Charts lazy-init (REQUIRED)** — build every chart the first time its slide becomes active, never eagerly at load. Charts created while their slide is `display:none` size to 0 and their tooltips/hover mis-align. Use the `initChartsOnActive()` pattern in `references/charts.md`, hooked into `show()`.
+23. **Roadmap** — when chantiers overlap across time, prefer the `gantt` component over `path`; add a `.g-today` "now" marker and use `.done` / `.prog` / `.plan` bar states.
+24. **Product portfolio** — use `product-grid` cards with real screenshots (copied into the deck assets folder, like any logo) to make products tangible and clickable; place the `foundation` band below them as the common base.
+25. **Prioritization** — use the value × complexity bubble matrix with a per-point `ex` (concrete example) so tooltips read "name + example + axes"; show a pruned `key` subset on the main slide and keep the full dataset / sensitive figures (e.g. effort) on annex slides marked with `annex-tag`.
 
 ---
 
@@ -226,6 +236,7 @@ The skill maintainer (Clément Peponnet) can commit improvements back to `snetor
 
 **Branding** (always copy to deck assets folder):
 `snetor_full_logo.png` · `snetor_full_logo_reversed.png` · `snetor_globe.png` · `Hero-banner-abstrait.jpg`
+`snetor_shapes.png` (optional — decorative wavy backdrop for the `foundation` band and `deco-shapes` on closing slides; copy when used)
 
 **Technology logos available** (copy only those needed):
 `azure.png` · `microsoft.png` · `microsoft_fabric.png` · `gcp.png` · `google.png` · `aws.png` · `amazon.png`
