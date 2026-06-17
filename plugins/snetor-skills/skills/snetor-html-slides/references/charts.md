@@ -220,9 +220,15 @@ If the data is a single percentage or a static demonstration, the existing CSS c
 
 ---
 
-## ⚠️ Lazy-init: build charts when their slide becomes active
+## ⚠️ Lazy-init: build charts on slide activation, after layout (CRITICAL)
 
-**Charts created while their slide is `display:none` size to 0px, so hover/tooltip hit-testing is misaligned (tooltips appear not to work).** Build each chart the first time its slide is shown — not eagerly at load.
+This is the single most error-prone part of a chart deck. Get all three details right:
+
+1. **Never build eagerly at load.** A chart created while its slide is `display:none` sizes its canvas to 0px. Result: the chart renders blank (you "have to reload to see it"), and its hover/tooltip hit model stays calibrated on the 0px size, so **tooltips never trigger even though the chart later paints**.
+2. **Build inside `requestAnimationFrame`,** not synchronously in `show()`. When `show()` flips the `.active` class the slide is still being laid out (and a CSS enter-animation may be running); a synchronous `new Chart()` reads a not-yet-settled size. One `rAF` lets layout settle first.
+3. **Keep the instance and `resize()` on every (re)activation.** Revisiting a slide, or a viewport change, needs an explicit `chart.resize()` to re-sync the canvas and the hit model.
+
+Builders must **`return` the `Chart` instance** (see `buildMatrix` / `buildCharges` below — note the `return new Chart(...)`).
 
 ```javascript
 const chartBuilders = {
@@ -230,16 +236,25 @@ const chartBuilders = {
   matrixFull: () => buildMatrix('matrixFull', RAW),
   chargeBars: () => buildCharges('chargeBars')
 };
-const builtCharts = {};
+const chartInstances = {};
 function initChartsOnActive() {
   if (!window.Chart) return;
   slides[current].querySelectorAll('canvas[id]').forEach((c) => {
-    if (!builtCharts[c.id] && chartBuilders[c.id]) { builtCharts[c.id] = true; chartBuilders[c.id](); }
+    const id = c.id;
+    if (chartInstances[id]) { requestAnimationFrame(() => chartInstances[id].resize()); return; }
+    if (!chartBuilders[id]) return;
+    requestAnimationFrame(() => {
+      if (chartInstances[id]) return;
+      chartInstances[id] = chartBuilders[id]();
+      requestAnimationFrame(() => { if (chartInstances[id]) chartInstances[id].resize(); });
+    });
   });
 }
 ```
 
 Hook `initChartsOnActive();` into `show()` right before the `document.title = ...` line (next to `runCountersOnActive();`). Set `Chart.defaults` once at load, but defer the `new Chart(...)` calls to `initChartsOnActive`.
+
+> **Verifying it really works** (you can't see hover in a static screenshot): drive headless Edge/Chrome over the DevTools Protocol — `Page.navigate`, send `ArrowRight` `Input.dispatchKeyEvent`s to reach the slide, then a trusted `Input.dispatchMouseEvent {type:'mouseMoved'}` on a bubble, and read back `Chart.getChart(canvasEl).getActiveElements().length` / `.tooltip.title`. Probe with the **canvas element** (`Chart.getChart(document.getElementById(id))`) — `Chart.getChart('id')` by string returns `undefined` and gives false negatives. Note: a synthetic `new MouseEvent('mousemove')` is unreliable (no `offsetX/Y`); use trusted CDP events.
 
 ---
 
@@ -272,7 +287,7 @@ function buildMatrix(canvasId, rows) {
       return { x: d.cplx + jit(gi,0), y: d.val + jit(gi,1), r: 7 + d.val*2.2, name: d.name, dept: d.dept, ex: d.ex || '' };
     })
   }));
-  new Chart(document.getElementById(canvasId), {
+  return new Chart(document.getElementById(canvasId), {
     type: 'bubble',
     data: { datasets },
     options: {
@@ -306,7 +321,7 @@ For the quantified detail (e.g. effort j-h/mois) behind the matrix — keep it i
 function buildCharges(canvasId) {
   if (!window.Chart) return;
   const rows = RAW.filter(d => d.jh != null).sort((a,b) => b.jh - a.jh);
-  new Chart(document.getElementById(canvasId), {
+  return new Chart(document.getElementById(canvasId), {
     type: 'bar',
     data: { labels: rows.map(d => d.name), datasets: [{
       label: 'j-h / mois', data: rows.map(d => d.jh),
