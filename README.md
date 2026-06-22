@@ -12,6 +12,20 @@
 
 ---
 
+## NEW TO THE TEAM? START HERE
+
+New to Claude Code at Snetor? Open the **interactive onboarding guide** — paste it into Claude Code
+and you get a guided, hands-on walkthrough (machine setup, repos, plugins, team conventions and a
+safe first task):
+
+> **https://claude.ai/claude-code/onboard/BMojJDEZzfOV**
+
+It covers how the team actually uses Claude, the setup checklist, the hard-won landing-zone gotchas
+(`merge = apply`, never `apply` locally, PowerShell for `terraform import`, the SSL CA bundle…) and
+a first PR to learn the branch → PR → CI plan → merge loop.
+
+---
+
 ## CONTENTS
 
 | File / Folder | Description |
