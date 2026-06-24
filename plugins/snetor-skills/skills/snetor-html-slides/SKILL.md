@@ -79,8 +79,15 @@ Choose a logical arc. Common patterns:
 
 For each slide, decide the layout:
 - `cover` class — slide 1 only, with hero image and h1
-- `dark` class — emphasis slide (1 per deck maximum, for a key decision moment)
+- `dark`/`light` — accent slide for rhythm at key moments; no two accent slides in a row
 - plain — default for all content slides
+
+**Theme & accent rhythm (spec §1) :**
+- Choisir un thème de deck selon le style validé au Step 1 : `theme-light` (défaut), `theme-dark`, ou mixte. Le poser sur `<main class="deck theme-...">`.
+- Utiliser les **slides d'accent** pour rythmer : `dark` dans un deck clair, `light` dans un deck foncé. Réserver les accents aux moments-clés (transition, citation, décision, big-number).
+- **Règles d'alternance** : pas deux slides d'accent consécutives ; un accent marque une rupture, pas une slide de contenu dense.
+
+**Archétypes aérés (spec §2) :** intercaler `section-divider` (respiration entre parties), `agenda` (en tête), `quote`, `big-number` (un KPI fort), `closing` (clôture). Voir `references/components.md`.
 
 And the primary component:
 - `market-facts` / `fact-card` — for 4 stats/metrics in a row
@@ -132,7 +139,7 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
   </style>
 </head>
 <body>
-  <main class="deck">
+  <main class="deck theme-light"><!-- theme-light (default) | theme-dark -->
     <!-- SLIDES HERE -->
     <!-- First slide gets class="slide cover active" -->
     <!-- Others get class="slide" -->
@@ -208,6 +215,8 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 23. **Roadmap** — when chantiers overlap across time, prefer the `gantt` component over `path`; add a `.g-today` "now" marker and use `.done` / `.prog` / `.plan` bar states.
 24. **Product portfolio** — use `product-grid` cards with real screenshots (copied into the deck assets folder, like any logo) to make products tangible and clickable; place the `foundation` band below them as the common base.
 25. **Prioritization** — use the value × complexity bubble matrix with a per-point `ex` (concrete example) so tooltips read "name + example + axes"; show a pruned `key` subset on the main slide and keep the full dataset / sensitive figures (e.g. effort) on annex slides marked with `annex-tag`.
+26. **Themes & accents** — set `theme-light` (default) or `theme-dark` on `<main class="deck">`. Use accent slides (`dark` in a light deck, `light` in a dark deck) for rhythm at key moments. No two accent slides in a row. On dark slides use the dark-safe component palette (see `references/css-system.md` → Deck Themes).
+27. **Archetypes** — use the aerated archetypes (`section-divider`, `agenda`, `quote`, `big-number`, `closing`) to vary rhythm and avoid the same arc every time. `big-number` uses `.bn-metric.counter`; `agenda` items may link via `?slide=N`.
 
 ---
 
