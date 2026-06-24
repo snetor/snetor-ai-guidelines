@@ -1,47 +1,15 @@
-# Snetor HTML Slides — CSS Design System
-
-This file contains the full CSS and design tokens for Snetor-branded HTML presentations.
-Always include this CSS verbatim in generated slides (inside a `<style>` tag in `<head>`).
-Adapt only the `--logo`, `--logo-reversed`, `--globe`, `--hero` and provider logo paths
-to match the actual relative path from the output file to the assets folder.
-
----
-
-## Color Tokens
-
-```
---green: #007D36         primary brand green
---green-dark: #006028    darker green for hover/depth
---green-20: #CCE0CD      green 20% tint (borders, accents)
---green-10: #E5EFE5      green 10% tint (card backgrounds)
---green-05: #F2F7F2      green 5% tint (subtle fills)
---navy: #152B47          primary dark (headlines, dark slides)
---blue-gray: #293F52     mid dark
---blue-green: #2A5458    teal dark (gradients)
---emerald: #168C74       teal accent
---pastel: #8CCAAE        light green (dark-slide accents)
---midnight: #1E1B2F      deep dark (rarely used)
---white: #FFFFFF
---muted: #4A5A6E         body text on light
---subtle: #7E8A9A        captions, small labels
---border: #E0E5DF        card borders
-```
-
----
-
-## Deck Themes
-
-Set the theme on `<main class="deck ...">`:
-- `theme-light` (default — may be omitted) — unchanged base styling.
-- `theme-dark` — every content slide dark by default. Use the **dark-safe** component palette (`.dark-card`, `.cost`, `.chart-card`, `.brick`, `.foundation`, `.ph-icon`, `.tab`, `.spotlight-card`, `.big-message`, + archetypes). Light-card components are meant for light slides.
-
-Per-slide accent (rhythm): add `dark` to a slide in a light deck, or `light` to a slide in a dark deck. `.light` opts the slide out of `theme-dark` back to the light styling.
-
----
-
-## Full CSS Block
-
-```css
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snetor — démo thème &amp; archétypes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  <style>
 :root {
   --green: #007D36;
   --green-dark: #006028;
@@ -61,11 +29,11 @@ Per-slide accent (rhythm): add `dark` to a slide in a light deck, or `light` to 
   --shadow: 0 18px 40px rgba(21, 43, 71, .14);
   --ease: cubic-bezier(.22, .61, .36, 1);
   /* PATHS: adjust relative to the output HTML file location */
-  --logo: url("../assets/DECK_NAME/snetor_full_logo.png");
-  --logo-reversed: url("../assets/DECK_NAME/snetor_full_logo_reversed.png");
-  --globe: url("../assets/DECK_NAME/snetor_globe.png");
-  --hero: url("../assets/DECK_NAME/Hero-banner-abstrait.jpg");
-  --shapes: url("../assets/DECK_NAME/snetor_shapes.png");
+  --logo: url("../assets/branding/snetor_full_logo.png");
+  --logo-reversed: url("../assets/branding/snetor_full_logo_reversed.png");
+  --globe: url("../assets/branding/snetor_globe.png");
+  --hero: url("../assets/branding/Hero-banner-abstrait.jpg");
+  --shapes: url("../assets/branding/snetor_shapes.png");
 }
 
 * { box-sizing: border-box; }
@@ -668,7 +636,6 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .closing .closing-title { font-size: 46px; line-height: 1.12; font-weight: 600; color: inherit; max-width: 920px; }
 .closing .closing-contact { display: flex; align-items: center; gap: 12px; font-size: 16px; color: inherit; opacity: .88; }
 .closing .closing-contact i { color: var(--green); font-size: 22px; }
-.closing.dark .closing-contact i, .deck.theme-dark .slide.closing:not(.light) .closing-contact i { color: var(--pastel); }
 
 /* BIG NUMBER — single giant KPI */
 .big-number .body { justify-content: center; align-items: center; text-align: center; gap: 10px; }
@@ -716,13 +683,258 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
   .slide { display:grid !important; position:relative; min-height:100vh; page-break-after:always; }
   .nav { display:none; }
 }
-```
+  </style>
+</head>
+<body>
+  <main class="deck theme-dark">
 
----
+    <!-- SLIDE 1 — COVER -->
+    <section class="slide cover active">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div>Système de design Snetor · Juin 2026</div>
+      </header>
+      <div class="body">
+        <div class="animate d1">
+          <div class="eyebrow">Design System</div>
+          <h1>Thème foncé &amp; archétypes de slides</h1>
+          <p class="lead">Démonstration du système CSS Snetor : thème global, accents clairs, et les six archétypes en action.</p>
+          <div class="hero-line"></div>
+        </div>
+      </div>
+      <div class="globe" aria-hidden="true"></div>
+      <footer class="footer">
+        <div>Deck de démo — non destiné à la diffusion.</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
 
-## Navigation JavaScript (always include at end of `<body>`)
+    <!-- SLIDE 2 — AGENDA -->
+    <section class="slide agenda">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Sommaire</div>
+      </header>
+      <div class="body">
+        <h2 class="animate d1">Au programme</h2>
+        <div class="agenda-list animate d2">
+          <a class="agenda-item" href="?slide=3">
+            <span class="ai-num">1</span>
+            <span>
+              <span class="ai-title">Séparateur de section</span>
+              <span class="ai-sub">Slide d'accent clair dans un deck foncé.</span>
+            </span>
+          </a>
+          <a class="agenda-item" href="?slide=4">
+            <span class="ai-num">2</span>
+            <span>
+              <span class="ai-title">Graphique &amp; statement</span>
+              <span class="ai-sub">chart-card donut + assertion clé sur fond foncé.</span>
+            </span>
+          </a>
+          <a class="agenda-item" href="?slide=5">
+            <span class="ai-num">3</span>
+            <span>
+              <span class="ai-title">Big Number</span>
+              <span class="ai-sub">KPI géant animé sur fond foncé.</span>
+            </span>
+          </a>
+          <a class="agenda-item" href="?slide=6">
+            <span class="ai-num">4</span>
+            <span>
+              <span class="ai-title">Citation &amp; Gantt</span>
+              <span class="ai-sub">Quote + roadmap Gantt dans un accent clair.</span>
+            </span>
+          </a>
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="sources"></div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
 
-```javascript
+    <!-- SLIDE 3 — SECTION DIVIDER LIGHT -->
+    <section class="slide section-divider light">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Partie 1</div>
+      </header>
+      <div class="body">
+        <div class="sd-index animate d1">01</div>
+        <h2 class="sd-title animate d2">Système de thème &amp; archétypes</h2>
+        <p class="sd-sub animate d3">Slide .light dans un deck .theme-dark : fond clair, texte navy, rendu propre.</p>
+      </div>
+      <footer class="footer">
+        <div class="sources"></div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 4 — CHART-CARD + STATEMENT (dark by theme) -->
+    <section class="slide">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Visualisation</div>
+      </header>
+      <div class="body">
+        <h2 class="animate d1">Répartition des composants utilisés</h2>
+        <div class="two-col even" style="align-items:start;">
+          <article class="chart-card animate d2">
+            <h3>Composants par catégorie</h3>
+            <div class="chart-wrap">
+              <canvas id="donutDemo"
+                data-chart="donut"
+                data-labels='["Archetypes","Cards","Charts","Navigation","Interactivité"]'
+                data-values='[6,8,4,3,4]'
+              ></canvas>
+            </div>
+            <p class="source-note">Source : references/components.md</p>
+          </article>
+          <div class="animate d3" style="display:flex; flex-direction:column; justify-content:center; gap:18px;">
+            <p class="statement">Le design system couvre <strong>25+ composants</strong> prêts à l'emploi pour tout type de deck.</p>
+            <p>Archetypes, charts, interactivity et animations d'entrée font partie du socle commun.</p>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="sources">Source : catalogue components.md · CSS system v2</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 5 — BIG NUMBER -->
+    <section class="slide big-number">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Le chiffre</div>
+      </header>
+      <div class="body">
+        <span class="bn-metric counter animate d1" data-target="68" data-suffix="%" data-duration="1400">0%</span>
+        <p class="bn-label animate d2">des présentations Snetor seront produites avec ce design system d'ici fin 2026.</p>
+        <p class="bn-sub animate d3">Objectif Head of AI · cible COMEX · périmètre France</p>
+      </div>
+      <footer class="footer">
+        <div class="sources">Source : plan transformation digitale 2026</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 6 — QUOTE -->
+    <section class="slide quote">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Verbatim</div>
+      </header>
+      <div class="body">
+        <blockquote class="animate d1">La qualité d'une présentation reflète la qualité de la pensée qui la sous-tend.</blockquote>
+        <div class="q-author animate d2">
+          <div>
+            <span class="q-name">Clément Peponnet</span> · <span class="q-role">Head of AI, Snetor</span>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="sources">Source : entretien interne.</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 7 — LIGHT + GANTT -->
+    <section class="slide light">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Roadmap</div>
+      </header>
+      <div class="body">
+        <h2 class="animate d1">Déploiement du design system — S1/S2 2026</h2>
+        <div class="gantt animate d2">
+          <div class="g-corner"></div>
+          <div class="g-head" style="grid-column:2;">Fév</div>
+          <div class="g-head" style="grid-column:3;">Mar</div>
+          <div class="g-head" style="grid-column:4;">Avr</div>
+          <div class="g-head" style="grid-column:5;">Mai</div>
+          <div class="g-head" style="grid-column:6;">Juin</div>
+          <div class="g-head" style="grid-column:7;">Juil</div>
+          <div class="g-head" style="grid-column:8;">Août</div>
+          <div class="g-today" style="grid-column:6;"></div>
+
+          <div class="g-label" style="grid-row:2;"><i class="ph-fill ph-magnifying-glass"></i>Audit CSS</div>
+          <div class="g-bar done" style="grid-row:2; grid-column:2 / 4;">Réalisé</div>
+
+          <div class="g-label" style="grid-row:3;"><i class="ph-fill ph-palette"></i>Thème &amp; archetypes</div>
+          <div class="g-bar done" style="grid-row:3; grid-column:3 / 6;">Tâches 1-3 ✓</div>
+          <div class="g-bar prog" style="grid-row:3; grid-column:6 / 7;">Démo</div>
+
+          <div class="g-label" style="grid-row:4;"><i class="ph-fill ph-rocket-launch"></i>Déploiement skills</div>
+          <div class="g-bar plan" style="grid-row:4; grid-column:6 / 8;">Merge PR</div>
+          <div class="g-bar plan" style="grid-row:4; grid-column:8 / 9;">Scale</div>
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="sources">Slide .light dans deck .theme-dark — barres growBar animées, marqueur Aujourd'hui.</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 8 — CLOSING DARK -->
+    <section class="slide closing dark">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Prochaines étapes</div>
+      </header>
+      <div class="body">
+        <h2 class="closing-title animate d1">Deck validé → merge PR → design system en production.</h2>
+        <div class="closing-steps pill-row animate d2">
+          <span class="pill">Revue visuelle Clément</span>
+          <span class="pill">Merge docs/onboarding-guide</span>
+          <span class="pill">Intégration SKILL.md</span>
+          <span class="pill">Point d'usage J+30</span>
+        </div>
+        <div class="closing-contact animate d3">
+          <i class="ph ph-envelope-simple"></i> c.peponnet@snetor.com
+        </div>
+      </div>
+      <div class="deco-shapes" aria-hidden="true"></div>
+      <footer class="footer">
+        <div class="sources"></div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+  </main>
+
+  <nav class="nav" aria-label="Navigation slides">
+    <button type="button" id="prev" aria-label="Slide précédente"></button>
+    <button type="button" id="next" aria-label="Slide suivante"></button>
+  </nav>
+
+  <!-- Presenter mode overlays -->
+  <div class="overview-grid" id="overview-grid" aria-hidden="true"></div>
+  <div class="shortcuts-modal" id="shortcuts-modal" aria-hidden="true">
+    <div class="panel">
+      <h3>Raccourcis clavier</h3>
+      <dl>
+        <dt>← →</dt><dd>Slide précédente / suivante</dd>
+        <dt>Space</dt><dd>Slide suivante</dd>
+        <dt>Home / End</dt><dd>Première / dernière slide</dd>
+        <dt>F</dt><dd>Plein écran</dd>
+        <dt>O</dt><dd>Vue d'ensemble</dd>
+        <dt>N</dt><dd>Notes présentateur</dd>
+        <dt>T</dt><dd>Minuteur</dd>
+        <dt>?</dt><dd>Cette aide</dd>
+        <dt>Esc</dt><dd>Fermer le panneau</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="notes-overlay" id="notes-overlay" aria-hidden="true">
+    <span class="label">Notes présentateur</span>
+    <div class="content"></div>
+  </div>
+  <div class="timer-display" id="timer-display" aria-hidden="true">00:00</div>
+
+  <script>
+// === NAVIGATION JS (verbatim from references/css-system.md) ===
 const slides = Array.from(document.querySelectorAll('.slide'));
 const progressBlocks = Array.from(document.querySelectorAll('.progress'));
 const initialSlide = Number.parseInt(new URLSearchParams(window.location.search).get('slide') || '1', 10);
@@ -743,7 +955,9 @@ function show(index) {
   current = Math.max(0, Math.min(slides.length - 1, index));
   slides.forEach((slide, i) => { slide.classList.toggle('active', i === current); });
   renderProgress();
-  document.title = `${DECK_TITLE} - ${current + 1}/${slides.length}`;
+  runCountersOnActive();
+  initChartsOnActive();
+  document.title = `Snetor — démo thème & archétypes - ${current + 1}/${slides.length}`;
 }
 
 document.getElementById('prev').addEventListener('click', () => show(current - 1));
@@ -764,5 +978,208 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'End') show(slides.length - 1);
 });
 
+// === PRESENTER MODE (from references/presenter-mode.md) ===
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+const overviewEl = document.getElementById('overview-grid');
+function buildOverview() {
+  overviewEl.innerHTML = '';
+  slides.forEach((slide, i) => {
+    const thumb = document.createElement('button');
+    thumb.type = 'button';
+    thumb.className = 'overview-thumb' + (i === current ? ' current' : '');
+    const heading = slide.querySelector('h1, h2');
+    const body = slide.querySelector('.body');
+    thumb.innerHTML = `
+      <span class="num">${String(i + 1).padStart(2, '0')}</span>
+      <span class="title">${heading ? heading.textContent.slice(0, 60) : 'Slide ' + (i + 1)}</span>
+      <span class="preview">${body ? body.textContent.replace(/\s+/g, ' ').trim().slice(0, 90) : ''}</span>
+    `;
+    thumb.addEventListener('click', () => {
+      show(i);
+      toggleOverview(false);
+    });
+    overviewEl.appendChild(thumb);
+  });
+}
+function toggleOverview(force) {
+  const next = typeof force === 'boolean' ? force : !overviewEl.classList.contains('active');
+  if (next) buildOverview();
+  overviewEl.classList.toggle('active', next);
+  overviewEl.setAttribute('aria-hidden', String(!next));
+}
+
+const shortcutsEl = document.getElementById('shortcuts-modal');
+function toggleShortcuts(force) {
+  const next = typeof force === 'boolean' ? force : !shortcutsEl.classList.contains('active');
+  shortcutsEl.classList.toggle('active', next);
+  shortcutsEl.setAttribute('aria-hidden', String(!next));
+}
+shortcutsEl.addEventListener('click', (e) => { if (e.target === shortcutsEl) toggleShortcuts(false); });
+
+const notesEl = document.getElementById('notes-overlay');
+const notesContentEl = notesEl.querySelector('.content');
+function refreshNotes() {
+  const note = slides[current].querySelector('.notes');
+  notesContentEl.textContent = note ? note.textContent.trim() : '(Pas de notes pour cette slide.)';
+}
+function toggleNotes(force) {
+  const next = typeof force === 'boolean' ? force : !notesEl.classList.contains('active');
+  if (next) refreshNotes();
+  notesEl.classList.toggle('active', next);
+  notesEl.setAttribute('aria-hidden', String(!next));
+}
+
+const timerEl = document.getElementById('timer-display');
+let timerStart = null;
+let timerElapsed = 0;
+let timerHandle = null;
+let timerRunning = false;
+function formatTime(ms) {
+  const total = Math.floor(ms / 1000);
+  const m = String(Math.floor(total / 60)).padStart(2, '0');
+  const s = String(total % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+function tickTimer() {
+  if (!timerRunning) return;
+  const ms = timerElapsed + (Date.now() - timerStart);
+  timerEl.textContent = formatTime(ms);
+}
+function toggleTimer() {
+  if (!timerEl.classList.contains('active')) {
+    timerEl.classList.add('active');
+    timerEl.classList.remove('paused');
+    timerStart = Date.now();
+    timerRunning = true;
+    timerHandle = setInterval(tickTimer, 500);
+    return;
+  }
+  if (timerRunning) {
+    timerElapsed += Date.now() - timerStart;
+    timerRunning = false;
+    timerEl.classList.add('paused');
+    clearInterval(timerHandle);
+  } else {
+    timerStart = Date.now();
+    timerRunning = true;
+    timerEl.classList.remove('paused');
+    timerHandle = setInterval(tickTimer, 500);
+  }
+}
+
+document.addEventListener('keydown', (event) => {
+  if (event.target.closest && event.target.closest('input, textarea, .tab, .acc-trigger, .check-card')) return;
+  const k = event.key;
+  if (k === 'Escape') {
+    toggleOverview(false); toggleShortcuts(false); toggleNotes(false);
+    return;
+  }
+  if (k === 'f' || k === 'F') { event.preventDefault(); toggleFullscreen(); return; }
+  if (k === 'o' || k === 'O') { event.preventDefault(); toggleOverview(); return; }
+  if (k === 'n' || k === 'N') { event.preventDefault(); toggleNotes(); return; }
+  if (k === 't' || k === 'T') { event.preventDefault(); toggleTimer(); return; }
+  if (k === '?') { event.preventDefault(); toggleShortcuts(); return; }
+});
+
+const originalShow = show;
+show = function(index) {
+  originalShow(index);
+  if (notesEl.classList.contains('active')) refreshNotes();
+};
+
+// === COUNTER ANIMATION (from references/charts.md) ===
+function animateCounter(el) {
+  if (el.dataset.animated === '1') return;
+  el.dataset.animated = '1';
+  const target = parseFloat(el.dataset.target);
+  const duration = parseInt(el.dataset.duration || '1000', 10);
+  const suffix = el.dataset.suffix || '';
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(target * eased).toLocaleString('fr-FR') + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function runCountersOnActive() {
+  document.querySelectorAll('.slide.active .counter').forEach(animateCounter);
+}
+
+// === CHART.JS — SNETOR THEME + LAZY-INIT (from references/charts.md) ===
+const SNETOR_PALETTE = ['#007D36', '#152B47', '#168C74', '#8CCAAE', '#293F52', '#CCE0CD'];
+if (window.Chart) {
+  Chart.defaults.font.family = 'Raleway, system-ui, sans-serif';
+  Chart.defaults.font.weight = '600';
+  Chart.defaults.color = '#4A5A6E';
+  Chart.defaults.animation = { duration: 900, easing: 'easeOutCubic' };
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.padding = 14;
+}
+
+function buildDonutDemo(canvasId) {
+  if (!window.Chart) return;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const labels = JSON.parse(canvas.dataset.labels || '[]');
+  const values = JSON.parse(canvas.dataset.values || '[]');
+  const slide = canvas.closest('.slide');
+  const onDark = !!slide && (slide.classList.contains('dark') || slide.classList.contains('cover')
+    || (!!document.querySelector('.deck.theme-dark') && !slide.classList.contains('light')));
+  const ink = onDark ? 'rgba(255,255,255,.82)' : '#4A5A6E';
+  return new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: SNETOR_PALETTE,
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      animation: false,
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'right', labels: { color: ink } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.label}: ${ctx.parsed}`
+          }
+        }
+      }
+    }
+  });
+}
+
+const chartBuilders = {
+  donutDemo: () => buildDonutDemo('donutDemo')
+};
+const chartInstances = {};
+
+function initChartsOnActive() {
+  if (!window.Chart) return;
+  slides[current].querySelectorAll('canvas[id]').forEach((c) => {
+    const id = c.id;
+    if (chartInstances[id]) { requestAnimationFrame(() => chartInstances[id].resize()); return; }
+    if (!chartBuilders[id]) return;
+    requestAnimationFrame(() => {
+      if (chartInstances[id]) return;
+      chartInstances[id] = chartBuilders[id]();
+      requestAnimationFrame(() => { if (chartInstances[id]) chartInstances[id].resize(); });
+    });
+  });
+}
+
+// === INITIAL RENDER ===
 show(current);
-```
+  </script>
+</body>
+</html>

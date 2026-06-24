@@ -36,26 +36,35 @@ You need the CSS from `css-system.md` to produce correct output. Do not reconstr
 
 ---
 
-## Step 1 — Understand the request
+## Step 1 — Intake wizard (cadrer avant de générer)
 
-Identify:
-1. **Topic** — what the slides are about
-2. **Audience** — COMEX, direction technique, équipe, client... This shapes the level of detail
-3. **Key messages** — what the audience must leave with (1–3 decisions or insights)
-4. **Slide count** — default to 4–6 slides; COMEX decks stay at 4–5
-5. **Source material** — vault pages, interview notes, existing wikis to draw from
-6. **Language** — detect from the request following `references/i18n.md`:
-   - User writes in FR → deck FR (default)
-   - User writes in EN → deck EN
-   - User writes in ES → deck ES
-   - Explicit override "in [language]" wins over auto-detection
-   - For other languages: generate content in that language, fall back to EN UI strings
+Avant de planifier ou d'écrire du HTML, **cadrer le besoin avec le collaborateur** via l'outil `AskUserQuestion` (choix multiples + « Autre » natif). Objectif : un deck ciblé, pas un template générique.
 
-If the request is ambiguous, infer from context in the vault (`index.md`, relevant `02-Wiki/` pages) rather than asking — then confirm the structure before generating HTML.
+**Détection de langue** d'abord, selon `references/i18n.md` (FR par défaut, EN/ES selon la requête, override « in [language] » prioritaire). Poser les questions du wizard dans la langue du collaborateur.
+
+### Mode express (défaut) — 3 tours
+
+1. **Objectif & cadrage** — une question `AskUserQuestion` couvrant : audience (COMEX / direction technique / équipe / client / autre), objectif (décider / informer / convaincre / former), et **message clé** (la 1 décision ou insight à retenir).
+2. **Structure** — proposer **2-3 plans** (chaque option = un outline en mini-ASCII : titres de slides + rôle de chaque slide), avec un nombre de slides indicatif. Le collaborateur choisit ou amende via « Autre ».
+3. **Style visuel** — une question avec, pour chaque option, un champ `preview` contenant une **mini-maquette ASCII** : thème (clair / foncé / mixte) et style de cover. Le collaborateur choisit via « Autre » s'il veut autre chose.
+
+### Mode guidé (sur demande)
+
+Si le collaborateur veut un contrôle fin, dérouler slide par slide : titre, sous-titre, et composant principal proposé (avec 1-2 alternatives). Une question `AskUserQuestion` par slide ou par petit groupe.
+
+### Garde-fou anti-friction
+
+Si la requête initiale est **déjà détaillée** (audience + objectif + plan explicites), **ne pas dérouler les 3 tours** : présenter un **récap unique à valider** (audience, objectif, plan, thème) et passer à Step 2 après accord. Le wizard sert à lever l'ambiguïté, pas à ralentir un brief clair.
+
+### Source material
+
+Identifier les sources à exploiter (pages du vault, notes d'entretien, wikis) — les citer dans les `.sources` des slides (Step 4, règle 9).
 
 ---
 
 ## Step 2 — Plan the slide structure
+
+Partir du plan validé au Step 1.
 
 Choose a logical arc. Common patterns:
 
@@ -70,8 +79,15 @@ Choose a logical arc. Common patterns:
 
 For each slide, decide the layout:
 - `cover` class — slide 1 only, with hero image and h1
-- `dark` class — emphasis slide (1 per deck maximum, for a key decision moment)
+- `dark`/`light` — accent slide for rhythm at key moments; no two accent slides in a row
 - plain — default for all content slides
+
+**Theme & accent rhythm (spec §1) :**
+- Choisir un thème de deck selon le style validé au Step 1 : `theme-light` (défaut), `theme-dark`, ou mixte. Le poser sur `<main class="deck theme-...">`.
+- Utiliser les **slides d'accent** pour rythmer : `dark` dans un deck clair, `light` dans un deck foncé. Réserver les accents aux moments-clés (transition, citation, décision, big-number).
+- **Règles d'alternance** : pas deux slides d'accent consécutives ; un accent marque une rupture, pas une slide de contenu dense.
+
+**Archétypes aérés (spec §2) :** intercaler `section-divider` (respiration entre parties), `agenda` (en tête), `quote`, `big-number` (un KPI fort), `closing` (clôture). Voir `references/components.md`.
 
 And the primary component:
 - `market-facts` / `fact-card` — for 4 stats/metrics in a row
@@ -123,7 +139,7 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
   </style>
 </head>
 <body>
-  <main class="deck">
+  <main class="deck theme-light"><!-- theme-light (default) | theme-dark -->
     <!-- SLIDES HERE -->
     <!-- First slide gets class="slide cover active" -->
     <!-- Others get class="slide" -->
@@ -172,6 +188,16 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 </html>
 ```
 
+### Garde-fous anti-surcharge (stricts — spec §4)
+
+Une slide doit respirer. Règles dures, appliquées à toute génération :
+
+- **1 idée par slide.** **1 composant principal max** par slide (le chrome — eyebrow, footer — ne compte pas).
+- **Budget mots strict** : ≤ ~25 mots de texte courant par slide (hors titres, statements, speaker notes).
+- **Détails ailleurs** : pousser le détail en speaker notes (`N`), `accordion`, ou slide d'annexe (`annex-tag`) — jamais entassé sur la slide.
+- **Auto-split** : si le contenu dépasse le budget, **scinder** la slide en deux plutôt que tasser.
+- **Refus de surcharger** : même sur demande explicite (« mets tout sur une slide »), proposer le split au lieu d'entasser.
+
 ### Non-negotiable rules
 
 1. **Copy the CSS verbatim** from `references/css-system.md`. Do not paraphrase, shorten, or reconstruct from memory. Replace `DECK_NAME` with the actual folder name.
@@ -187,18 +213,20 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 11. **Charts** — for any non-trivial quantitative comparison (multi-series, donut, line trend, radar, area), use `chart-card` from `references/charts.md`. Do NOT generate raw `<canvas>` or hand-coded SVG bars. The CSS-based `.stacked` and `.impact-bars` remain valid for simple single-row visualizations.
 12. **Counters** — for hero metrics on cover/dark slides or fact-cards, prefer `.metric.counter` with `data-target` over static text.
 13. **CDN libs** — only include Chart.js / jsvectormap when the deck actually uses them. Pin versions per `references/charts.md`.
-14. **Prefer interactivity over text** — if a slide compares 3+ options, use `tab-slide` instead of bullet lists. If a slide has details that interrupt the main message, push them into `accordion` or `tooltip`. Aim for max 30 words of body text per slide outside of statements.
+14. **Prefer interactivity over text** — if a slide compares 3+ options, use `tab-slide` instead of bullet lists. If a slide has details that interrupt the main message, push them into `accordion` or `tooltip`. Respecter le budget mots des garde-fous anti-surcharge (≤ ~25 mots de corps/slide) ; au-delà, split ou renvoi en notes/accordion/annexe.
 15. **Hover-reveal cards** — use sparingly (max 1 row per deck) for "punchline + reveal" effects on metric cards. See `references/interactivity.md`.
 16. **Marquee** — for ecosystem / partner / client logo slides with 6+ logos only. ≤5 logos = static row. Duplicate the logo set twice in the markup for seamless infinite scroll. See `references/external-libs.md`.
 17. **Bento grid** — for "value prop synthesis" / "what we do" slides only. Max 1 bento per deck. 5 cells with mixed `.big` / `.tall` / `.wide` / `.green` / `.dark` modifiers.
 18. **Spotlight cards** — `.dark` slides only, max 1 row per deck.
 19. **Phosphor icons** — for fact-card iconography and inline iconography. Use class `<i class="ph ph-<name> ph-icon">`. Prefer regular weight by default, `ph-fill` for KPI cards needing more visual weight. Tone variants: default (green), `.navy`, `.teal`. See `references/external-libs.md`.
-20. **Speaker notes** — for any slide whose body text exceeds 30 words, add `<aside class="notes">` with the detail. Presenter accesses via `N` key. See `references/presenter-mode.md`.
+20. **Speaker notes** — for any slide whose body text exceeds the word budget (~25 words, see Garde-fous anti-surcharge), add `<aside class="notes">` with the detail. Presenter accesses via `N` key. See `references/presenter-mode.md`.
 21. **Presenter mode DOM** — every deck must include the 4 overlays (`#overview-grid`, `#shortcuts-modal`, `#notes-overlay`, `#timer-display`) after the `<main class="deck">` block. Bootstrap script from `references/presenter-mode.md` is always included.
 22. **Charts lazy-init (REQUIRED)** — never build charts eagerly at load. A chart built while its slide is `display:none` sizes to 0px → blank render ("reload to see it") AND dead tooltips (hit model stuck at 0px). Build on slide activation, **inside `requestAnimationFrame`** (so layout settles), keep the instance, and `resize()` on every (re)activation. Builders must `return` the `Chart`. Use the exact `initChartsOnActive()` pattern in `references/charts.md`, hooked into `show()`. Verify hover with trusted CDP mouse events, not synthetic `MouseEvent`s.
 23. **Roadmap** — when chantiers overlap across time, prefer the `gantt` component over `path`; add a `.g-today` "now" marker and use `.done` / `.prog` / `.plan` bar states.
 24. **Product portfolio** — use `product-grid` cards with real screenshots (copied into the deck assets folder, like any logo) to make products tangible and clickable; place the `foundation` band below them as the common base.
 25. **Prioritization** — use the value × complexity bubble matrix with a per-point `ex` (concrete example) so tooltips read "name + example + axes"; show a pruned `key` subset on the main slide and keep the full dataset / sensitive figures (e.g. effort) on annex slides marked with `annex-tag`.
+26. **Themes & accents** — set `theme-light` (default) or `theme-dark` on `<main class="deck">`. Use accent slides (`dark` in a light deck, `light` in a dark deck) for rhythm at key moments. No two accent slides in a row. On dark slides use the dark-safe component palette (see `references/css-system.md` → Deck Themes).
+27. **Archetypes** — use the aerated archetypes (`section-divider`, `agenda`, `quote`, `big-number`, `closing`) to vary rhythm and avoid the same arc every time. `big-number` uses `.bn-metric.counter`; `agenda` items may link via `?slide=N`.
 
 ---
 
