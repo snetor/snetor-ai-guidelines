@@ -29,6 +29,16 @@ to match the actual relative path from the output file to the assets folder.
 
 ---
 
+## Deck Themes
+
+Set the theme on `<main class="deck ...">`:
+- `theme-light` (default — may be omitted) — unchanged base styling.
+- `theme-dark` — every content slide dark by default. Use the **dark-safe** component palette (`.dark-card`, `.cost`, `.chart-card`, `.brick`, `.foundation`, `.ph-icon`, `.tab`, `.spotlight-card`, `.big-message`, + archetypes). Light-card components are meant for light slides.
+
+Per-slide accent (rhythm): add `dark` to a slide in a light deck, or `light` to a slide in a dark deck. `.light` opts the slide out of `theme-dark` back to the light styling.
+
+---
+
 ## Full CSS Block
 
 ```css
@@ -579,6 +589,46 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 /* === DECORATIVE SHAPES + ANNEX TAG === */
 .deco-shapes { position:absolute; right:0; bottom:0; width:420px; height:300px; background:var(--shapes) right bottom / contain no-repeat; opacity:.10; z-index:0; pointer-events:none; }
 .annex-tag { display:inline-flex; align-items:center; gap:8px; padding:4px 12px; border-radius:999px; background:var(--navy); color:#fff; font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+
+/* === DECK THEME LAYER (additif — spec §1) ===
+   theme-light (défaut, implicite) = styling de base inchangé.
+   theme-dark = chaque slide de contenu foncée par défaut, en réutilisant la
+   cascade .dark existante (dupliquée ici en sélecteurs scopés, sans éditer
+   les règles .dark d'origine).
+   .light sur une slide = escape hatch : exclut la slide du thème foncé via
+   :not(.light), elle retombe sur le styling clair de base. Aucun style propre. */
+
+.deck.theme-dark .slide:not(.cover):not(.light) {
+  background: linear-gradient(135deg, var(--navy), var(--blue-green) 72%, var(--green));
+  color: white;
+}
+.deck.theme-dark .slide:not(.cover):not(.light) h2,
+.deck.theme-dark .slide:not(.cover):not(.light) h3,
+.deck.theme-dark .slide:not(.cover):not(.light) p,
+.deck.theme-dark .slide:not(.cover):not(.light) li { color: white; }
+.deck.theme-dark .slide:not(.cover):not(.light) .logo { background-image: var(--logo-reversed); }
+.deck.theme-dark .slide:not(.cover):not(.light) .eyebrow { color: rgba(255,255,255,.82); }
+.deck.theme-dark .slide:not(.cover):not(.light) .eyebrow::before { background: var(--pastel); }
+.deck.theme-dark .slide:not(.cover):not(.light) .statement { color: white; border-left-color: var(--pastel); }
+.deck.theme-dark .slide:not(.cover):not(.light) .statement strong { color: var(--pastel); }
+.deck.theme-dark .slide:not(.cover):not(.light) .metric { color: var(--pastel); }
+.deck.theme-dark .slide:not(.cover):not(.light) .footer { color: rgba(255,255,255,.72); }
+.deck.theme-dark .slide:not(.cover):not(.light) .source-note { color: rgba(255,255,255,.6); }
+.deck.theme-dark .slide:not(.cover):not(.light) .source-note a { color: var(--pastel); }
+.deck.theme-dark .slide:not(.cover):not(.light) .progress span { background: rgba(255,255,255,.28); }
+.deck.theme-dark .slide:not(.cover):not(.light) .progress span.on { background: var(--pastel); }
+/* dark-safe components inside a theme-dark slide (mirror existing .dark variants) */
+.deck.theme-dark .slide:not(.cover):not(.light) .chart-card { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.24); box-shadow: none; }
+.deck.theme-dark .slide:not(.cover):not(.light) .chart-card h3 { color: white; }
+.deck.theme-dark .slide:not(.cover):not(.light) .chart-card .source-note { color: rgba(255,255,255,.7); }
+.deck.theme-dark .slide:not(.cover):not(.light) .chart-card .source-note a { color: var(--pastel); }
+.deck.theme-dark .slide:not(.cover):not(.light) .ph-icon { color: var(--pastel); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); }
+.deck.theme-dark .slide:not(.cover):not(.light) .ph-icon.navy { color: var(--white); background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.22); }
+.deck.theme-dark .slide:not(.cover):not(.light) .tab { color: rgba(255,255,255,.7); }
+.deck.theme-dark .slide:not(.cover):not(.light) .tab:hover,
+.deck.theme-dark .slide:not(.cover):not(.light) .tab.active { color: var(--pastel); }
+.deck.theme-dark .slide:not(.cover):not(.light) .tab.active { border-bottom-color: var(--pastel); }
+.deck.theme-dark .slide:not(.cover):not(.light) .tabs { border-bottom-color: rgba(255,255,255,.18); }
 
 /* RESPONSIVE */
 @media (max-width: 980px) {
