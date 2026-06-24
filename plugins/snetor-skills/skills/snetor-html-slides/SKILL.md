@@ -188,6 +188,16 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 </html>
 ```
 
+### Garde-fous anti-surcharge (stricts — spec §4)
+
+Une slide doit respirer. Règles dures, appliquées à toute génération :
+
+- **1 idée par slide.** **1 composant principal max** par slide (le chrome — eyebrow, footer — ne compte pas).
+- **Budget mots strict** : ≤ ~25 mots de texte courant par slide (hors titres, statements, speaker notes).
+- **Détails ailleurs** : pousser le détail en speaker notes (`N`), `accordion`, ou slide d'annexe (`annex-tag`) — jamais entassé sur la slide.
+- **Auto-split** : si le contenu dépasse le budget, **scinder** la slide en deux plutôt que tasser.
+- **Refus de surcharger** : même sur demande explicite (« mets tout sur une slide »), proposer le split au lieu d'entasser.
+
 ### Non-negotiable rules
 
 1. **Copy the CSS verbatim** from `references/css-system.md`. Do not paraphrase, shorten, or reconstruct from memory. Replace `DECK_NAME` with the actual folder name.
@@ -203,7 +213,7 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 11. **Charts** — for any non-trivial quantitative comparison (multi-series, donut, line trend, radar, area), use `chart-card` from `references/charts.md`. Do NOT generate raw `<canvas>` or hand-coded SVG bars. The CSS-based `.stacked` and `.impact-bars` remain valid for simple single-row visualizations.
 12. **Counters** — for hero metrics on cover/dark slides or fact-cards, prefer `.metric.counter` with `data-target` over static text.
 13. **CDN libs** — only include Chart.js / jsvectormap when the deck actually uses them. Pin versions per `references/charts.md`.
-14. **Prefer interactivity over text** — if a slide compares 3+ options, use `tab-slide` instead of bullet lists. If a slide has details that interrupt the main message, push them into `accordion` or `tooltip`. Aim for max 30 words of body text per slide outside of statements.
+14. **Prefer interactivity over text** — if a slide compares 3+ options, use `tab-slide` instead of bullet lists. If a slide has details that interrupt the main message, push them into `accordion` or `tooltip`. Respecter le budget mots des garde-fous anti-surcharge (≤ ~25 mots de corps/slide) ; au-delà, split ou renvoi en notes/accordion/annexe.
 15. **Hover-reveal cards** — use sparingly (max 1 row per deck) for "punchline + reveal" effects on metric cards. See `references/interactivity.md`.
 16. **Marquee** — for ecosystem / partner / client logo slides with 6+ logos only. ≤5 logos = static row. Duplicate the logo set twice in the markup for seamless infinite scroll. See `references/external-libs.md`.
 17. **Bento grid** — for "value prop synthesis" / "what we do" slides only. Max 1 bento per deck. 5 cells with mixed `.big` / `.tall` / `.wide` / `.green` / `.dark` modifiers.
