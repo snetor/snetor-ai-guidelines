@@ -630,6 +630,53 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .deck.theme-dark .slide:not(.cover):not(.light) .tab.active { border-bottom-color: var(--pastel); }
 .deck.theme-dark .slide:not(.cover):not(.light) .tabs { border-bottom-color: rgba(255,255,255,.18); }
 
+/* === SLIDE ARCHETYPES (aerated, low-density — spec §2) ===
+   Theme-adaptive via color:inherit + opacity. Reuse existing animations only. */
+
+/* SECTION DIVIDER — chapter break */
+.section-divider .body { justify-content: center; gap: 16px; }
+.section-divider .sd-index { font-size: 84px; font-weight: 700; line-height: 1; color: currentColor; opacity: .18; }
+.section-divider .sd-title { font-size: 52px; line-height: 1.1; font-weight: 600; color: inherit; max-width: 920px; }
+.section-divider .sd-sub { font-size: 20px; line-height: 1.4; color: inherit; opacity: .72; max-width: 760px; }
+
+/* QUOTE — full-bleed citation */
+.quote .body { justify-content: center; gap: 22px; }
+.quote blockquote { margin: 0; padding-left: 34px; position: relative; font-size: 38px; line-height: 1.26; font-weight: 600; color: inherit; max-width: 1000px; }
+.quote blockquote::before { content: "\201C"; position: absolute; left: -4px; top: -22px; font-size: 92px; line-height: 1; color: var(--green); opacity: .55; }
+.quote .q-author { display: flex; align-items: center; gap: 14px; }
+.quote .q-author::before { content: ""; width: 34px; height: 2px; background: var(--green); flex: 0 0 auto; }
+.quote .q-name { font-size: 18px; font-weight: 700; color: inherit; }
+.quote .q-role { font-size: 15px; color: inherit; opacity: .66; }
+
+/* AGENDA — numbered outline (light-card; safe on any background) */
+.agenda .agenda-list { display: grid; gap: 12px; max-width: 940px; }
+.agenda .agenda-item { display: grid; grid-template-columns: 46px 1fr; gap: 18px; align-items: center; padding: 14px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); box-shadow: 0 2px 6px rgba(21,43,71,.08); text-decoration: none; transition: transform .2s var(--ease), border-color .2s var(--ease); }
+.agenda a.agenda-item:hover { transform: translateX(4px); border-color: rgba(0,125,54,.42); }
+.agenda .ai-num { font-size: 24px; font-weight: 700; color: var(--green); line-height: 1; }
+.agenda .ai-title { display: block; font-size: 19px; font-weight: 700; color: var(--navy); }
+.agenda .ai-sub { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+.slide.active .agenda-item { animation: rise 480ms var(--ease) both; }
+.slide.active .agenda-item:nth-child(1) { animation-delay: 90ms; }
+.slide.active .agenda-item:nth-child(2) { animation-delay: 160ms; }
+.slide.active .agenda-item:nth-child(3) { animation-delay: 230ms; }
+.slide.active .agenda-item:nth-child(4) { animation-delay: 300ms; }
+.slide.active .agenda-item:nth-child(5) { animation-delay: 370ms; }
+.slide.active .agenda-item:nth-child(6) { animation-delay: 440ms; }
+
+/* CLOSING — final message + next steps + contact */
+.closing .body { justify-content: center; gap: 22px; }
+.closing .closing-title { font-size: 46px; line-height: 1.12; font-weight: 600; color: inherit; max-width: 920px; }
+.closing .closing-contact { display: flex; align-items: center; gap: 12px; font-size: 16px; color: inherit; opacity: .88; }
+.closing .closing-contact i { color: var(--green); font-size: 22px; }
+
+/* BIG NUMBER — single giant KPI */
+.big-number .body { justify-content: center; align-items: center; text-align: center; gap: 10px; }
+.big-number .bn-metric { font-size: 160px; line-height: .95; font-weight: 700; color: var(--green); }
+.big-number .bn-label { font-size: 24px; font-weight: 600; color: inherit; max-width: 700px; }
+.big-number .bn-sub { font-size: 16px; color: inherit; opacity: .66; }
+.section-divider.dark .sd-title, .deck.theme-dark .slide.section-divider:not(.light) .sd-title { color: white; }
+.big-number.dark .bn-metric, .deck.theme-dark .slide.big-number:not(.light) .bn-metric { color: var(--pastel); }
+
 /* RESPONSIVE */
 @media (max-width: 980px) {
   body { overflow: auto; }
@@ -658,6 +705,9 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
   .globe { opacity:.25; right:16px; bottom:40px; width:150px; height:150px; }
   .footer { margin-top:24px; }
   .nav { display:none; }
+  .section-divider .sd-title { font-size: 34px; } .section-divider .sd-index { font-size: 56px; }
+  .quote blockquote { font-size: 26px; } .closing .closing-title { font-size: 30px; }
+  .big-number .bn-metric { font-size: 92px; } .agenda .agenda-list { max-width: none; }
 }
 
 @media print {
