@@ -599,7 +599,7 @@ Every slide may include a speaker notes aside, hidden by default and revealed vi
 </section>
 ```
 
-Required for any slide whose body text exceeds 30 words.
+Required for any slide whose body text exceeds the word budget (~25 words).
 
 ---
 

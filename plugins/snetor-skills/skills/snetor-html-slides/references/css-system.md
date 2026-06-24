@@ -668,6 +668,7 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .closing .closing-title { font-size: 46px; line-height: 1.12; font-weight: 600; color: inherit; max-width: 920px; }
 .closing .closing-contact { display: flex; align-items: center; gap: 12px; font-size: 16px; color: inherit; opacity: .88; }
 .closing .closing-contact i { color: var(--green); font-size: 22px; }
+.closing.dark .closing-contact i, .deck.theme-dark .slide.closing:not(.light) .closing-contact i { color: var(--pastel); }
 
 /* BIG NUMBER — single giant KPI */
 .big-number .body { justify-content: center; align-items: center; text-align: center; gap: 10px; }

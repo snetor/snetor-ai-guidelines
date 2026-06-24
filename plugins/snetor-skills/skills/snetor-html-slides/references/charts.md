@@ -132,6 +132,10 @@ function snetorChartConfig(canvas) {
   };
 }
 
+// LEGACY eager bootstrap — superseded by the lazy-init pattern (SKILL rule 22).
+// Building a chart while its slide is display:none renders to a 0px canvas (blank
+// + dead tooltips). Use initChartsOnActive() below instead; keep this only for a
+// single-chart prototype without slide navigation.
 document.querySelectorAll('canvas[data-chart]').forEach((canvas) => {
   new Chart(canvas, snetorChartConfig(canvas));
 });
