@@ -36,26 +36,35 @@ You need the CSS from `css-system.md` to produce correct output. Do not reconstr
 
 ---
 
-## Step 1 — Understand the request
+## Step 1 — Intake wizard (cadrer avant de générer)
 
-Identify:
-1. **Topic** — what the slides are about
-2. **Audience** — COMEX, direction technique, équipe, client... This shapes the level of detail
-3. **Key messages** — what the audience must leave with (1–3 decisions or insights)
-4. **Slide count** — default to 4–6 slides; COMEX decks stay at 4–5
-5. **Source material** — vault pages, interview notes, existing wikis to draw from
-6. **Language** — detect from the request following `references/i18n.md`:
-   - User writes in FR → deck FR (default)
-   - User writes in EN → deck EN
-   - User writes in ES → deck ES
-   - Explicit override "in [language]" wins over auto-detection
-   - For other languages: generate content in that language, fall back to EN UI strings
+Avant de planifier ou d'écrire du HTML, **cadrer le besoin avec le collaborateur** via l'outil `AskUserQuestion` (choix multiples + « Autre » natif). Objectif : un deck ciblé, pas un template générique.
 
-If the request is ambiguous, infer from context in the vault (`index.md`, relevant `02-Wiki/` pages) rather than asking — then confirm the structure before generating HTML.
+**Détection de langue** d'abord, selon `references/i18n.md` (FR par défaut, EN/ES selon la requête, override « in [language] » prioritaire). Poser les questions du wizard dans la langue du collaborateur.
+
+### Mode express (défaut) — 3 tours
+
+1. **Objectif & cadrage** — une question `AskUserQuestion` couvrant : audience (COMEX / direction technique / équipe / client / autre), objectif (décider / informer / convaincre / former), et **message clé** (la 1 décision ou insight à retenir).
+2. **Structure** — proposer **2-3 plans** (chaque option = un outline en mini-ASCII : titres de slides + rôle de chaque slide), avec un nombre de slides indicatif. Le collaborateur choisit ou amende via « Autre ».
+3. **Style visuel** — une question avec, pour chaque option, un champ `preview` contenant une **mini-maquette ASCII** : thème (clair / foncé / mixte) et style de cover. Le collaborateur choisit via « Autre » s'il veut autre chose.
+
+### Mode guidé (sur demande)
+
+Si le collaborateur veut un contrôle fin, dérouler slide par slide : titre, sous-titre, et composant principal proposé (avec 1-2 alternatives). Une question `AskUserQuestion` par slide ou par petit groupe.
+
+### Garde-fou anti-friction
+
+Si la requête initiale est **déjà détaillée** (audience + objectif + plan explicites), **ne pas dérouler les 3 tours** : présenter un **récap unique à valider** (audience, objectif, plan, thème) et passer à Step 2 après accord. Le wizard sert à lever l'ambiguïté, pas à ralentir un brief clair.
+
+### Source material
+
+Identifier les sources à exploiter (pages du vault, notes d'entretien, wikis) — les citer dans les `.sources` des slides (Step 4, règle 9).
 
 ---
 
 ## Step 2 — Plan the slide structure
+
+Partir du plan validé au Step 1.
 
 Choose a logical arc. Common patterns:
 
