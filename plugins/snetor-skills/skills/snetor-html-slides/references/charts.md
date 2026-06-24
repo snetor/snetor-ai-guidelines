@@ -86,6 +86,16 @@ function snetorChartConfig(canvas) {
   const values = JSON.parse(canvas.dataset.values || '[]');
   const suffix = canvas.dataset.suffix || '';
 
+  // Theme-aware text/grid colors: charts on a dark slide (.dark/.cover accent
+  // or any slide of a theme-dark deck that is not a .light accent) need light
+  // legend/axis text — Chart.defaults.color (#4A5A6E) is unreadable on dark.
+  const slide = canvas.closest('.slide');
+  const onDark = !!slide && (slide.classList.contains('dark') || slide.classList.contains('cover')
+    || (!!document.querySelector('.deck.theme-dark') && !slide.classList.contains('light')));
+  const ink = onDark ? 'rgba(255,255,255,.82)' : '#4A5A6E';
+  const gridc = onDark ? 'rgba(255,255,255,.16)' : '#E0E5DF';
+  const ptLabel = onDark ? '#FFFFFF' : '#152B47';
+
   const dataset = {
     label: canvas.dataset.label || '',
     data: values,
@@ -109,14 +119,14 @@ function snetorChartConfig(canvas) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: type === 'donut' || type === 'radar' },
+        legend: { display: type === 'donut' || type === 'radar', labels: { color: ink } },
         tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed.y ?? ctx.parsed.r ?? ctx.parsed}${suffix}` } }
       },
       scales: ['bar', 'line', 'area'].includes(type) ? {
-        y: { beginAtZero: true, grid: { color: '#E0E5DF' }, ticks: { callback: (v) => v + suffix } },
-        x: { grid: { display: false } }
+        y: { beginAtZero: true, grid: { color: gridc }, ticks: { color: ink, callback: (v) => v + suffix } },
+        x: { grid: { display: false }, ticks: { color: ink } }
       } : type === 'radar' ? {
-        r: { beginAtZero: true, grid: { color: '#E0E5DF' }, angleLines: { color: '#E0E5DF' }, pointLabels: { color: '#152B47', font: { weight: '700' } } }
+        r: { beginAtZero: true, grid: { color: gridc }, angleLines: { color: gridc }, pointLabels: { color: ptLabel, font: { weight: '700' } } }
       } : undefined
     }
   };
