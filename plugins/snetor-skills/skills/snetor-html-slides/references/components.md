@@ -8,7 +8,7 @@ All examples assume `class="slide active"` context.
 ## Slide Shell (always the same)
 
 ```html
-<section class="slide [cover|dark|]">
+<section class="slide [cover|dark|light|section-divider|quote|agenda|big-number|closing|]">
   <header class="brand animate">
     <div class="logo" aria-label="Snetor"></div>
     <div class="eyebrow">Section label</div>
@@ -29,6 +29,8 @@ Slide classes:
 - *(none)* — white background with subtle left green gradient
 - `cover` — dark hero background (use for slide 1 only)
 - `dark` — dark navy→teal→green gradient (for emphasis slides)
+- `light` — light accent slide inside a `theme-dark` deck (symmetric of `dark`)
+- archetype classes (`section-divider`, `quote`, `agenda`, `big-number`, `closing`) — see "Slide Archetypes"
 
 ---
 
@@ -768,6 +770,90 @@ Marks appendix slides kept after the main deck (full data, detailed charts) — 
 
 ```html
 <span class="annex-tag animate d1"><i class="ph-fill ph-paperclip"></i>Annexe A</span>
+```
+
+---
+
+## Slide Archetypes (aerated, low-density)
+
+Use these for rhythm and to keep slides light. They adapt to the deck theme
+automatically (text follows the slide color). `section-divider`, `quote` and
+`big-number` shine as **accent** slides (`dark` in a light deck, `light` in a
+dark deck).
+
+### Section Divider (chapter break)
+
+```html
+<section class="slide section-divider dark">
+  <header class="brand animate"><div class="logo" aria-label="Snetor"></div><div class="eyebrow">Partie 2</div></header>
+  <div class="body">
+    <div class="sd-index animate d1">02</div>
+    <h2 class="sd-title animate d2">Le titre du chapitre, court et net.</h2>
+    <p class="sd-sub animate d3">Une ligne de contexte optionnelle.</p>
+  </div>
+  <footer class="footer"><div class="sources"></div><div class="progress" aria-hidden="true"></div></footer>
+</section>
+```
+
+### Quote (full-bleed citation)
+
+```html
+<section class="slide quote">
+  <header class="brand animate"><div class="logo" aria-label="Snetor"></div><div class="eyebrow">Verbatim</div></header>
+  <div class="body">
+    <blockquote class="animate d1">Une citation marquante, en une à deux phrases maximum.</blockquote>
+    <div class="q-author animate d2"><div><span class="q-name">Prénom Nom</span> · <span class="q-role">Rôle, Direction</span></div></div>
+  </div>
+  <footer class="footer"><div class="sources">Source : entretien interne.</div><div class="progress" aria-hidden="true"></div></footer>
+</section>
+```
+
+### Agenda (numbered outline, optionally clickable)
+
+Wrap items in `<a class="agenda-item" href="?slide=N">` to jump to a slide; use `<div class="agenda-item">` for a static outline.
+
+```html
+<section class="slide agenda">
+  <header class="brand animate"><div class="logo" aria-label="Snetor"></div><div class="eyebrow">Sommaire</div></header>
+  <div class="body">
+    <h2 class="animate d1">Au programme</h2>
+    <div class="agenda-list animate d2">
+      <a class="agenda-item" href="?slide=3"><span class="ai-num">1</span><span><span class="ai-title">Contexte</span><span class="ai-sub">Où en est-on aujourd'hui.</span></span></a>
+      <a class="agenda-item" href="?slide=5"><span class="ai-num">2</span><span><span class="ai-title">Enjeux</span><span class="ai-sub">Ce qui est en jeu.</span></span></a>
+      <a class="agenda-item" href="?slide=7"><span class="ai-num">3</span><span><span class="ai-title">Décision</span><span class="ai-sub">Ce qu'on demande.</span></span></a>
+    </div>
+  </div>
+  <footer class="footer"><div class="sources"></div><div class="progress" aria-hidden="true"></div></footer>
+</section>
+```
+
+### Big Number (single hero KPI)
+
+```html
+<section class="slide big-number dark">
+  <header class="brand animate"><div class="logo" aria-label="Snetor"></div><div class="eyebrow">Le chiffre</div></header>
+  <div class="body">
+    <span class="bn-metric counter animate d1" data-target="68" data-suffix="%">0%</span>
+    <p class="bn-label animate d2">La phrase qui donne le sens du chiffre.</p>
+    <p class="bn-sub animate d3">Précision / périmètre / source.</p>
+  </div>
+  <footer class="footer"><div class="sources">Source : ...</div><div class="progress" aria-hidden="true"></div></footer>
+</section>
+```
+
+### Closing (final message + next steps + contact)
+
+```html
+<section class="slide closing dark">
+  <header class="brand animate"><div class="logo" aria-label="Snetor"></div><div class="eyebrow">Prochaines étapes</div></header>
+  <div class="body">
+    <h2 class="closing-title animate d1">Ce qu'on retient, et la suite.</h2>
+    <div class="closing-steps pill-row animate d2"><span class="pill">Valider le périmètre</span><span class="pill">Lancer le pilote</span><span class="pill">Point à J+30</span></div>
+    <div class="closing-contact animate d3"><i class="ph ph-envelope-simple"></i> c.peponnet@snetor.com</div>
+  </div>
+  <div class="deco-shapes" aria-hidden="true"></div>
+  <footer class="footer"><div class="sources"></div><div class="progress" aria-hidden="true"></div></footer>
+</section>
 ```
 
 ---
