@@ -90,7 +90,10 @@ function gitBranch(cwd) {
 }
 
 try {
-  const raw = fs.readFileSync(0, "utf8");
+  let raw = fs.readFileSync(0, "utf8");
+  // Strip a leading UTF-8 BOM (Windows can prepend one to the piped JSON,
+  // which would otherwise make JSON.parse throw "Unexpected token ﻿").
+  if (raw.charCodeAt(0) === 0xfeff) raw = raw.slice(1);
 
   if (!raw.trim()) {
     console.log(`${c.green}Claude statusline OK${c.reset}`);
