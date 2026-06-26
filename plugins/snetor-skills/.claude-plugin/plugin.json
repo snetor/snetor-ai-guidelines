@@ -1,7 +1,7 @@
 {
   "name": "snetor-skills",
-  "version": "1.3.0",
-  "description": "Snetor-branded visuals using the official Snetor design system (Raleway, green/navy palette, logos): animated HTML presentation decks AND Excalidraw architecture diagrams with embedded service icons.",
+  "version": "1.4.0",
+  "description": "Snetor skills for Claude Code: branded visuals using the official Snetor design system (animated HTML presentation decks AND Excalidraw architecture diagrams with embedded service icons), plus a travel-report assistant that helps sales reps dictate client-visit reports and drafts them in Snetor format.",
   "author": {
     "name": "Snetor",
     "email": "c.peponnet@snetor.com",
@@ -17,6 +17,9 @@
     "excalidraw",
     "diagram",
     "architecture",
-    "design-system"
+    "design-system",
+    "travel-report",
+    "sales",
+    "crm"
   ]
 }
