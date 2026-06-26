@@ -1,12 +1,14 @@
 # snetor-skills
 
-Snetor-branded visuals for Claude Code. The plugin bundles two skills that share the same brand
-assets (Raleway font, green/navy palette, logos, service icons):
+Snetor skills for Claude Code. The plugin bundles three skills — two branded-visual generators
+that share the same brand assets (Raleway font, green/navy palette, logos, service icons), and a
+travel-report assistant for sales reps:
 
 | Skill | Produces | Triggers on |
 |---|---|---|
 | **`snetor-html-slides`** | A self-contained animated `.html` presentation deck | slides, presentation, COMEX deck, pitch |
 | **`snetor-excalidraw-diagrams`** | An editable `.excalidraw` diagram with embedded logos/icons (+ PNG preview) | architecture diagram, schéma, flow/network diagram |
+| **`snetor-travel-report`** | An English, Outlook-ready travel report drafted from a sales rep's dictation (any language) | travel report, rapport de voyage, compte rendu de visite, "today I visited…" |
 
 ## Installation
 
@@ -25,8 +27,9 @@ git clone https://github.com/snetor/snetor-ai-guidelines.git
 
 Then in Claude Code: `/plugin install` and select `plugins/snetor-skills`.
 
-The skills `snetor-skills:snetor-html-slides` and `snetor-skills:snetor-excalidraw-diagrams` will
-appear in `/skills`. Both auto-trigger from context; you can also invoke them explicitly.
+The skills `snetor-skills:snetor-html-slides`, `snetor-skills:snetor-excalidraw-diagrams` and
+`snetor-skills:snetor-travel-report` will appear in `/skills`. All auto-trigger from context; you
+can also invoke them explicitly.
 
 > **Migration note (rename from `snetor-html-slides`):** machines provisioned before the rename have
 > `snetor-html-slides@snetor-ai-guidelines` in their `~/.claude/settings.json`. Re-run
@@ -35,13 +38,14 @@ appear in `/skills`. Both auto-trigger from context; you can also invoke them ex
 
 ## Shared assets
 
-Both skills read the same brand assets, maintained in **one place**:
+The two **visual** skills (`snetor-html-slides` and `snetor-excalidraw-diagrams`) read the same
+brand assets, maintained in **one place**:
 
 - `skills/snetor-html-slides/assets/branding/` — Snetor logos, globe, hero banner
 - `skills/snetor-html-slides/assets/logos/` — technology / vendor / Azure service icons
 
 `snetor-excalidraw-diagrams` references these logos (no duplication) — update a logo once and both
-skills pick it up.
+visual skills pick it up. `snetor-travel-report` is text-only and uses no brand assets.
 
 ## Updating
 
@@ -63,9 +67,12 @@ snetor-skills/
 │   │   ├── SKILL.md
 │   │   ├── assets/{branding,logos}/   ← shared brand assets (source of truth)
 │   │   └── references/
-│   └── snetor-excalidraw-diagrams/    ← architecture diagrams
+│   ├── snetor-excalidraw-diagrams/    ← architecture diagrams
+│   │   ├── SKILL.md
+│   │   ├── scripts/                   ← excalidraw builder + preview renderer
+│   │   └── references/
+│   └── snetor-travel-report/          ← sales travel reports (text-only)
 │       ├── SKILL.md
-│       ├── scripts/                   ← excalidraw builder + preview renderer
-│       └── references/
+│       └── references/                ← templates, glossaire, report-style
 └── README.md
 ```
