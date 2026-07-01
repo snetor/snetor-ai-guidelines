@@ -60,8 +60,10 @@ One UAC prompt. Everything else is automatic. See [`scripts/README.md`](scripts/
 
 ### Plugin snetor-skills
 
-Snetor-branded visuals — two skills: **`snetor-html-slides`** (animated HTML decks) and
-**`snetor-excalidraw-diagrams`** (architecture diagrams with embedded service icons).
+Three skills for Snetor teams: **`snetor-html-slides`** (animated HTML decks) and
+**`snetor-excalidraw-diagrams`** (architecture diagrams with embedded service icons) for branded
+visuals, plus **`snetor-travel-report`** — helps sales reps dictate client-visit reports (in any
+language) and drafts them in English, Outlook-ready, for the client-matrix pipeline.
 
 #### Via the marketplace (recommended)
 
