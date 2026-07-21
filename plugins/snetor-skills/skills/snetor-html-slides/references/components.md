@@ -774,6 +774,101 @@ Marks appendix slides kept after the main deck (full data, detailed charts) — 
 
 ---
 
+## Scope Ribbon (bandeau de périmètre sous le titre)
+
+Rappelle en une ligne le périmètre/scope d'une slide de coût ou de décision — utile quand le chiffrage couvre plusieurs livrables et que l'audience risque de l'oublier. À placer **juste après le `<h2>`**, avec la même classe `animate` que le titre.
+
+```html
+<h2 class="animate d1">Le titre de la slide.</h2>
+<div class="scope-ribbon animate d1">Périmètre : <strong>PIM produit + CRM interne (Twenty)</strong> <em>· une seule équipe recrutée, un seul budget</em></div>
+```
+
+`strong` = ce que couvre le périmètre (vert) ; `em` = la nuance (gris, non italique). Fonctionne sur slide claire, `dark` et deck `theme-dark`. Répéter le même bandeau sur les slides coût / programme / décision pour marteler le scope.
+
+---
+
+## Macro Cost-Code Bars (composition lisible de loin, sans Chart.js)
+
+**Composant de coût exécutif préféré** pour un COMEX / grande salle : chaque ligne est un scénario, la barre est segmentée par **macro-composant** (couleur = sens, pas décor), gros total à droite. Se lit en 2 secondes de loin — préférer aux charts empilés multi-séries quand l'audience est décisionnelle.
+
+- **Longueur de barre** = part du plus gros total : mettre `style="width:X%"` sur `.macro-bar` (100 % pour le scénario le plus cher, moins pour les autres) → la barre la moins chère est visiblement plus courte.
+- **Largeur des segments** = part du total de la ligne : `style="width:Y%"` sur chaque `.seg` (somme = 100 %). Laisser un segment sans texte s'il est trop étroit.
+- Palette sémantique fournie : `.intern` (vert, construit/internalisé), `.buy` (navy, acheté/éditeur), `.base` (gris, socle). Adapter les noms au sujet, garder **≤ 3-4 codes**.
+
+```html
+<div class="body">
+  <h2 class="animate d1">Le coût ne départage pas — la couleur, oui</h2>
+  <div class="macro-legend animate d2">
+    <div class="mi"><span class="sw intern"></span>Interne recruté</div>
+    <div class="mi"><span class="sw buy"></span>Éditeur / acheté</div>
+    <div class="mi"><span class="sw base"></span>Socle (infra, contingence)</div>
+  </div>
+  <div class="cost-rows animate d3">
+    <div class="cost-row">
+      <div class="cr-label"><b>Akeneo</b><span>acheter</span></div>
+      <div class="cr-bar-wrap">
+        <div class="macro-bar" style="width:100%;">
+          <div class="seg intern" style="width:37.1%;">227</div>
+          <div class="seg buy" style="width:44.0%;">270</div>
+          <div class="seg base" style="width:18.9%;">116</div>
+        </div>
+      </div>
+      <div class="cr-total"><b>613 k€</b><span>sur 3 ans</span></div>
+    </div>
+    <div class="cost-row">
+      <div class="cr-label"><b>Home-made</b><span>construire</span></div>
+      <div class="cr-bar-wrap">
+        <div class="macro-bar" style="width:89.6%;">
+          <div class="seg intern" style="width:68.0%;">374</div>
+          <div class="seg buy" style="width:4.4%;"></div>
+          <div class="seg base" style="width:27.6%;">152</div>
+        </div>
+      </div>
+      <div class="cr-total"><b>549 k€</b><span>sur 3 ans</span></div>
+    </div>
+  </div>
+  <div class="big-message animate d4">La composition raconte l'histoire : plus de vert = plus internalisé.</div>
+</div>
+```
+
+---
+
+## Card Semantic Accents (liseré coloré par sens)
+
+Le liseré haut de `.card` est vert par défaut. Pour coder les deux volets d'une paire (ex. PIM vs CRM, construire vs acheter), utiliser `.card.accent-navy` (ou l'alias `.card.buy`) et `.card.accent-teal`.
+
+```html
+<div class="grid cols-2">
+  <article class="card"><i class="ph ph-cube ph-icon"></i><h3>PIM produit</h3><p>Référentiel produit gouverné.</p></article>
+  <article class="card accent-navy"><i class="ph ph-users-three ph-icon navy"></i><h3>CRM interne — Twenty</h3><p>Relation client internalisée.</p></article>
+</div>
+```
+
+---
+
+## Tradeoff Cards (deux voies comparées — ex. build vs buy)
+
+Deux options en vis-à-vis, une mise en avant en vert (`.good`), l'autre en garde (`.watch`). Idéal pour un « acheter ou construire » sur une slide aérée.
+
+```html
+<div class="tradeoff-grid animate d2">
+  <article class="tradeoff-card">
+    <i class="ph ph-shopping-cart-simple ph-icon navy" style="margin-bottom:14px;"></i>
+    <h3>Acheter — Akeneo <small style="color:var(--subtle);font-weight:800;">· score 87</small></h3>
+    <p>Importer la maturité : couverture native, pérennisation, support éditeur.</p>
+  </article>
+  <article class="tradeoff-card good">
+    <i class="ph ph-wrench ph-icon" style="margin-bottom:14px;"></i>
+    <h3>Construire — full custom <small style="color:var(--subtle);font-weight:800;">· score 86</small></h3>
+    <p>Internaliser la compétence : adoption, fondation data, autonomie.</p>
+  </article>
+</div>
+```
+
+`.tradeoff-card.wide` occupe toute la largeur (verdict / note transverse sous les deux cartes).
+
+---
+
 ## Slide Archetypes (aerated, low-density)
 
 Use these for rhythm and to keep slides light. They adapt to the deck theme

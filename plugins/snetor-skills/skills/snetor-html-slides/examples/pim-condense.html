@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Décision PIM — version condensée</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+:root {
+  --green: #007D36;
+  --green-dark: #006028;
+  --green-20: #CCE0CD;
+  --green-10: #E5EFE5;
+  --green-05: #F2F7F2;
+  --navy: #152B47;
+  --blue-gray: #293F52;
+  --blue-green: #2A5458;
+  --emerald: #168C74;
+  --pastel: #8CCAAE;
+  --midnight: #1E1B2F;
+  --white: #FFFFFF;
+  --muted: #4A5A6E;
+  --subtle: #7E8A9A;
+  --border: #E0E5DF;
+  --shadow: 0 18px 40px rgba(21, 43, 71, .14);
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --logo: url("assets/pim-decision-condensee/snetor_full_logo.png");
+  --logo-reversed: url("assets/pim-decision-condensee/snetor_full_logo_reversed.png");
+  --globe: url("assets/pim-decision-condensee/snetor_globe.png");
+  --hero: url("assets/pim-decision-condensee/Hero-banner-abstrait.jpg");
+  --shapes: url("assets/pim-decision-condensee/snetor_shapes.png");
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  background: var(--navy);
+  color: var(--navy);
+  font-family: "Raleway", system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+}
+
+.deck { width: 100vw; height: 100vh; position: relative; background: var(--white); }
+
+.slide {
+  position: absolute; inset: 0; display: none;
+  grid-template-rows: auto 1fr auto;
+  gap: 28px; padding: 44px 64px 34px;
+  background: linear-gradient(90deg, rgba(0,125,54,.055), transparent 42%), var(--white);
+  overflow: hidden;
+}
+
+.slide.active { display: grid; animation: slideIn 520ms var(--ease) both; }
+.slide.active .animate { animation: rise 620ms var(--ease) both; }
+.slide.active .d1 { animation-delay: 90ms; }
+.slide.active .d2 { animation-delay: 170ms; }
+.slide.active .d3 { animation-delay: 250ms; }
+.slide.active .d4 { animation-delay: 330ms; }
+
+@keyframes slideIn { from { opacity:0; transform:translateX(22px); } to { opacity:1; transform:translateX(0); } }
+@keyframes rise { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+@keyframes growLine { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+@keyframes growPath { from { transform:translateY(-50%) scaleX(0); } to { transform:translateY(-50%) scaleX(1); } }
+@keyframes pulseDot { 0% { box-shadow:0 0 0 0 rgba(0,125,54,.24); } 100% { box-shadow:0 0 0 14px rgba(0,125,54,0); } }
+@keyframes fadeScale { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+@keyframes growBar { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+@keyframes checkPop { 0%{transform:scale(.8);opacity:.3;} 70%{transform:scale(1.08);opacity:1;} 100%{transform:scale(1);opacity:1;} }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide.active, .slide.active .animate { animation: none; }
+}
+
+/* BRAND HEADER */
+.brand { display:flex; align-items:center; justify-content:space-between; gap:24px; min-height:42px; position:relative; z-index:2; }
+.logo { width:148px; height:42px; background: var(--logo) left center / contain no-repeat; }
+.dark .logo, .cover .logo { background-image: var(--logo-reversed); }
+.eyebrow { display:flex; align-items:center; gap:10px; color:var(--green); font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; margin-bottom:16px; }
+.eyebrow::before { content:""; width:3px; height:18px; background:var(--green); display:inline-block; }
+.dark .eyebrow, .cover .eyebrow { color:rgba(255,255,255,.82); }
+.dark .eyebrow::before, .cover .eyebrow::before { background:var(--pastel); }
+
+/* TYPOGRAPHY */
+h1, h2, h3, p { margin: 0; }
+h1 { max-width:980px; font-size:60px; line-height:1.06; font-weight:600; color:var(--white); }
+h2 { max-width:1040px; font-size:44px; line-height:1.14; font-weight:600; color:var(--navy); }
+h3 { font-size:20px; line-height:1.25; font-weight:700; color:var(--navy); margin-bottom:10px; }
+p, li { font-size:18px; line-height:1.48; color:var(--muted); }
+ul { margin:0; padding-left:18px; }
+li { margin:7px 0; }
+
+/* BODY */
+.body { display:flex; flex-direction:column; justify-content:center; gap:26px; position:relative; z-index:2; min-height:0; }
+
+/* SLIDE BACKGROUNDS */
+.cover {
+  color: white;
+  background: linear-gradient(90deg, rgba(21,43,71,.94), rgba(0,125,54,.78)), var(--hero) center / cover no-repeat;
+}
+.cover::after, .dark::after {
+  content:""; position:absolute; right:-120px; top:-120px; width:520px; height:520px;
+  border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.035); transform:rotate(8deg);
+}
+.dark {
+  background: linear-gradient(135deg, var(--navy), var(--blue-green) 72%, var(--green));
+  color: white;
+}
+.dark h2, .dark h3, .dark p, .dark li { color: white; }
+
+/* LEAD TEXT */
+.lead { max-width:850px; font-size:22px; line-height:1.45; color:rgba(255,255,255,.84); margin-top:20px; }
+.hero-line { width:172px; height:4px; background:linear-gradient(90deg, var(--pastel), var(--white)); margin-top:34px; transform-origin:left center; }
+.slide.active .hero-line { animation: growLine 720ms var(--ease) 360ms both; }
+
+/* GLOBE DECORATION */
+.globe { position:absolute; right:72px; bottom:80px; width:210px; height:210px; background:var(--globe) center / contain no-repeat; opacity:.9; z-index:1; }
+.slide.active .globe { animation: fadeScale 760ms var(--ease) 220ms both; }
+
+/* STATEMENT */
+.statement { max-width:1040px; padding-left:24px; border-left:4px solid var(--green); font-size:28px; line-height:1.34; color:var(--navy); font-weight:600; }
+.statement strong { color:var(--green); font-weight:700; }
+
+/* GRIDS */
+.grid { display:grid; gap:18px; }
+.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* CARDS */
+.card { position:relative; min-height:152px; padding:22px; border:1px solid var(--border); border-radius:6px; background:var(--white); box-shadow:0 2px 6px rgba(21,43,71,.08); overflow:hidden; }
+.card::before { content:""; position:absolute; inset:0 0 auto 0; height:4px; background:var(--green); transform-origin:left center; }
+.slide.active .card::before { animation: growLine 640ms var(--ease) 260ms both; }
+.card.tight { min-height:124px; }
+.card.dark-card { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.24); box-shadow:none; }
+.card.dark-card::before { background:var(--pastel); }
+.card.dark-card h3, .card.dark-card p { color:var(--white); }
+
+/* METRICS */
+.metric { display:block; margin-bottom:12px; color:var(--green); font-size:44px; line-height:1; font-weight:700; }
+.metric small { font-size:18px; font-weight:600; color:var(--subtle); }
+.dark .metric { color:var(--pastel); }
+a.metric, a.share, a.figure-link { color:inherit; text-decoration:none; }
+a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; text-underline-offset:4px; }
+
+/* SOURCE NOTE */
+.source-note { display:inline-block; margin-top:10px; color:var(--subtle); font-size:12px; font-weight:600; line-height:1.3; }
+.source-note a { color:var(--green); text-decoration:underline; text-underline-offset:3px; }
+
+/* PILLS */
+.pill-row { display:flex; flex-wrap:wrap; gap:10px; }
+.pill { padding:9px 14px; border-radius:999px; color:var(--green); background:var(--green-10); border:1px solid var(--green-20); font-size:13px; font-weight:700; }
+.slide.active .pill { animation: fadeScale 480ms var(--ease) both; }
+.slide.active .pill:nth-child(1) { animation-delay:80ms; }
+.slide.active .pill:nth-child(2) { animation-delay:140ms; }
+.slide.active .pill:nth-child(3) { animation-delay:200ms; }
+.slide.active .pill:nth-child(4) { animation-delay:260ms; }
+.slide.active .pill:nth-child(5) { animation-delay:320ms; }
+.slide.active .pill:nth-child(6) { animation-delay:380ms; }
+
+/* BIG MESSAGE BAND */
+.big-message { padding:18px 22px; border-radius:6px; color:white; background:linear-gradient(135deg, var(--navy), var(--green)); font-size:22px; line-height:1.28; font-weight:700; box-shadow:var(--shadow); }
+
+/* FOOTER */
+.footer { position:relative; z-index:2; display:flex; align-items:end; justify-content:space-between; gap:20px; color:var(--subtle); font-size:12px; line-height:1.36; }
+.dark .footer, .cover .footer { color:rgba(255,255,255,.72); }
+.sources { max-width:920px; }
+
+/* PROGRESS DOTS */
+.progress { display:grid; grid-auto-flow:column; grid-auto-columns:28px; gap:5px; flex:0 0 auto; }
+.progress span { display:block; height:4px; background:var(--green-20); }
+.progress span.on { background:var(--green); }
+.dark .progress span, .cover .progress span { background:rgba(255,255,255,.28); }
+.dark .progress span.on, .cover .progress span.on { background:var(--pastel); }
+
+/* NAV BUTTONS */
+.nav { position:fixed; right:24px; bottom:18px; z-index:20; display:flex; gap:8px; }
+.nav button { width:42px; height:38px; border:1px solid rgba(255,255,255,.28); border-radius:6px; background:rgba(21,43,71,.92); color:white; cursor:pointer; font-size:0; }
+.nav button::before { content:""; display:inline-block; width:10px; height:10px; border-top:2px solid white; border-left:2px solid white; }
+#prev::before { transform:rotate(-45deg); }
+#next::before { transform:rotate(135deg); }
+
+/* PHOSPHOR ICONS */
+.ph-icon { display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; font-size:32px; color:var(--green); background:var(--green-10); border:1px solid var(--green-20); border-radius:12px; flex:0 0 auto; }
+.ph-icon.large { width:56px; height:56px; font-size:38px; }
+.ph-icon.navy { color:var(--navy); background:rgba(21,43,71,.08); border-color:rgba(21,43,71,.18); }
+.ph-icon.teal { color:var(--blue-green); background:rgba(42,84,88,.08); border-color:rgba(42,84,88,.20); }
+.dark .ph-icon, .cover .ph-icon { color:var(--pastel); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); }
+.dark .ph-icon.navy, .cover .ph-icon.navy { color:var(--white); background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.22); }
+.fact-card .ph-icon { margin-bottom:8px; }
+
+/* METHOD FLOW */
+.flow { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:18px; position:relative; }
+.flow::before { content:""; position:absolute; left:11%; right:11%; top:38px; height:2px; background:var(--green-20); transform-origin:left center; z-index:0; }
+.slide.active .flow::before { animation: growLine 900ms var(--ease) 220ms both; }
+.flow-node { position:relative; z-index:1; text-align:center; padding:0 6px; }
+.flow-node .ph-icon { margin:0 auto 14px; width:76px; height:76px; font-size:40px; border-radius:50%; box-shadow:0 6px 18px rgba(21,43,71,.10); background:var(--white); }
+.flow-node h3 { font-size:20px; margin-bottom:6px; }
+.flow-node p { font-size:15px; line-height:1.4; }
+.slide.active .flow-node { animation: rise 560ms var(--ease) both; }
+.slide.active .flow-node:nth-child(1){animation-delay:120ms}
+.slide.active .flow-node:nth-child(2){animation-delay:230ms}
+.slide.active .flow-node:nth-child(3){animation-delay:340ms}
+.slide.active .flow-node:nth-child(4){animation-delay:450ms}
+
+/* TRADEOFF / COMPARE CARDS */
+.tradeoff-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.tradeoff-card { min-height:156px; padding:26px; border-radius:8px; border:1px solid var(--border); background:var(--white); box-shadow:0 2px 6px rgba(21,43,71,.08); }
+.tradeoff-card.good { background:linear-gradient(180deg, var(--green-05), white); }
+
+/* CLOSING ARCHETYPE */
+.closing .body { justify-content: center; gap: 22px; }
+.closing .closing-title { font-size: 48px; line-height: 1.12; font-weight: 600; color: inherit; max-width: 980px; }
+.closing .closing-contact { display: flex; align-items: center; gap: 12px; font-size: 18px; color: inherit; opacity: .9; }
+.closing .closing-contact i { color: var(--pastel); font-size: 24px; }
+
+/* PRESENTER MODE */
+.notes { display:none; }
+.overview-grid { position:fixed; inset:0; z-index:50; display:none; padding:32px 48px; background:rgba(21,43,71,.96); overflow:auto; }
+.overview-grid.active { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:18px; align-content:start; animation:fadeScale 240ms var(--ease) both; }
+.overview-thumb { aspect-ratio:16/10; padding:14px; border:1px solid rgba(255,255,255,.18); border-radius:6px; background:white; color:var(--navy); cursor:pointer; overflow:hidden; transition:transform 200ms var(--ease), border-color 200ms var(--ease); display:flex; flex-direction:column; gap:6px; font-family:inherit; text-align:left; }
+.overview-thumb:hover { transform:translateY(-2px); border-color:var(--pastel); }
+.overview-thumb.current { border-color:var(--green); border-width:2px; }
+.overview-thumb .num { color:var(--green); font-size:11px; font-weight:800; letter-spacing:.1em; }
+.overview-thumb .title { font-size:13px; font-weight:700; line-height:1.3; color:var(--navy); }
+.overview-thumb .preview { flex:1; font-size:10px; line-height:1.3; color:var(--muted); overflow:hidden; }
+.shortcuts-modal { position:fixed; inset:0; z-index:51; display:none; place-items:center; padding:24px; background:rgba(21,43,71,.86); }
+.shortcuts-modal.active { display:grid; animation:fadeScale 240ms var(--ease) both; }
+.shortcuts-modal .panel { max-width:480px; width:100%; padding:28px; border-radius:8px; background:white; box-shadow:var(--shadow); }
+.shortcuts-modal h3 { color:var(--navy); margin-bottom:16px; }
+.shortcuts-modal dl { display:grid; grid-template-columns:auto 1fr; gap:10px 18px; margin:0; }
+.shortcuts-modal dt { font-family:"SFMono-Regular", Consolas, monospace; padding:2px 8px; border-radius:4px; background:var(--green-10); border:1px solid var(--green-20); color:var(--green); font-size:13px; font-weight:700; justify-self:start; }
+.shortcuts-modal dd { margin:0; color:var(--muted); font-size:14px; line-height:1.4; }
+.notes-overlay { position:fixed; left:24px; right:24px; bottom:78px; z-index:40; display:none; padding:18px 22px; border-radius:8px; background:rgba(21,43,71,.96); color:white; box-shadow:var(--shadow); max-width:880px; margin:0 auto; }
+.notes-overlay.active { display:block; animation:rise 240ms var(--ease) both; }
+.notes-overlay .label { display:block; margin-bottom:8px; color:var(--pastel); font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.notes-overlay .content { font-size:15px; line-height:1.5; color:rgba(255,255,255,.92); }
+.timer-display { position:fixed; left:24px; bottom:18px; z-index:30; display:none; padding:8px 14px; border-radius:6px; background:rgba(21,43,71,.92); color:white; font:700 14px "SFMono-Regular", Consolas, monospace; border:1px solid rgba(255,255,255,.18); }
+.timer-display.active { display:inline-flex; }
+.timer-display.paused { background:rgba(176,48,31,.92); }
+
+/* DECORATIVE SHAPES */
+.deco-shapes { position:absolute; right:0; bottom:0; width:420px; height:300px; background:var(--shapes) right bottom / contain no-repeat; opacity:.10; z-index:0; pointer-events:none; }
+
+/* === MACRO COST CODE (condensed deck) — grands composants par couleur === */
+.macro-legend { display:flex; flex-wrap:wrap; gap:30px; }
+.macro-legend .mi { display:flex; align-items:center; gap:12px; font-size:19px; font-weight:700; color:var(--navy); }
+.macro-legend .sw { width:24px; height:24px; border-radius:6px; flex:0 0 auto; }
+.macro-legend .sw.intern { background:var(--green); }
+.macro-legend .sw.buy { background:var(--navy); }
+.macro-legend .sw.base { background:var(--green-20); border:1px solid var(--border); }
+.cost-rows { display:grid; gap:22px; }
+.cost-row { display:grid; grid-template-columns:180px 1fr 150px; gap:24px; align-items:center; }
+.cost-row .cr-label b { display:block; font-size:26px; color:var(--navy); font-weight:800; line-height:1.1; }
+.cost-row .cr-label span { font-size:15px; color:var(--subtle); font-weight:700; }
+.cr-bar-wrap { min-width:0; }
+.macro-bar { height:76px; display:flex; overflow:hidden; border-radius:8px; box-shadow:0 2px 8px rgba(21,43,71,.12); }
+.macro-bar .seg { display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:800; transform-origin:left center; white-space:nowrap; }
+.slide.active .macro-bar .seg { animation: growBar 820ms var(--ease) both; }
+.macro-bar .seg.intern { background:var(--green); }
+.macro-bar .seg.buy { background:var(--navy); }
+.macro-bar .seg.base { background:var(--green-20); color:var(--navy); }
+.cost-row .cr-total { text-align:right; }
+.cost-row .cr-total b { display:block; font-size:48px; line-height:1; color:var(--navy); font-weight:700; }
+.cost-row .cr-total span { font-size:14px; font-weight:700; color:var(--subtle); }
+
+/* two big scope cards colour-coded */
+.card.buy::before { background:var(--navy); }
+
+/* RESPONSIVE */
+@media (max-width: 980px) {
+  body { overflow: auto; }
+  .deck { height: auto; min-height: 100vh; }
+  .slide { position:relative; min-height:100vh; height:auto; padding:30px 22px 44px; overflow:visible; }
+  .slide.active { display: block; }
+  h1 { font-size:38px; } h2 { font-size:30px; } p, li { font-size:16px; } .lead { font-size:18px; }
+  .grid, .tradeoff-grid, .flow { grid-template-columns: 1fr; }
+  .flow::before { display:none; }
+  .cost-row { grid-template-columns:1fr; gap:10px; }
+  .cost-row .cr-total { text-align:left; }
+  .closing .closing-title { font-size:30px; }
+  .globe { opacity:.25; right:16px; bottom:40px; width:150px; height:150px; }
+  .footer { margin-top:24px; }
+  .nav { display:none; }
+}
+
+@media print {
+  body { overflow:visible; background:white; }
+  .slide { display:grid !important; position:relative; min-height:100vh; page-break-after:always; }
+  .nav { display:none; }
+}
+  </style>
+</head>
+<body>
+  <main class="deck theme-light">
+
+    <!-- SLIDE 1 — COVER -->
+    <section class="slide cover active">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">COMEX · Décision · 21 juillet 2026</div>
+      </header>
+      <div class="body">
+        <h1 class="animate d1">PIM Snetor : acheter ou construire ?</h1>
+        <p class="lead animate d2">Un référentiel produit + un CRM interne. La décision, en 5 minutes.</p>
+        <div class="hero-line animate d3"></div>
+      </div>
+      <div class="globe"></div>
+      <footer class="footer">
+        <div class="sources">Version condensée du deck de décision PIM du 08-07 · chiffrage programme 17-07</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 2 — ENJEU -->
+    <section class="slide">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Enjeu · pourquoi un PIM</div>
+      </header>
+      <div class="body">
+        <h2 class="animate d1">Du bricolage manuel à un référentiel produit gouverné</h2>
+        <p class="statement animate d2">Aujourd'hui : circuits fragiles entre SAP, SharePoint, GLPI et fichiers locaux. <strong>Demain : un flux propre, du besoin métier jusqu'à SAP.</strong></p>
+        <div class="flow animate d3">
+          <div class="flow-node">
+            <i class="ph ph-magic-wand ph-icon teal"></i>
+            <h3>Créer</h3>
+            <p>Création produit assistée.</p>
+          </div>
+          <div class="flow-node">
+            <i class="ph ph-folders ph-icon navy"></i>
+            <h3>Documenter</h3>
+            <p>Dernier document valide.</p>
+          </div>
+          <div class="flow-node">
+            <i class="ph ph-seal-check ph-icon"></i>
+            <h3>Valider</h3>
+            <p>MDM, rôles, audit trail.</p>
+          </div>
+          <div class="flow-node">
+            <i class="ph ph-arrows-left-right ph-icon navy"></i>
+            <h3>Publier</h3>
+            <p>Écriture SAP tracée.</p>
+          </div>
+        </div>
+        <div class="big-message animate d4">Sans data produit structurée, pas d'IA. Le PIM est la fondation.</div>
+      </div>
+      <aside class="notes">Baseline vérifiée : 42 038 documents retenus, 776 870 lignes sap.article. Scope V1 borné (EP toutes entités, PE SNFR, PP SNFR) — pas une migration de 57k docs en bloc.</aside>
+      <footer class="footer">
+        <div class="sources">Source : 02-Wiki/pim/2026-06-22 - Note de décision PIM Snetor.md (§1, §2)</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 3 — FINALISTES -->
+    <section class="slide">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Finalistes · deux voies</div>
+      </header>
+      <div class="body">
+        <h2 class="animate d1">Deux approches en tête, au coude-à-coude</h2>
+        <div class="tradeoff-grid animate d2">
+          <article class="tradeoff-card">
+            <i class="ph ph-shopping-cart-simple ph-icon navy" style="margin-bottom:14px;"></i>
+            <h3>Acheter — Akeneo <small style="color:var(--subtle);font-weight:800;">· score 87</small></h3>
+            <p>Importer la maturité : couverture native, pérennisation, support éditeur.</p>
+          </article>
+          <article class="tradeoff-card good">
+            <i class="ph ph-wrench ph-icon" style="margin-bottom:14px;"></i>
+            <h3>Construire — full custom <small style="color:var(--subtle);font-weight:800;">· score 86</small></h3>
+            <p>Internaliser la compétence : adoption, fondation data, autonomie.</p>
+          </article>
+        </div>
+        <div class="big-message animate d3">Le score ne tranche pas (86 vs 87). Le choix est stratégique, pas arithmétique.</div>
+      </div>
+      <aside class="notes">Profils miroir → scores très proches. SpecialChem challenger (~78 provisoire) hors finalistes tant que workflow, extraction IA et TCO ne sont pas prouvés. Twenty, Pimcore, NeoLedge derrière.</aside>
+      <footer class="footer">
+        <div class="sources">Source : note de décision PIM §6 (grille pondérée)</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 4 — COUT (macro code couleur) -->
+    <section class="slide">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Coût · TCO 3 ans</div>
+      </header>
+      <div class="body">
+        <h2 class="animate d1">Le coût ne départage pas — la couleur, oui</h2>
+        <div class="macro-legend animate d2">
+          <div class="mi"><span class="sw intern"></span>Interne recruté</div>
+          <div class="mi"><span class="sw buy"></span>Éditeur / acheté</div>
+          <div class="mi"><span class="sw base"></span>Socle (infra, contingence)</div>
+        </div>
+        <div class="cost-rows animate d3">
+          <div class="cost-row">
+            <div class="cr-label"><b>Akeneo</b><span>acheter</span></div>
+            <div class="cr-bar-wrap">
+              <div class="macro-bar" style="width:100%;">
+                <div class="seg intern" style="width:37.1%;">227</div>
+                <div class="seg buy" style="width:44.0%;">270</div>
+                <div class="seg base" style="width:18.9%;">116</div>
+              </div>
+            </div>
+            <div class="cr-total"><b>613 k€</b><span>sur 3 ans</span></div>
+          </div>
+          <div class="cost-row">
+            <div class="cr-label"><b>Home-made</b><span>construire</span></div>
+            <div class="cr-bar-wrap">
+              <div class="macro-bar" style="width:89.6%;">
+                <div class="seg intern" style="width:68.0%;">374</div>
+                <div class="seg buy" style="width:4.4%;"></div>
+                <div class="seg base" style="width:27.6%;">152</div>
+              </div>
+            </div>
+            <div class="cr-total"><b>549 k€</b><span>sur 3 ans</span></div>
+          </div>
+        </div>
+        <div class="big-message animate d4">64 k€ d'écart sur 3 ans, à hypothèses égales. Ce qui change vraiment : le home-made garde la valeur en interne (vert), l'éditeur l'externalise (navy).</div>
+      </div>
+      <aside class="notes">Akeneo 613,25 k€ : éditeur 270 (souscription 204 + intégration SaaS 42 + intégration CRM 24), interne recruté 227,25 (dev/DevOps 146,25 + data steward 81), socle 116 (infra/IA 36 + contingence 80). Home-made 549,5 k€ : éditeur 24 (intégration CRM), interne recruté 373,5 (dev/DevOps 292,5 + data steward 81), socle 152 (infra/IA 72 + contingence 80). Chiffres au k€ près = deck complet slide 9.</aside>
+      <footer class="footer">
+        <div class="sources">Source : note de décision PIM §8 (chiffrage programme 17-07)</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 5 — PROGRAMME PIM + CRM (mutualisation) -->
+    <section class="slide">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Périmètre · un seul programme</div>
+      </header>
+      <div class="body">
+        <h2 class="animate d1">Un budget, deux livrables</h2>
+        <div class="grid cols-2 animate d2">
+          <article class="card">
+            <i class="ph ph-cube ph-icon" style="margin-bottom:14px;"></i>
+            <h3>PIM produit</h3>
+            <p>Le référentiel produit gouverné : créer, documenter, valider, publier vers SAP.</p>
+          </article>
+          <article class="card buy">
+            <i class="ph ph-users-three ph-icon navy" style="margin-bottom:14px;"></i>
+            <h3>CRM interne — Twenty</h3>
+            <p>La relation client internalisée, open-source, sur la même fondation data.</p>
+          </article>
+        </div>
+        <div class="big-message animate d3">Une équipe recrutée, une infra, un budget. Le CRM roule sur l'investissement PIM : + 24 k€ d'intégration, pas un second budget.</div>
+      </div>
+      <aside class="notes">Le run (équipe recrutée + infra) est identique entre PIM isolé et programme PIM+CRM. Seul écart = 24 k€ d'intégration CRM en build. La capacité est mutualisée sur les deux projets.</aside>
+      <footer class="footer">
+        <div class="sources">Source : note de décision PIM §8 · deck complet slides 6 & 9</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+    <!-- SLIDE 6 — DECISION -->
+    <section class="slide dark closing">
+      <header class="brand animate">
+        <div class="logo" aria-label="Snetor"></div>
+        <div class="eyebrow">Décision COMEX</div>
+      </header>
+      <div class="body">
+        <div class="closing-title animate d1">Notre choix : <strong style="color:var(--pastel);">construire</strong>. Le PIM home-made, full custom.</div>
+        <p class="animate d2" style="font-size:22px; line-height:1.45; max-width:900px;">Score quasi égal (86 vs 87), coût plus bas (549 k€). Surtout : on internalise la compétence au lieu de dépendre d'un éditeur — au regard de nos expériences passées avec les éditeurs.</p>
+        <div class="pill-row animate d3">
+          <span class="pill">Autonomie</span>
+          <span class="pill">Adoption</span>
+          <span class="pill">Maîtrise de la data</span>
+          <span class="pill">Coût maîtrisé</span>
+        </div>
+        <div class="closing-contact animate d4"><i class="ph ph-flag-checkered"></i> Prochaine étape : benchmark final sur dataset Snetor, puis build de 4 mois.</div>
+      </div>
+      <div class="deco-shapes" aria-hidden="true"></div>
+      <aside class="notes">Décision assumée : full custom. Choix stratégique d'internalisation face aux expériences passées avec les éditeurs. Build 4 mois puis run ; 1,4 ETP recrutés. Akeneo reste le plan B crédible si la capacité interne se sature.</aside>
+      <footer class="footer">
+        <div class="sources">Décision COMEX · deck complet : 03-Outputs/pim/2026-07-08 - Note de décision PIM - COMEX.html</div>
+        <div class="progress" aria-hidden="true"></div>
+      </footer>
+    </section>
+
+  </main>
+
+  <nav class="nav" aria-label="Navigation des slides">
+    <button type="button" id="prev" aria-label="Slide précédente"></button>
+    <button type="button" id="next" aria-label="Slide suivante"></button>
+  </nav>
+
+  <div class="overview-grid" id="overview-grid" aria-hidden="true"></div>
+  <div class="shortcuts-modal" id="shortcuts-modal" aria-hidden="true">
+    <div class="panel">
+      <h3>Raccourcis clavier</h3>
+      <dl>
+        <dt>← →</dt><dd>Slide précédente / suivante</dd>
+        <dt>Espace</dt><dd>Slide suivante</dd>
+        <dt>Home / End</dt><dd>Première / dernière slide</dd>
+        <dt>F</dt><dd>Plein écran</dd>
+        <dt>O</dt><dd>Vue d'ensemble</dd>
+        <dt>N</dt><dd>Notes présentateur</dd>
+        <dt>T</dt><dd>Minuteur</dd>
+        <dt>?</dt><dd>Cette aide</dd>
+        <dt>Esc</dt><dd>Fermer</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="notes-overlay" id="notes-overlay" aria-hidden="true">
+    <span class="label">Notes présentateur</span>
+    <div class="content"></div>
+  </div>
+  <div class="timer-display" id="timer-display" aria-hidden="true">00:00</div>
+
+  <script>
+    const DECK_TITLE = 'Décision PIM — version condensée';
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const progressBlocks = Array.from(document.querySelectorAll('.progress'));
+    const initialSlide = Number.parseInt(new URLSearchParams(window.location.search).get('slide') || '1', 10);
+    let current = Number.isFinite(initialSlide) ? initialSlide - 1 : 0;
+
+    function renderProgress() {
+      progressBlocks.forEach((block) => {
+        block.innerHTML = '';
+        slides.forEach((_, index) => {
+          const segment = document.createElement('span');
+          if (index <= current) segment.classList.add('on');
+          block.appendChild(segment);
+        });
+      });
+    }
+
+    function show(index) {
+      current = Math.max(0, Math.min(slides.length - 1, index));
+      slides.forEach((slide, i) => { slide.classList.toggle('active', i === current); });
+      renderProgress();
+      document.title = `${DECK_TITLE} - ${current + 1}/${slides.length}`;
+    }
+
+    document.getElementById('prev').addEventListener('click', () => show(current - 1));
+    document.getElementById('next').addEventListener('click', () => show(current + 1));
+
+    document.addEventListener('keydown', (event) => {
+      if (event.target.closest && event.target.closest('input, textarea, .tab, .acc-trigger, .check-card')) return;
+      if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); show(current + 1); }
+      if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); show(current - 1); }
+      if (event.key === 'Home') show(0);
+      if (event.key === 'End') show(slides.length - 1);
+    });
+
+    show(current);
+
+    // === PRESENTER MODE ===
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+    const overviewEl = document.getElementById('overview-grid');
+    function buildOverview() {
+      overviewEl.innerHTML = '';
+      slides.forEach((slide, i) => {
+        const thumb = document.createElement('button');
+        thumb.type = 'button';
+        thumb.className = 'overview-thumb' + (i === current ? ' current' : '');
+        const heading = slide.querySelector('h1, h2, .closing-title');
+        const body = slide.querySelector('.body');
+        thumb.innerHTML = `
+          <span class="num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="title">${heading ? heading.textContent.slice(0, 60) : 'Slide ' + (i + 1)}</span>
+          <span class="preview">${body ? body.textContent.replace(/\s+/g, ' ').trim().slice(0, 90) : ''}</span>
+        `;
+        thumb.addEventListener('click', () => { show(i); toggleOverview(false); });
+        overviewEl.appendChild(thumb);
+      });
+    }
+    function toggleOverview(force) {
+      const next = typeof force === 'boolean' ? force : !overviewEl.classList.contains('active');
+      if (next) buildOverview();
+      overviewEl.classList.toggle('active', next);
+      overviewEl.setAttribute('aria-hidden', String(!next));
+    }
+    const shortcutsEl = document.getElementById('shortcuts-modal');
+    function toggleShortcuts(force) {
+      const next = typeof force === 'boolean' ? force : !shortcutsEl.classList.contains('active');
+      shortcutsEl.classList.toggle('active', next);
+      shortcutsEl.setAttribute('aria-hidden', String(!next));
+    }
+    shortcutsEl.addEventListener('click', (e) => { if (e.target === shortcutsEl) toggleShortcuts(false); });
+    const notesEl = document.getElementById('notes-overlay');
+    const notesContentEl = notesEl.querySelector('.content');
+    function refreshNotes() {
+      const note = slides[current].querySelector('.notes');
+      notesContentEl.textContent = note ? note.textContent.trim() : '(Pas de notes pour cette slide.)';
+    }
+    function toggleNotes(force) {
+      const next = typeof force === 'boolean' ? force : !notesEl.classList.contains('active');
+      if (next) refreshNotes();
+      notesEl.classList.toggle('active', next);
+      notesEl.setAttribute('aria-hidden', String(!next));
+    }
+    const timerEl = document.getElementById('timer-display');
+    let timerStart = null, timerElapsed = 0, timerHandle = null, timerRunning = false;
+    function formatTime(ms) {
+      const total = Math.floor(ms / 1000);
+      const m = String(Math.floor(total / 60)).padStart(2, '0');
+      const s = String(total % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+    function tickTimer() {
+      if (!timerRunning) return;
+      timerEl.textContent = formatTime(timerElapsed + (Date.now() - timerStart));
+    }
+    function toggleTimer() {
+      if (!timerEl.classList.contains('active')) {
+        timerEl.classList.add('active'); timerEl.classList.remove('paused');
+        timerStart = Date.now(); timerRunning = true;
+        timerHandle = setInterval(tickTimer, 500); return;
+      }
+      if (timerRunning) {
+        timerElapsed += Date.now() - timerStart; timerRunning = false;
+        timerEl.classList.add('paused'); clearInterval(timerHandle);
+      } else {
+        timerStart = Date.now(); timerRunning = true;
+        timerEl.classList.remove('paused'); timerHandle = setInterval(tickTimer, 500);
+      }
+    }
+    document.addEventListener('keydown', (event) => {
+      if (event.target.closest && event.target.closest('input, textarea, .tab, .acc-trigger, .check-card')) return;
+      const k = event.key;
+      if (k === 'Escape') { toggleOverview(false); toggleShortcuts(false); toggleNotes(false); return; }
+      if (k === 'f' || k === 'F') { event.preventDefault(); toggleFullscreen(); return; }
+      if (k === 'o' || k === 'O') { event.preventDefault(); toggleOverview(); return; }
+      if (k === 'n' || k === 'N') { event.preventDefault(); toggleNotes(); return; }
+      if (k === 't' || k === 'T') { event.preventDefault(); toggleTimer(); return; }
+      if (k === '?') { event.preventDefault(); toggleShortcuts(); return; }
+    });
+    const originalShow = show;
+    show = function(index) {
+      originalShow(index);
+      if (notesEl.classList.contains('active')) refreshNotes();
+    };
+  </script>
+</body>
+</html>

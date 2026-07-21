@@ -359,3 +359,66 @@ function buildCharges(canvasId) {
   });
 }
 ```
+
+---
+
+## Deep-dive patterns (opt-in — audience technique / annexe)
+
+> These are for the **rich / deep-dive** density only. For an executive / COMEX slide, prefer the CSS **macro cost-code** bars (`references/components.md`) — bigger, legible from far, no legend with 7 entries. Use the patterns below when the audience actually wants the ventilation.
+
+### Multi-series stacked bar (TCO ventilé par poste)
+
+Several cost lines stacked per candidate, with a **footer showing the total**. All datasets share `stack:'t'`; build via lazy-init like any chart. Keep to ≤ 4-5 segments or it becomes unreadable.
+
+```javascript
+const TCO = { // k€, per candidate
+  'Akeneo':    { build: 62, lic: 68,  staff: 75.75, infra: 32 },
+  'Home-made': { build: 20, lic: 0,   staff: 124.5, infra: 44 }
+};
+const order = ['Home-made','Akeneo'];
+const total = (c) => { const t = TCO[c]; return t.build + (t.lic + t.staff + t.infra) * 3; };
+function buildStackedTco(canvasId) {
+  if (!window.Chart) return;
+  return new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: { labels: order, datasets: [
+      { label: 'Build + contingence',   data: order.map(c => TCO[c].build),   backgroundColor: '#8CCAAE', stack: 't', borderRadius: 3 },
+      { label: 'Licence / TMA (3 ans)', data: order.map(c => TCO[c].lic * 3),  backgroundColor: '#293F52', stack: 't', borderRadius: 3 },
+      { label: 'Staffing recruté (3 ans)', data: order.map(c => TCO[c].staff * 3), backgroundColor: '#168C74', stack: 't', borderRadius: 3 },
+      { label: 'Infra, IA & contingence (3 ans)', data: order.map(c => TCO[c].infra * 3), backgroundColor: '#B6C2C9', stack: 't', borderRadius: 3 }
+    ] },
+    options: { animation: false, /* see tooltip gotcha */ responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position:'bottom', labels:{ usePointStyle:true, padding:10, boxWidth:10, font:{family:'Raleway',weight:'600',size:10} } },
+        tooltip: { callbacks: {
+          label: (ctx) => `${ctx.dataset.label} : ${ctx.parsed.y.toLocaleString('fr-FR')} k€`,
+          footer: (items) => 'TCO : ' + total(items[0].label).toLocaleString('fr-FR') + ' k€' } } },
+      scales: { x: { stacked:true, grid:{display:false}, ticks:{color:'#152B47',font:{weight:'700'}} },
+                y: { stacked:true, beginAtZero:true, grid:{color:'#E0E5DF'}, ticks:{color:'#4A5A6E', callback:(v)=>v+'k'} } } }
+  });
+}
+```
+
+### Superposed radar (2 profils comparés)
+
+Two datasets on one radar to compare two finalists axis-by-axis (mirror profiles → close scores). Green (`#007D36`) vs navy (`#152B47`).
+
+```javascript
+const DIMS = ['Couverture','UX / adoption','Time-to-value','TCO / run','Pérennisation','Fondation data'];
+const NOTES = { 'Full custom':[5,5,3.75,4,3,4.5], 'Akeneo':[4.9,4,4.5,3.75,5,4] };
+function buildRadarFinalists(canvasId) {
+  if (!window.Chart) return;
+  return new Chart(document.getElementById(canvasId), {
+    type: 'radar',
+    data: { labels: DIMS, datasets: [
+      { label:'Full custom', data: NOTES['Full custom'], borderColor:'#007D36', backgroundColor:'rgba(0,125,54,.14)', borderWidth:2.5, pointRadius:2.5, pointBackgroundColor:'#007D36' },
+      { label:'Akeneo',      data: NOTES['Akeneo'],      borderColor:'#152B47', backgroundColor:'rgba(21,43,71,.12)', borderWidth:2.5, pointRadius:2.5, pointBackgroundColor:'#152B47' }
+    ] },
+    options: { animation: false, /* see tooltip gotcha */ responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position:'bottom', labels:{ usePointStyle:true, padding:14, font:{family:'Raleway',weight:'600'} } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label} : ${ctx.parsed.r}/5` } } },
+      scales: { r: { min:0, max:5, grid:{color:'#E0E5DF'}, angleLines:{color:'#E0E5DF'}, pointLabels:{color:'#152B47',font:{weight:'700',size:12}}, ticks:{display:false, stepSize:1, backdropColor:'transparent'} } } }
+  });
+}
+```
+
+Both builders `return` the Chart and hook into the same `initChartsOnActive()` lazy-init + `animation:false` tooltip rules as every other chart.
