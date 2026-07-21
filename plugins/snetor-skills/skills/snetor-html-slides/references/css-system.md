@@ -590,6 +590,61 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .deco-shapes { position:absolute; right:0; bottom:0; width:420px; height:300px; background:var(--shapes) right bottom / contain no-repeat; opacity:.10; z-index:0; pointer-events:none; }
 .annex-tag { display:inline-flex; align-items:center; gap:8px; padding:4px 12px; border-radius:999px; background:var(--navy); color:#fff; font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
 
+/* === SCOPE RIBBON (bandeau de périmètre sous le titre) ===
+   Rappelle en une ligne le périmètre/scope d'une slide de coût ou de décision
+   (ex. « Périmètre : PIM + CRM interne — une équipe, un budget »). À placer
+   juste après le <h2>, avec la même classe animate que le titre. */
+.scope-ribbon { display:inline-flex; align-items:center; gap:10px; margin-top:14px; padding:8px 16px; border-radius:999px; background:var(--green-05); border:1px solid var(--border); color:var(--navy); font-size:15px; font-weight:700; line-height:1.3; }
+.scope-ribbon::before { content:""; width:9px; height:9px; border-radius:50%; background:var(--green); flex:0 0 auto; }
+.scope-ribbon strong { color:var(--green); font-weight:800; }
+.scope-ribbon em { font-style:normal; color:var(--muted); font-weight:600; }
+.dark .scope-ribbon, .deck.theme-dark .slide:not(.cover):not(.light) .scope-ribbon { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.24); color:#fff; }
+.dark .scope-ribbon em, .deck.theme-dark .slide:not(.cover):not(.light) .scope-ribbon em { color:rgba(255,255,255,.72); }
+
+/* === MACRO COST-CODE (barres de composition lisibles de loin, SANS Chart.js) ===
+   Pour un slide coût / TCO exécutif : chaque ligne = un scénario, barre segmentée
+   par MACRO-composant (couleur = sémantique, pas décoratif) + gros total à droite.
+   Longueur de barre = part du plus gros total (mettre width:% sur .macro-bar pour
+   comparer les totaux entre lignes) ; largeur des segments = part du total de la
+   ligne. Préférer ce composant aux charts empilés multi-séries pour un COMEX. */
+.macro-legend { display:flex; flex-wrap:wrap; gap:30px; }
+.macro-legend .mi { display:flex; align-items:center; gap:12px; font-size:19px; font-weight:700; color:var(--navy); }
+.macro-legend .sw { width:24px; height:24px; border-radius:6px; flex:0 0 auto; }
+.cost-rows { display:grid; gap:22px; }
+.cost-row { display:grid; grid-template-columns:180px 1fr 150px; gap:24px; align-items:center; }
+.cost-row .cr-label b { display:block; font-size:26px; color:var(--navy); font-weight:800; line-height:1.1; }
+.cost-row .cr-label span { font-size:15px; color:var(--subtle); font-weight:700; }
+.cost-row .cr-bar-wrap { min-width:0; }
+.macro-bar { height:76px; display:flex; overflow:hidden; border-radius:8px; box-shadow:0 2px 8px rgba(21,43,71,.12); }
+.macro-bar .seg { display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:800; transform-origin:left center; white-space:nowrap; }
+.slide.active .macro-bar .seg { animation: growBar 820ms var(--ease) both; }
+.cost-row .cr-total { text-align:right; }
+.cost-row .cr-total b { display:block; font-size:48px; line-height:1; color:var(--navy); font-weight:700; }
+.cost-row .cr-total span { font-size:14px; font-weight:700; color:var(--subtle); }
+/* Palette macro (sémantique — adapter les noms au sujet, garder ≤ 3-4 codes) :
+   intern = construit / internalisé (vert), buy = acheté / éditeur / licence (navy),
+   base = socle neutre (gris). */
+.macro-legend .sw.intern, .macro-bar .seg.intern { background:var(--green); }
+.macro-legend .sw.buy, .macro-bar .seg.buy { background:var(--navy); }
+.macro-legend .sw.base { background:var(--green-20); border:1px solid var(--border); }
+.macro-bar .seg.base { background:var(--green-20); color:var(--navy); }
+.dark .macro-legend .mi, .deck.theme-dark .slide:not(.cover):not(.light) .macro-legend .mi { color:#fff; }
+.dark .cost-row .cr-label b, .dark .cost-row .cr-total b,
+.deck.theme-dark .slide:not(.cover):not(.light) .cost-row .cr-label b,
+.deck.theme-dark .slide:not(.cover):not(.light) .cost-row .cr-total b { color:#fff; }
+
+/* === CARD SEMANTIC ACCENTS (liseré haut coloré par sens) ===
+   Par défaut .card::before est vert. Ces variantes recolorent le liseré pour
+   coder deux volets d'une paire (ex. PIM vs CRM, construire vs acheter). */
+.card.accent-navy::before, .card.buy::before { background:var(--navy); }
+.card.accent-teal::before { background:var(--emerald); }
+
+@media (max-width: 980px) {
+  .cost-row { grid-template-columns:1fr; gap:10px; }
+  .cost-row .cr-total { text-align:left; }
+  .macro-bar { width:100% !important; }
+}
+
 /* === DECK THEME LAYER (additif — spec §1) ===
    theme-light (défaut, implicite) = styling de base inchangé.
    theme-dark = chaque slide de contenu foncée par défaut, en réutilisant la

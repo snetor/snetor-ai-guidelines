@@ -47,6 +47,7 @@ Avant de planifier ou d'écrire du HTML, **cadrer le besoin avec le collaborateu
 1. **Objectif & cadrage** — une question `AskUserQuestion` couvrant : audience (COMEX / direction technique / équipe / client / autre), objectif (décider / informer / convaincre / former), et **message clé** (la 1 décision ou insight à retenir).
 2. **Structure** — proposer **2-3 plans** (chaque option = un outline en mini-ASCII : titres de slides + rôle de chaque slide), avec un nombre de slides indicatif. Le collaborateur choisit ou amende via « Autre ».
 3. **Style visuel** — une question avec, pour chaque option, un champ `preview` contenant une **mini-maquette ASCII** : thème (clair / foncé / mixte) et style de cover. Le collaborateur choisit via « Autre » s'il veut autre chose.
+4. **Densité** — une question `AskUserQuestion` : **Aérée (défaut)** — deck lisible de loin (grande salle / petite télé), gros texte, 1 idée/slide, visuels macro (`macro cost-code`, `big-number`, barres CSS) ; ou **Riche / deep-dive** — charts multi-séries, radars, matrice bulles, tooltips (audience technique / annexe). **Par défaut, choisir Aérée** : c'est la préférence explicite du CEO Snetor pour les présentations en séance (voir « Densité par défaut » au Step 4).
 
 ### Mode guidé (sur demande)
 
@@ -102,7 +103,9 @@ And the primary component:
 - `journey` — premium closing milestone bar ("we are here")
 - `provider-grid` — technology comparison (2–3 providers)
 - `grid cols-2` with `card` — paired concepts
-- `tradeoff-grid` — pros/cons, good/watch
+- `tradeoff-grid` — pros/cons, good/watch (ex. acheter vs construire)
+- `macro cost-code` — coût / TCO exécutif : barres de composition CSS colorées par macro-composant + gros total, lisible de loin ; **préféré aux charts empilés multi-séries pour un COMEX** (voir `references/components.md`)
+- `scope-ribbon` — bandeau de périmètre rappelé sous le titre des slides coût / programme / décision (ex. « PIM + CRM interne »)
 
 ---
 
@@ -188,6 +191,18 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 </html>
 ```
 
+### Densité par défaut = aérée (préférence explicite du CEO Snetor)
+
+Par défaut, un deck Snetor est **aéré et lisible de loin** (grande salle, petite télé). C'est la forme attendue **sauf demande contraire explicite** (densité « Riche » choisie au Step 1, ou audience technique / annexe).
+
+Un deck aéré, c'est :
+- **gros titres**, 1 idée par slide, ≤ ~25 mots de corps ;
+- des **visuels macro** qui se lisent en 2 secondes : `big-number`, `macro cost-code` (barres de composition CSS + gros total), `scope-ribbon`, `fact-card`, `.stacked` / `.impact-bars` CSS ;
+- un **code couleur sémantique** (≤ 3-4 codes) plutôt qu'une légende à 7 postes ;
+- **5-8 slides** pour une décision.
+
+La version **riche / deep-dive** (Chart.js multi-séries, radars superposés, matrice bulles, tooltips denses — voir `references/charts.md` § Deep-dive) est un **opt-in** : ne pas y aller par défaut. En cas de doute, poser la question de densité (Step 1) et choisir **Aérée**.
+
 ### Garde-fous anti-surcharge (stricts — spec §4)
 
 Une slide doit respirer. Règles dures, appliquées à toute génération :
@@ -227,6 +242,9 @@ Une slide doit respirer. Règles dures, appliquées à toute génération :
 25. **Prioritization** — use the value × complexity bubble matrix with a per-point `ex` (concrete example) so tooltips read "name + example + axes"; show a pruned `key` subset on the main slide and keep the full dataset / sensitive figures (e.g. effort) on annex slides marked with `annex-tag`.
 26. **Themes & accents** — set `theme-light` (default) or `theme-dark` on `<main class="deck">`. Use accent slides (`dark` in a light deck, `light` in a dark deck) for rhythm at key moments. No two accent slides in a row. On dark slides use the dark-safe component palette (see `references/css-system.md` → Deck Themes).
 27. **Archetypes** — use the aerated archetypes (`section-divider`, `agenda`, `quote`, `big-number`, `closing`) to vary rhythm and avoid the same arc every time. `big-number` uses `.bn-metric.counter`; `agenda` items may link via `?slide=N`.
+28. **Densité par défaut = aérée** (préférence CEO). Générer un deck aéré par défaut (voir « Densité par défaut »). Réserver les visuels denses (charts multi-séries, radars superposés, matrice bulles, tooltips denses) aux deep-dives / annexes ou à une demande explicite. En cas de doute, choisir aéré.
+29. **Coût / TCO** — pour un slide coût exécutif, préférer le `macro cost-code` (barres CSS colorées par macro-composant + gros total, ≤ 3-4 codes couleur sémantiques) au chart empilé multi-séries. Le stacked multi-séries reste pour un deep-dive. Voir `references/components.md`.
+30. **Scope ribbon** — quand un chiffrage / une décision couvre plusieurs livrables ou un périmètre non évident, rappeler le périmètre via un `scope-ribbon` sous le titre, répété sur les slides coût / programme / décision.
 
 ---
 
