@@ -31,6 +31,7 @@ Assets copied to: `03-Outputs/assets/<deck-slug>/`
 Before writing any HTML, read:
 - `references/css-system.md` — full CSS + color tokens + navigation JS (copy verbatim)
 - `references/components.md` — HTML patterns for every component type
+- `references/standalone.md` — **uniquement si le deck doit être autonome / hors ligne** (voir Step 1, question 5)
 
 You need the CSS from `css-system.md` to produce correct output. Do not reconstruct it from memory.
 
@@ -48,6 +49,7 @@ Avant de planifier ou d'écrire du HTML, **cadrer le besoin avec le collaborateu
 2. **Structure** — proposer **2-3 plans** (chaque option = un outline en mini-ASCII : titres de slides + rôle de chaque slide), avec un nombre de slides indicatif. Le collaborateur choisit ou amende via « Autre ».
 3. **Style visuel** — une question avec, pour chaque option, un champ `preview` contenant une **mini-maquette ASCII** : thème (clair / foncé / mixte) et style de cover. Le collaborateur choisit via « Autre » s'il veut autre chose.
 4. **Densité** — une question `AskUserQuestion` : **Aérée (défaut)** — deck lisible de loin (grande salle / petite télé), gros texte, 1 idée/slide, visuels macro (`macro cost-code`, `big-number`, barres CSS) ; ou **Riche / deep-dive** — charts multi-séries, radars, matrice bulles, tooltips (audience technique / annexe). **Par défaut, choisir Aérée** : c'est la préférence explicite du CEO Snetor pour les présentations en séance (voir « Densité par défaut » au Step 4).
+5. **Autonomie** — **ne poser la question que si un signal stand-alone est présent** (mots « stand-alone », « autonome », « hors ligne », « sans internet », « package », « à envoyer par mail » ; présentation hors des locaux Snetor ; deck destiné à l'archivage ou au partage externe). Deux niveaux : **package autonome** (HTML + dossier `assets/` adjacent, zéro réseau — défaut) ou **fichier unique** (tout en base64, un seul fichier). Sans signal, ne pas poser la question : le mode connecté reste le défaut. Voir `references/standalone.md`.
 
 ### Mode guidé (sur demande)
 
@@ -120,6 +122,10 @@ And the primary component:
 **Path convention:** The HTML file is at `03-Outputs/slides/<file>.html`.
 Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 
+**En mode stand-alone**, le dossier d'assets est **adjacent au HTML** (`<dossier du deck>/assets/<deck-slug>/`)
+et les chemins deviennent `assets/<deck-slug>/…`. Copier en plus les **4 polices** depuis `assets/fonts/`
+du skill. Détail complet : `references/standalone.md`.
+
 ---
 
 ## Step 4 — Generate the HTML
@@ -133,6 +139,8 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DECK TITLE</title>
+  <!-- Mode connecté (défaut). En stand-alone : SUPPRIMER ces 3 <link> et déclarer
+       4 @font-face locaux en tête du <style> — voir references/standalone.md §4. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -227,13 +235,13 @@ Une slide doit respirer. Règles dures, appliquées à toute génération :
 10. **Slide count** — 4–6 slides for COMEX decks; up to 8 for technical deep-dives. No padding slides.
 11. **Charts** — for any non-trivial quantitative comparison (multi-series, donut, line trend, radar, area), use `chart-card` from `references/charts.md`. Do NOT generate raw `<canvas>` or hand-coded SVG bars. The CSS-based `.stacked` and `.impact-bars` remain valid for simple single-row visualizations.
 12. **Counters** — for hero metrics on cover/dark slides or fact-cards, prefer `.metric.counter` with `data-target` over static text.
-13. **CDN libs** — only include Chart.js / jsvectormap when the deck actually uses them. Pin versions per `references/charts.md`.
+13. **CDN libs** — only include Chart.js / jsvectormap when the deck actually uses them. Pin versions per `references/charts.md`. **En stand-alone, tout CDN est interdit** : privilégier les visuels CSS, vendorer `chart.umd.min.js` dans les assets du deck si un chart est indispensable, et renoncer à jsvectormap (fond de carte réseau). Voir `references/standalone.md` §6.
 14. **Prefer interactivity over text** — if a slide compares 3+ options, use `tab-slide` instead of bullet lists. If a slide has details that interrupt the main message, push them into `accordion` or `tooltip`. Respecter le budget mots des garde-fous anti-surcharge (≤ ~25 mots de corps/slide) ; au-delà, split ou renvoi en notes/accordion/annexe.
 15. **Hover-reveal cards** — use sparingly (max 1 row per deck) for "punchline + reveal" effects on metric cards. See `references/interactivity.md`.
 16. **Marquee** — for ecosystem / partner / client logo slides with 6+ logos only. ≤5 logos = static row. Duplicate the logo set twice in the markup for seamless infinite scroll. See `references/external-libs.md`.
 17. **Bento grid** — for "value prop synthesis" / "what we do" slides only. Max 1 bento per deck. 5 cells with mixed `.big` / `.tall` / `.wide` / `.green` / `.dark` modifiers.
 18. **Spotlight cards** — `.dark` slides only, max 1 row per deck.
-19. **Phosphor icons** — for fact-card iconography and inline iconography. Use class `<i class="ph ph-<name> ph-icon">`. Prefer regular weight by default, `ph-fill` for KPI cards needing more visual weight. Tone variants: default (green), `.navy`, `.teal`. See `references/external-libs.md`.
+19. **Phosphor icons** — for fact-card iconography and inline iconography. Use class `<i class="ph ph-<name> ph-icon">`. Prefer regular weight by default, `ph-fill` for KPI cards needing more visual weight. Tone variants: default (green), `.navy`, `.teal`. See `references/external-libs.md`. **En stand-alone**, le CDN Phosphor est indisponible : se passer d'icônes (recommandé) ou embarquer des SVG inline dans un `<span class="ph-icon">`. Voir `references/standalone.md` §5.
 20. **Speaker notes** — for any slide whose body text exceeds the word budget (~25 words, see Garde-fous anti-surcharge), add `<aside class="notes">` with the detail. Presenter accesses via `N` key. See `references/presenter-mode.md`.
 21. **Presenter mode DOM** — every deck must include the 4 overlays (`#overview-grid`, `#shortcuts-modal`, `#notes-overlay`, `#timer-display`) after the `<main class="deck">` block. Bootstrap script from `references/presenter-mode.md` is always included.
 22. **Charts lazy-init (REQUIRED)** — never build charts eagerly at load. A chart built while its slide is `display:none` sizes to 0px → blank render ("reload to see it") AND dead tooltips (hit model stuck at 0px). Build on slide activation, **inside `requestAnimationFrame`** (so layout settles), keep the instance, and `resize()` on every (re)activation. Builders must `return` the `Chart`. Use the exact `initChartsOnActive()` pattern in `references/charts.md`, hooked into `show()`. Verify hover with trusted CDP mouse events, not synthetic `MouseEvent`s.
@@ -245,6 +253,7 @@ Une slide doit respirer. Règles dures, appliquées à toute génération :
 28. **Densité par défaut = aérée** (préférence CEO). Générer un deck aéré par défaut (voir « Densité par défaut »). Réserver les visuels denses (charts multi-séries, radars superposés, matrice bulles, tooltips denses) aux deep-dives / annexes ou à une demande explicite. En cas de doute, choisir aéré.
 29. **Coût / TCO** — pour un slide coût exécutif, préférer le `macro cost-code` (barres CSS colorées par macro-composant + gros total, ≤ 3-4 codes couleur sémantiques) au chart empilé multi-séries. Le stacked multi-séries reste pour un deep-dive. Voir `references/components.md`.
 30. **Scope ribbon** — quand un chiffrage / une décision couvre plusieurs livrables ou un périmètre non évident, rappeler le périmètre via un `scope-ribbon` sous le titre, répété sur les slides coût / programme / décision.
+31. **Stand-alone (sur demande)** — quand le deck doit être autonome / hors ligne, appliquer `references/standalone.md` **intégralement** : polices `Raleway` embarquées (les 3 `<link>` Google Fonts supprimés), assets dans un dossier **adjacent** au HTML, zéro CDN, pas de `world-map`. **La vérification en 3 contrôles est obligatoire** (aucune référence réseau résiduelle, chaque asset présent sur le disque, rendu réel contrôlé) — un deck stand-alone ne se suppose pas, il se vérifie. Ne pas activer ce mode par défaut : il alourdit le package et interdit les charts Chart.js.
 
 ---
 
@@ -291,7 +300,12 @@ The skill maintainer (Clément Peponnet) can commit improvements back to `snetor
 `sap.png` · `sap-b1.png` · `sap-concur.png` · `s4-hana.png` · `opentext.png`
 `kantox.png` · `xeneta.png` · `buyco.png` · `datasur.png` · `alpega-tms.png`
 
-**Iconography:** use [Phosphor Icons](https://phosphoricons.com) via CDN — see `references/external-libs.md` for the recommended icon set per topic and weight variants. No copy needed; the script tag pulls all weights.
+**Polices** (mode stand-alone uniquement, dans `assets/fonts/`) :
+`Raleway-Regular.ttf` · `Raleway-Medium.ttf` · `Raleway-SemiBold.ttf` · `Raleway-Bold.ttf`
+En mode connecté, ne pas les copier : Google Fonts fait le travail.
 
-All asset files live in this skill's `assets/branding/` and `assets/logos/` subdirectories.
-Copy them to `03-Outputs/assets/<deck-slug>/` before referencing them from the HTML.
+**Iconography:** use [Phosphor Icons](https://phosphoricons.com) via CDN — see `references/external-libs.md` for the recommended icon set per topic and weight variants. No copy needed; the script tag pulls all weights. *(Indisponible en stand-alone — voir `references/standalone.md` §5.)*
+
+All asset files live in this skill's `assets/branding/`, `assets/logos/` and `assets/fonts/` subdirectories.
+Copy them to `03-Outputs/assets/<deck-slug>/` before referencing them from the HTML
+(ou dans `<dossier du deck>/assets/<deck-slug>/` en mode stand-alone).
