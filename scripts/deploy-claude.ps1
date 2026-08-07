@@ -297,7 +297,18 @@ function Invoke-Phase5-Snetor {
         Write-Warn "CLAUDE.md introuvable dans le repo"
     }
 
-    # 2. settings.json (fusion si existant)
+    # 2. Output styles (styles de réponse sélectionnables via /config)
+    $stylesSrc = Join-Path $repoDir 'output-styles'
+    if (Test-Path $stylesSrc) {
+        $stylesDst = "$claudeDir\output-styles"
+        New-Item -ItemType Directory -Path $stylesDst -Force | Out-Null
+        Copy-Item "$stylesSrc\*.md" $stylesDst -Force
+        Write-Ok "Output styles copiés ($stylesDst)"
+    } else {
+        Write-Warn "output-styles introuvable dans le repo — skip"
+    }
+
+    # 3. settings.json (fusion si existant)
     $settingsPath    = "$claudeDir\settings.json"
     $snetorPlugins   = [ordered]@{
         'superpowers@claude-plugins-official'     = $true
@@ -307,6 +318,7 @@ function Invoke-Phase5-Snetor {
     $snetorDefaults  = [ordered]@{
         theme        = 'dark'
         effortLevel  = 'medium'
+        outputStyle  = 'ELI5'
     }
 
     if (Test-Path $settingsPath) {
@@ -339,7 +351,7 @@ function Invoke-Phase5-Snetor {
     Set-JsonFile -Object $cfg -Path $settingsPath
     Write-Ok "settings.json configuré (plugins Snetor activés)"
 
-    # 3. Status line
+    # 4. Status line
     $statuslineScript = Join-Path $repoDir 'statusline\install.ps1'
     if (Test-Path $statuslineScript) {
         Write-Info "Installation de la status line ..."
