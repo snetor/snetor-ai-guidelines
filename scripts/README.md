@@ -7,7 +7,7 @@ Une seule exécution, **une seule boite UAC**, tout le reste est automatique.
 
 | Phase | Action |
 |---|---|
-| 0 | Auto-élévation admin (1 UAC) — profil collab préservé |
+| 0 | Auto-élévation admin (1 UAC) — profil collab préservé. En contexte SYSTEM (NinjaOne), l'élévation est ignorée et le collab est détecté automatiquement |
 | 1 | Node.js LTS — détecte la version courante et installe silencieusement si absent |
 | 2 | Git for Windows — installe le dernier release officiel (GitHub `git-for-windows`) si absent |
 | 3 | Claude Desktop — MSIX officiel signé, provisioning machine-wide (`Add-AppxProvisionedPackage`) |
@@ -38,6 +38,13 @@ Une seule exécution, **une seule boite UAC**, tout le reste est automatique.
 
 5. Approuver la boite UAC avec les credentials admin DSI
 6. Le script tourne seul jusqu'au récapitulatif final (~5-10 min)
+
+### Déploiement NinjaOne (sans intervention)
+
+Le script détecte qu'il tourne en SYSTEM, résout le collab connecté (`query user`, puis
+`Win32_ComputerSystem.UserName` en secours) et son profil via le SID dans `ProfileList`.
+Aucune boite UAC : l'agent NinjaOne est déjà élevé. Le collab reçoit deux fenêtres
+d'information (début / fin d'installation) affichées dans sa session via `Invoke-AsLoggedInUser`.
 
 ## Étapes manuelles post-déploiement (collab)
 
