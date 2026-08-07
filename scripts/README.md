@@ -12,7 +12,7 @@ Une seule exécution, **une seule boite UAC**, tout le reste est automatique.
 | 2 | Git for Windows — installe le dernier release officiel (GitHub `git-for-windows`) si absent |
 | 3 | Claude Desktop — MSIX officiel signé, provisioning machine-wide (`Add-AppxProvisionedPackage`) |
 | 4 | Claude Code (Cowork) — `npm install -g @anthropic-ai/claude-code` dans le profil du collab |
-| 5 | Config Snetor — CLAUDE.md global, settings.json (plugins), status line |
+| 5 | Config Snetor — CLAUDE.md global, output styles, settings.json (plugins), status line |
 | 6 | M365 MCP — pré-configure `claude_desktop_config.json` (résolution chemin MSIX réelle) |
 | 7 | Récapitulatif coloré + checklist des actions manuelles |
 

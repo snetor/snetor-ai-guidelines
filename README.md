@@ -32,6 +32,7 @@ a first PR to learn the branch → PR → CI plan → merge loop.
 |---|---|
 | `CLAUDE.md` | Global instructions injected into every Claude Code session |
 | `scripts/` | DSI deployment scripts — onboard a collaborator in one run |
+| `output-styles/` | Custom output styles — how Claude phrases its answers |
 | `statusline/` | Custom status line — context usage, rate limit, git branch |
 | `assets/` | Snetor brand assets |
 
@@ -112,6 +113,27 @@ Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
 
 ---
 
+### Output styles
+
+An output style changes **how** Claude answers — tone, length, structure — without touching its
+coding instructions. Styles live in `~/.claude/output-styles`, one markdown file per style.
+
+`output-styles/eli5.md` is the Snetor default: short sentences, no jargon, and every answer ends
+with *what was done, whether it worked, what to do next*. Decisions are presented as 2 options max
+with a recommendation.
+
+```powershell
+Copy-Item -Recurse output-styles "$env:USERPROFILE\.claude\output-styles" -Force
+```
+
+Then restart Claude Code and pick it with `/config` → **Output style** → `ELI5`
+(or set `"outputStyle": "ELI5"` in `~/.claude/settings.json`).
+
+> Write your own style: drop a `.md` file in that folder with a `name` / `description` frontmatter
+> and `keep-coding-instructions: true`, then reselect it via `/config`.
+
+---
+
 ## RECOMMENDED PLUGINS
 
 Enable via `/config` in Claude Code or directly in `~/.claude/settings.json`.
@@ -132,6 +154,7 @@ Reference block for `~/.claude/settings.json`:
 {
   "theme": "dark",
   "effortLevel": "medium",
+  "outputStyle": "ELI5",
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
