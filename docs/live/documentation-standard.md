@@ -61,6 +61,20 @@ La distinction entre `decided` et `applied` compte : une decision prise dont
 rien n est deploye est un piege classique, et le champ le rend visible des
 l en-tete.
 
+Deux champs `dated` optionnels relient un document a son successeur :
+
+- `supersedes` : chemin relatif a la racine du repo vers le document que
+  celui-ci remplace. Le fichier cite doit exister.
+- `superseded_by` : chemin relatif, obligatoire des que `status` vaut
+  `superseded`. Le fichier cite doit exister.
+
+Ces deux champs remplacent la suppression. Un document `dated` ne se
+reecrit jamais et ne s efface jamais : quand il cesse de valoir, on ecrit
+son successeur et on relie les deux. La chaine reste navigable, et un
+lecteur qui tombe sur l ancien document est renvoye vers le nouveau au lieu
+de croire a une information perimee. C est ce qui distingue le regime
+`dated` du regime `live`, ou le fichier se reecrit sur place.
+
 ## L index est genere
 
 `docs/README.md` est produit par `scripts/check_docs.py` depuis les
