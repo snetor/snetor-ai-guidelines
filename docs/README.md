@@ -10,6 +10,10 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 - [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-08-10
 
+### Datés
+
+- [Règles de migration d'un repo vers le standard de documentation](dated/decisions/2026-08-10-regles-de-migration-d-un-repo.md) — 2026-08-10, decided
+
 ## dev
 
 ### À jour
@@ -18,6 +22,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### Datés
 
+- [Règles de migration d'un repo vers le standard de documentation](dated/decisions/2026-08-10-regles-de-migration-d-un-repo.md) — 2026-08-10, decided
 - [Skill de conversion d un artefact HTML en application interne](dated/decisions/2026-08-04-skill-artifact-to-app.md) — 2026-08-04, proposed
 
 ## newcomer
