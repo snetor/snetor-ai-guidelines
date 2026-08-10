@@ -608,3 +608,82 @@ def test_lecture_non_utf8_n_empeche_pas_de_rapporter_une_autre_erreur(tmp_path):
     errors = check_links(tmp_path)
     assert any("casse.md" in e for e in errors)
     assert any("fantome.md" in e for e in errors)
+
+
+def _checkout_imbrique(racine):
+    """Simule le second checkout pose par check-docs.yml dans .docs-standard/."""
+    _ecrire(racine / ".docs-standard" / "README.md", "# Standard de documentation\n")
+    _ecrire(racine / ".docs-standard" / "HANDOFF.md", "# HANDOFF du standard\n")
+    _ecrire(racine / ".docs-standard" / "scripts" / "README.md", "# Scripts\n")
+    _ecrire(racine / ".docs-standard" / "docs" / "README.md", "# Index du standard\n")
+    _ecrire(
+        racine / ".docs-standard" / "docs" / "live" / "documentation-standard.md",
+        "---\nregime: live\naudience: [dev]\nreviewed: 2026-08-10\n---\n# Standard\n",
+    )
+
+
+def test_un_checkout_imbrique_dans_docs_standard_ne_casse_pas_un_repo_conforme(tmp_path):
+    # Mise en page du workflow reutilisable : le repo appelant a la racine, le
+    # repo standard dans .docs-standard/. L index a ete genere en local, donc
+    # sans .docs-standard. Le verificateur doit rendre le meme verdict dans les
+    # deux mises en page, sinon un repo conforme sort en 0 en local et en 1 en
+    # CI, sans echappatoire.
+    _repo_conforme(tmp_path)
+    _checkout_imbrique(tmp_path)
+
+    errors, warnings = run(tmp_path, fix=False, today=AUJOURD_HUI)
+    assert errors == []
+    assert main(["--repo-root", str(tmp_path), "--today", "2026-08-10"]) == 0
+
+    entries, _ = collect_entries(tmp_path)
+    index = generate_index(entries, find_side_readmes(tmp_path))
+    assert ".docs-standard" not in index
+    assert index == (tmp_path / "docs" / "README.md").read_text(encoding="utf-8")
+
+
+def test_un_markdown_dans_un_dossier_masque_n_est_ni_indexe_ni_scanne(tmp_path):
+    # Regle generale : tout composant de chemin prefixe par un point est hors
+    # champ. Vaut pour .terraform, .venv, .github/... comme pour .docs-standard.
+    _ecrire(tmp_path / ".terraform" / "modules" / "README.md", "# Module tiers\n")
+    _ecrire(tmp_path / ".cache" / "note.md", "[mort](fantome-du-cache.md)\n")
+    _ecrire(tmp_path / "scripts" / "README.md", "# Scripts\n")
+
+    assert sorted(p.name for p in iter_markdown(tmp_path)) == ["README.md"]
+    assert find_side_readmes(tmp_path) == [("scripts/README.md", "Scripts")]
+    assert check_links(tmp_path) == []
+
+
+def test_strip_code_tolere_une_cloture_indentee_sous_un_item_de_liste():
+    # Bloc de code indente sous un item de liste : la cloture porte la meme
+    # indentation que l ouverture. Si elle n est pas reconnue, le lien d exemple
+    # qu il contient est pris pour un lien reel et signale comme mort.
+    text = (
+        "- Lancer la commande :\n"
+        "\n"
+        "      ```\n"
+        "      voir [le guide](guide-inexistant.md)\n"
+        "      ```\n"
+        "\n"
+        "Fin du document.\n"
+    )
+    nettoye = strip_code(text)
+    assert "guide-inexistant.md" not in nettoye
+    assert find_internal_links(nettoye) == []
+    assert "Fin du document." in nettoye
+
+
+def test_check_links_ignore_un_lien_dans_un_bloc_indente(tmp_path):
+    _ecrire(
+        tmp_path / "docs" / "source.md",
+        "1. Exemple :\n\n   ```yaml\n   doc: [guide](fantome.md)\n   ```\n\nsuite\n",
+    )
+    assert check_links(tmp_path) == []
+
+
+def test_main_refuse_un_today_qui_n_est_pas_une_date_iso(tmp_path, capsys):
+    _repo_conforme(tmp_path)
+    code = main(["--repo-root", str(tmp_path), "--today", "10/08/2026"])
+    assert code != 0
+    sortie = capsys.readouterr().out
+    assert "--today" in sortie
+    assert "ISO" in sortie

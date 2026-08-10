@@ -126,8 +126,23 @@ def validate_frontmatter(
 
 SPAN_RE = re.compile(r"`[^`\n]*`")
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
-IGNORED_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".pytest_cache"}
+IGNORED_DIRS = {"node_modules", "venv"}
 EXTERNAL_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
+
+
+def est_ignore(rel: Path) -> bool:
+    """Vrai si un composant du chemin est masque (prefixe par un point) ou technique.
+
+    La regle du point couvre `.git`, `.venv`, `.pytest_cache`, `.terraform`,
+    et surtout `.docs-standard` : le workflow reutilisable
+    `.github/workflows/check-docs.yml` y depose un second checkout de ce repo
+    dans le repo appelant. Sans cette exclusion, les markdown du standard
+    entrent dans l index attendu du repo appelant, et un repo conforme sort
+    en 1 en CI alors qu il sort en 0 en local. Une regle generale valant pour
+    tout dossier masque, plutot qu un nom litteral, ferme aussi le piege pour
+    le prochain sous-checkout.
+    """
+    return any(part.startswith(".") or part in IGNORED_DIRS for part in rel.parts)
 
 
 def strip_code(text: str) -> str:
@@ -135,7 +150,11 @@ def strip_code(text: str) -> str:
     lines: list[str] = []
     in_fence = False
     for line in text.split("\n"):
-        if line.startswith("```"):
+        # `lstrip` : une cloture indentee — bloc de code sous un item de liste,
+        # sous une citation — ferme bien le bloc. Sans cela, tout le reste du
+        # fichier passe pour du code, ou pire, le contenu du bloc passe pour du
+        # texte et ses liens d exemple sont signales comme morts.
+        if line.lstrip().startswith("```"):
             in_fence = not in_fence
             continue
         if not in_fence:
@@ -156,10 +175,9 @@ def find_internal_links(text: str) -> list[str]:
 
 
 def iter_markdown(repo_root: Path):
-    """Parcourt les markdown du repo en ignorant les dossiers techniques."""
+    """Parcourt les markdown du repo en ignorant masques et dossiers techniques."""
     for chemin in sorted(repo_root.rglob("*.md")):
-        parties = set(chemin.relative_to(repo_root).parts)
-        if parties & IGNORED_DIRS:
+        if est_ignore(chemin.relative_to(repo_root)):
             continue
         yield chemin
 
@@ -461,7 +479,20 @@ def main(argv=None) -> int:
     )
     args = parseur.parse_args(argv)
 
-    today = as_date(args.today) or datetime.date.today()
+    # Une valeur --today invalide ne doit jamais retomber en silence sur la date
+    # du jour : sur un gate CI, une faute de frappe changerait le verdict du
+    # check de specs perimees sans que personne ne le voie.
+    if args.today is None:
+        today = datetime.date.today()
+    else:
+        today = as_date(args.today)
+        if today is None:
+            print(
+                f"ERROR --today {args.today!r} n est pas une date ISO "
+                "(YYYY-MM-DD) : verdict impossible a calculer"
+            )
+            return 2
+
     errors, warnings = run(Path(args.repo_root).resolve(), args.fix, today)
 
     for message in warnings:

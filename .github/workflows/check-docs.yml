@@ -9,6 +9,12 @@ on:
         type: string
         default: "3.12"
 
+# Un workflow appele herite du scope du token appelant. Le verificateur ne fait
+# que lire : on reduit explicitement, d autant qu un des repos consommateurs
+# applique de l infrastructure.
+permissions:
+  contents: read
+
 jobs:
   check-docs:
     runs-on: ubuntu-latest
