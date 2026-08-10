@@ -241,25 +241,32 @@ def test_check_links_resout_relativement_au_fichier_pas_au_repo(tmp_path):
     assert check_links(tmp_path) == []
 
 
-def test_strip_code_bloc1_jamais_ferme_ne_mange_pas_lien_reel():
-    # Cas du bug: deux blocs. Vieille regex apparie ``` 1 avec ``` 2 et supprime tout entre,
-    # y compris un lien qui ne devrait pas être supprimé. Nouvelle: toggle ligne par ligne.
-    text = "[avant](avant.md)\n```\n[faux1](fantome1.md)\n[real](real.md)\n```\n[apres](apres.md)\n```\n[faux2](fantome2.md)\n```\n"
-    nettoye = strip_code(text)
-    liens = find_internal_links(nettoye)
-    # Vieille regex: ``` 1 et 2 appariés, [real] supprimé (perte silencieuse)
-    # Nouvelle: toggle sur chaque ```, [real] supprimé (in_fence=True entre 1-2)
-    assert "avant.md" in liens, f"Expected 'avant.md' to be preserved, got {liens}"
-    assert "apres.md" in liens, f"Expected 'apres.md' to be preserved, got {liens}"
-    # [real] et [faux2] sont dans des blocs -> doivent être supprimés
-    assert "real.md" not in liens, f"Did not expect 'real.md' in {liens}"
-    assert "fantome2.md" not in liens, f"Did not expect 'fantome2.md' in {liens}"
-
-
-def test_strip_code_bloc_ouvert_non_ferme_ne_mange_pas_le_lien_apres():
+def test_strip_code_bloc_non_ferme_supprime_le_lien_qui_le_suit():
+    # Un seul marqueur ``` (jamais referme): tout ce qui suit, jusqu a la fin
+    # du fichier, est traite comme du code. Le lien qui suit le marqueur
+    # d ouverture disparait donc, meme s il ressemble a un lien reel.
     text = "[reel1](reel1.md)\n```\n[faux](fantome.md)\n[reel2](reel2.md)\n"
     nettoye = strip_code(text)
     assert find_internal_links(nettoye) == ["reel1.md"]
+
+
+def test_strip_code_nombre_impair_de_marqueurs_traite_la_fin_comme_code():
+    # Trois marqueurs ```: le contenu situe apres le dernier marqueur non
+    # apparie est traite comme etant a l interieur d un bloc de code non
+    # referme (CommonMark: un bloc non ferme s etend jusqu a la fin du
+    # document). Le lien qui y figure ne doit donc pas remonter.
+    text = (
+        "[a](a.md)\n"
+        "```\n"
+        "[faux1](f1.md)\n"
+        "[intercale](i.md)\n"
+        "```\n"
+        "[faux2](f2.md)\n"
+        "```\n"
+        "[c](c.md)\n"
+    )
+    nettoye = strip_code(text)
+    assert find_internal_links(nettoye) == ["a.md", "f2.md"]
 
 
 def test_strip_code_bloc_avec_annotation_de_langage():
