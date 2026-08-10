@@ -122,3 +122,48 @@ def validate_frontmatter(
             errors.append(f"{rel_path}: {champ} pointe un fichier inexistant ({cible})")
 
     return errors
+
+
+FENCE_RE = re.compile(r"^```.*?^```", re.DOTALL | re.MULTILINE)
+SPAN_RE = re.compile(r"`[^`\n]*`")
+LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
+IGNORED_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".pytest_cache"}
+EXTERNAL_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
+
+
+def strip_code(text: str) -> str:
+    """Retire les blocs et spans de code pour ne pas y chercher de liens."""
+    return SPAN_RE.sub("", FENCE_RE.sub("", text))
+
+
+def find_internal_links(text: str) -> list[str]:
+    """Liste les cibles de liens markdown internes, ancre retiree."""
+    cibles: list[str] = []
+    for brut in LINK_RE.findall(text):
+        if brut.startswith(EXTERNAL_PREFIXES):
+            continue
+        cible = brut.split("#", 1)[0].strip()
+        if cible:
+            cibles.append(cible)
+    return cibles
+
+
+def iter_markdown(repo_root: Path):
+    """Parcourt les markdown du repo en ignorant les dossiers techniques."""
+    for chemin in sorted(repo_root.rglob("*.md")):
+        parties = set(chemin.relative_to(repo_root).parts)
+        if parties & IGNORED_DIRS:
+            continue
+        yield chemin
+
+
+def check_links(repo_root: Path) -> list[str]:
+    """Signale tout lien markdown interne pointant un fichier inexistant."""
+    errors: list[str] = []
+    for chemin in iter_markdown(repo_root):
+        rel = chemin.relative_to(repo_root).as_posix()
+        texte = strip_code(chemin.read_text(encoding="utf-8"))
+        for cible in find_internal_links(texte):
+            if not (chemin.parent / cible).exists():
+                errors.append(f"{rel}: lien interne mort vers {cible}")
+    return errors

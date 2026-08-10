@@ -183,3 +183,59 @@ def test_validate_supersedes_pointant_un_fichier_existant(tmp_path):
         "supersedes": "docs/dated/decisions/ancien.md",
     }
     assert validate_frontmatter(meta, "docs/dated/decisions/a.md", tmp_path) == []
+
+
+from check_docs import check_links, find_internal_links, iter_markdown, strip_code
+
+
+def test_strip_code_retire_les_blocs_et_les_spans():
+    text = "avant\n```\n[faux](fantome.md)\n```\napres `[aussi](fantome.md)` fin\n"
+    nettoye = strip_code(text)
+    assert "fantome.md" not in nettoye
+    assert "avant" in nettoye
+    assert "fin" in nettoye
+
+
+def test_find_internal_links_ignore_http_mailto_et_ancres():
+    text = (
+        "[a](live/a.md) [b](https://example.com) [c](mailto:x@y.z) "
+        "[d](#section) [e](../tests/README.md#titre)\n"
+    )
+    assert find_internal_links(text) == ["live/a.md", "../tests/README.md"]
+
+
+def test_find_internal_links_ignore_ce_qui_est_dans_un_bloc_de_code():
+    text = "```\n[faux](fantome.md)\n```\n[vrai](reel.md)\n"
+    assert find_internal_links(strip_code(text)) == ["reel.md"]
+
+
+def test_iter_markdown_ignore_git_et_node_modules(tmp_path):
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "a.md").write_text("a", encoding="utf-8")
+    (tmp_path / ".git").mkdir()
+    (tmp_path / ".git" / "b.md").write_text("b", encoding="utf-8")
+    (tmp_path / "node_modules").mkdir()
+    (tmp_path / "node_modules" / "c.md").write_text("c", encoding="utf-8")
+    trouves = sorted(p.name for p in iter_markdown(tmp_path))
+    assert trouves == ["a.md"]
+
+
+def test_check_links_signale_un_lien_mort_et_accepte_un_lien_valide(tmp_path):
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "cible.md").write_text("# cible\n", encoding="utf-8")
+    (tmp_path / "docs" / "source.md").write_text(
+        "[ok](cible.md) et [casse](fantome.md)\n", encoding="utf-8"
+    )
+    errors = check_links(tmp_path)
+    assert len(errors) == 1
+    assert "fantome.md" in errors[0]
+    assert "docs/source.md" in errors[0].replace("\\", "/")
+
+
+def test_check_links_resout_relativement_au_fichier_pas_au_repo(tmp_path):
+    (tmp_path / "docs" / "live").mkdir(parents=True)
+    (tmp_path / "docs" / "live" / "voisin.md").write_text("# v\n", encoding="utf-8")
+    (tmp_path / "docs" / "live" / "source.md").write_text(
+        "[voisin](voisin.md)\n", encoding="utf-8"
+    )
+    assert check_links(tmp_path) == []
