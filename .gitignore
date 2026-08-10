@@ -3,3 +3,10 @@ tasks/
 # Python
 __pycache__/
 *.pyc
+.pytest_cache/
+
+# Espace de travail des sessions subagent-driven
+.superpowers/
+
+# Plans d implementation superpowers : zone de travail, jamais versionnee
+docs/superpowers/plans/

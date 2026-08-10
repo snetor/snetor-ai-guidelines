@@ -1,112 +1,54 @@
-# Workflow Orchestration
+# snetor-ai-guidelines — règles projet
 
-## 1. Plan Mode Default
+Ce repo distribue la configuration Claude Code de Snetor. Les règles d équipe
+copiées sur les postes vivent dans `claude-config/snetor-guidelines.md`, pas
+ici : ce fichier ne contient que ce qui concerne le travail **dans** ce repo.
 
-- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+## Point d entrée
 
-- If something goes sideways, STOP and re-plan immediately – don't keep pushing
+Lire `HANDOFF.md` en premier, puis `docs/README.md` pour l index.
 
-- Use plan mode for verification steps, not just building
+## Ce dépôt est public
 
-- Write detailed specs upfront to reduce ambiguity
+Le `HANDOFF.md` d un repo public ne porte **ni inventaire de repos internes, ni
+topologie réseau, ni posture de sécurité du poste**. Dire ce qui vient ensuite
+sans dresser la carte. Le standard impose un routeur à la racine de tout repo :
+dans un repo public, ce routeur est lu par n importe qui. Cela vaut aussi pour
+`README.md` et les fichiers de `docs/`.
 
----
+## Ce qui est distribué et comment
 
-## 2. Subagent Strategy
+| Artefact | Destination sur le poste | Vecteur |
+|---|---|---|
+| `claude-config/snetor-guidelines.md` | `~/.claude/snetor-guidelines.md` | `scripts/deploy-claude.ps1` |
+| `output-styles/*.md` | `~/.claude/output-styles/` | `scripts/deploy-claude.ps1` |
+| `plugins/snetor-skills/` | cache de plugins | marketplace Claude Code |
+| `statusline/` | `~/.claude/` | `statusline/install.ps1` |
 
-- Use subagents liberally to keep main context window clean
+Le `CLAUDE.md` personnel de l utilisateur n est **jamais** écrasé : il importe
+`@~/.claude/snetor-guidelines.md`. Toute règle d équipe va dans le fichier
+importé, jamais dans le `CLAUDE.md` du poste.
 
-- Offload research, exploration, and parallel analysis to subagents
+## Conséquences à ne pas oublier
 
-- For complex problems, throw more compute at it via subagents
+Modifier `claude-config/snetor-guidelines.md` change le comportement de tous
+les agents Snetor. Modifier un `SKILL.md` du plugin le propage à tous les
+postes, le marketplace étant en mise à jour automatique. Dans les deux cas,
+bumper la version dans `plugins/snetor-skills/.claude-plugin/plugin.json` et
+`.claude-plugin/marketplace.json`.
 
-- One task per subagent for focused execution
+Le workflow `.github/workflows/check-docs.yml` est consommé par les autres
+repos via le tag `v1`. Toute modification du vérificateur exige de redéplacer
+ce tag, sinon les repos consommateurs ne voient pas le changement.
 
----
+## Vérifier avant d affirmer
 
-## 3. Self-Improvement Loop
+Un test vert prouve que le code fait ce que le test dit, pas que le poste est
+configuré. Pour toute affirmation sur la configuration d un poste, montrer la
+sortie de `/context` ou du script concerné.
 
-- After ANY correction from the user: update `tasks/lessons.md` with the pattern
+## Documentation
 
-- Write rules for yourself that prevent the same mistake
-
-- Ruthlessly iterate on these lessons until mistake rate drops
-
-- Review lessons at session start for relevant project
-
----
-
-## 4. Verification Before Done
-
-- Never mark a task complete without proving it works
-
-- Diff behavior between main and your changes when relevant
-
-- Ask yourself: "Would a staff engineer approve this?"
-
-- Run tests, check logs, demonstrate correctness
-
----
-
-## 5. Demand Elegance (Balanced)
-
-- For non-trivial changes: pause and ask "is there a more elegant way?"
-
-- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
-
-- Skip this for simple, obvious fixes – don't over-engineer
-
-- Challenge your own work before presenting it
-
----
-
-## 6. Think Before Coding
-
-- State your assumptions explicitly before implementing. If uncertain, ask.
-
-- If multiple interpretations exist, present them – don't pick one silently.
-
-- If a simpler approach exists, say so. Push back when warranted.
-
-- If something is unclear, stop and name what's confusing before continuing.
-
----
-
-# Autonomous Bug Fixing
-
-- When given a bug report: just fix it. Don't ask for hand-holding
-
-- Point at logs, errors, failing tests – then resolve them
-
-- Zero context switching required from the user
-
-- Go fix failing CI tests without being told how
-
----
-
-# Task Management
-
-- **Plan First:** Write plan to `tasks/todo.md` with checkable items
-
-- **Verify Plan:** Check in before starting implementation
-
-- **Track Progress:** Mark items complete as you go
-
-- **Explain Changes:** High-level summary at each step
-
-- **Document Results:** Add review section to `tasks/todo.md`
-
-- **Capture Lessons:** Update `tasks/lessons.md` after corrections
-
-- **Success Criteria First:** Transform each task into a verifiable goal — "fix the bug" → "write a test that reproduces it, then make it pass." For multi-step tasks, state a brief plan with a verify check per step.
-
----
-
-# Core Principles
-
-- **Simplicity First:** No features beyond what was asked. No abstractions for single-use code. No unasked configurability. If 50 lines could replace 200, rewrite.
-
-- **Surgical Changes:** Touch only what's necessary for the task. Don't improve adjacent code, comments, or formatting. Match existing style. If you notice unrelated dead code, mention it — clean it in a dedicated separate commit, never mixed silently into the current change.
-
-- **No Laziness:** Find root causes. No temporary fixes. Senior developer standards.
- 
+Ce repo applique le standard qu il définit. Voir
+`docs/live/documentation-standard.md`. Avant de clôturer une branche, utiliser
+le skill `snetor-docs-close`.

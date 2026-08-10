@@ -30,7 +30,8 @@ a first PR to learn the branch → PR → CI plan → merge loop.
 
 | File / Folder | Description |
 |---|---|
-| `CLAUDE.md` | Global instructions injected into every Claude Code session |
+| `CLAUDE.md` | Repo-local rules — how to work inside this repo, not a template |
+| `claude-config/` | Team guidelines — imported into every Claude Code session |
 | `scripts/` | DSI deployment scripts — onboard a collaborator in one run |
 | `output-styles/` | Custom output styles — how Claude phrases its answers |
 | `statusline/` | Custom status line — context usage, rate limit, git branch |
@@ -61,10 +62,12 @@ One UAC prompt. Everything else is automatic. See [`scripts/README.md`](scripts/
 
 ### Plugin snetor-skills
 
-Three skills for Snetor teams: **`snetor-html-slides`** (animated HTML decks) and
+Four skills for Snetor teams: **`snetor-html-slides`** (animated HTML decks) and
 **`snetor-excalidraw-diagrams`** (architecture diagrams with embedded service icons) for branded
-visuals, plus **`snetor-travel-report`** — helps sales reps dictate client-visit reports (in any
-language) and drafts them in English, Outlook-ready, for the client-matrix pipeline.
+visuals, **`snetor-travel-report`** — helps sales reps dictate client-visit reports (in any
+language) and drafts them in English, Outlook-ready — and **`snetor-docs-close`**, which closes a
+branch against the Snetor documentation standard: plan purge, spec arbitration, lessons, todo
+cleanup, `HANDOFF.md` rewrite, then index regeneration and verification.
 
 #### Via the marketplace (recommended)
 
@@ -103,13 +106,34 @@ Restart Claude Code — the status line is active.
 
 ---
 
-### Global CLAUDE.md
+### Team guidelines (snetor-guidelines.md)
 
-To apply Snetor conventions to all your projects:
+Copy the team rules, then import them from your personal `CLAUDE.md`:
 
 ```powershell
-Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
+$claudeMd = "$env:USERPROFILE\.claude\CLAUDE.md"
+$import   = '@~/.claude/snetor-guidelines.md'
+Copy-Item claude-config\snetor-guidelines.md "$env:USERPROFILE\.claude\snetor-guidelines.md" -Force
+if (-not (Test-Path $claudeMd)) { New-Item -ItemType File $claudeMd | Out-Null }
+if (-not (Select-String -Path $claudeMd -SimpleMatch $import -Quiet)) {
+    [System.IO.File]::AppendAllText($claudeMd, "`r`n$import`r`n", (New-Object System.Text.UTF8Encoding($false)))
+}
 ```
+
+Your personal `CLAUDE.md` is never overwritten — it only imports the team file. The snippet is
+idempotent: it appends the import line only if it is not already there, so running it twice does not
+duplicate it. It writes UTF-8 **without** BOM, like `deploy-claude.ps1` does, because a BOM at the
+head of `CLAUDE.md` can upset the memory-file parser. Check that it loads with `/context`, section
+**Memory files**.
+
+> **Migration note (team rules used to be inlined):** machines provisioned before this split had the
+> team rules **copied into** `~/.claude/CLAUDE.md` by the old `deploy-claude.ps1`. The current script
+> never overwrites that file — it only adds the import line — so those machines now load the team
+> rules **twice**: once from the inlined copy, which is frozen and will never be updated again, and
+> once from the import. Open `~/.claude/CLAUDE.md`, delete the inlined team-rules block by hand, and
+> keep only your own personal context plus the `@~/.claude/snetor-guidelines.md` line. This step is
+> deliberately manual: stripping a block of text out of a collaborator's personal file by script
+> risks losing local personalisations, which is a worse outcome than the duplicate it would fix.
 
 ---
 
