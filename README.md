@@ -118,9 +118,12 @@ Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
 An output style changes **how** Claude answers — tone, length, structure — without touching its
 coding instructions. Styles live in `~/.claude/output-styles`, one markdown file per style.
 
-`output-styles/eli5.md` is the Snetor default: short sentences, no jargon, and every answer ends
-with *what was done, whether it worked, what to do next*. Decisions are presented as 2 options max
-with a recommendation.
+`output-styles/eli5.md` is the Snetor default: short sentences and plain words, but the exact
+technical term is always kept and explained right after — written for people who know the stack and
+have no time to decode. Every answer ends with *what was done, whether it worked, what to do next*.
+Decisions come as 3 options max with a recommendation. Two things are never compressed: warnings
+before an irreversible action, and the recap after Claude has been working on its own (done /
+blocked / needs you).
 
 ```powershell
 Copy-Item -Recurse output-styles "$env:USERPROFILE\.claude\output-styles" -Force
