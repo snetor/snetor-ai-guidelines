@@ -395,3 +395,172 @@ def test_generate_index_stable_entre_deux_appels():
         }
     ]
     assert generate_index(entries, []) == generate_index(entries, [])
+
+
+from check_docs import (
+    HANDOFF_MAX_LINES,
+    PENDING_MAX_AGE_DAYS,
+    SPEC_MAX_AGE_DAYS,
+    check_docs_layout,
+    check_handoff,
+    check_index,
+    check_stale_specs,
+    freshness_warnings,
+    main,
+    run,
+)
+
+AUJOURD_HUI = datetime.date(2026, 8, 10)
+
+
+def test_seuils_conformes_a_la_spec():
+    assert HANDOFF_MAX_LINES == 150
+    assert SPEC_MAX_AGE_DAYS == 30
+    assert PENDING_MAX_AGE_DAYS == 90
+
+
+def test_check_handoff_absent_est_une_erreur(tmp_path):
+    errors = check_handoff(tmp_path)
+    assert any("HANDOFF.md" in e and "absent" in e for e in errors)
+
+
+def test_check_handoff_trop_long_est_une_erreur(tmp_path):
+    (tmp_path / "HANDOFF.md").write_text("ligne\n" * 151, encoding="utf-8")
+    errors = check_handoff(tmp_path)
+    assert any("151" in e and "150" in e for e in errors)
+
+
+def test_check_handoff_dans_le_plafond_passe(tmp_path):
+    (tmp_path / "HANDOFF.md").write_text("ligne\n" * 150, encoding="utf-8")
+    assert check_handoff(tmp_path) == []
+
+
+def test_check_docs_layout_refuse_un_markdown_hors_des_dossiers_autorises(tmp_path):
+    _ecrire(tmp_path / "docs" / "vrac.md", "# vrac\n")
+    errors = check_docs_layout(tmp_path)
+    assert any("docs/vrac.md" in e for e in errors)
+
+
+def test_check_docs_layout_accepte_readme_live_dated_superpowers(tmp_path):
+    _ecrire(tmp_path / "docs" / "README.md", "index\n")
+    _ecrire(tmp_path / "docs" / "live" / "a.md", "a\n")
+    _ecrire(tmp_path / "docs" / "dated" / "b.md", "b\n")
+    _ecrire(tmp_path / "docs" / "superpowers" / "specs" / "c.md", "c\n")
+    assert check_docs_layout(tmp_path) == []
+
+
+def test_check_stale_specs_bloque_au_dela_de_30_jours(tmp_path):
+    _ecrire(tmp_path / "docs" / "superpowers" / "specs" / "2026-07-01-vieille-design.md", "x\n")
+    _ecrire(tmp_path / "docs" / "superpowers" / "specs" / "2026-08-05-fraiche-design.md", "x\n")
+    errors = check_stale_specs(tmp_path, AUJOURD_HUI)
+    assert len(errors) == 1
+    assert "2026-07-01-vieille-design.md" in errors[0]
+
+
+def test_check_stale_specs_ignore_un_nom_sans_date(tmp_path):
+    _ecrire(tmp_path / "docs" / "superpowers" / "specs" / "notes.md", "x\n")
+    assert check_stale_specs(tmp_path, AUJOURD_HUI) == []
+
+
+def test_check_index_signale_une_divergence_puis_la_corrige(tmp_path):
+    _ecrire(
+        tmp_path / "docs" / "live" / "a.md",
+        "---\nregime: live\naudience: [dev]\nreviewed: 2026-08-10\n---\n# A\n",
+    )
+    entries, _ = collect_entries(tmp_path)
+    attendu = generate_index(entries, find_side_readmes(tmp_path))
+
+    errors = check_index(tmp_path, attendu, fix=False)
+    assert any("docs/README.md" in e for e in errors)
+
+    assert check_index(tmp_path, attendu, fix=True) == []
+    assert (tmp_path / "docs" / "README.md").read_text(encoding="utf-8") == attendu
+    assert check_index(tmp_path, attendu, fix=False) == []
+
+
+def test_freshness_warnings_live_perime_et_frais():
+    entries = [
+        {
+            "rel": "docs/live/vieux.md",
+            "title": "Vieux",
+            "meta": {"regime": "live", "audience": ["dev"], "reviewed": "2026-01-01", "ttl": "90d"},
+        },
+        {
+            "rel": "docs/live/frais.md",
+            "title": "Frais",
+            "meta": {"regime": "live", "audience": ["dev"], "reviewed": "2026-08-01"},
+        },
+    ]
+    warnings = freshness_warnings(entries, AUJOURD_HUI)
+    assert len(warnings) == 1
+    assert "docs/live/vieux.md" in warnings[0]
+
+
+def test_freshness_warnings_dated_en_attente_depuis_plus_de_90_jours():
+    entries = [
+        {
+            "rel": "docs/dated/vieille-propo.md",
+            "title": "Propo",
+            "meta": {"regime": "dated", "audience": ["dev"], "date": "2026-01-01", "status": "proposed"},
+        },
+        {
+            "rel": "docs/dated/tranchee.md",
+            "title": "Tranchee",
+            "meta": {"regime": "dated", "audience": ["dev"], "date": "2026-01-01", "status": "decided"},
+        },
+    ]
+    warnings = freshness_warnings(entries, AUJOURD_HUI)
+    assert len(warnings) == 1
+    assert "vieille-propo.md" in warnings[0]
+
+
+def _repo_conforme(tmp_path):
+    (tmp_path / "HANDOFF.md").write_text("# Handoff\n", encoding="utf-8")
+    _ecrire(
+        tmp_path / "docs" / "live" / "a.md",
+        "---\nregime: live\naudience: [dev]\nreviewed: 2026-08-10\n---\n# A\n",
+    )
+    entries, _ = collect_entries(tmp_path)
+    _ecrire(
+        tmp_path / "docs" / "README.md",
+        generate_index(entries, find_side_readmes(tmp_path)),
+    )
+
+
+def test_run_sur_un_repo_conforme_ne_produit_aucune_erreur(tmp_path):
+    _repo_conforme(tmp_path)
+    errors, warnings = run(tmp_path, fix=False, today=AUJOURD_HUI)
+    assert errors == []
+    assert warnings == []
+
+
+def test_main_retourne_1_si_erreur_et_0_sinon(tmp_path, capsys):
+    assert main(["--repo-root", str(tmp_path)]) == 1
+    capsys.readouterr()
+
+    _repo_conforme(tmp_path)
+    assert main(["--repo-root", str(tmp_path), "--today", "2026-08-10"]) == 0
+    sortie = capsys.readouterr().out
+    assert "OK" in sortie
+
+
+def test_main_fix_regenere_l_index_et_retourne_0(tmp_path, capsys):
+    (tmp_path / "HANDOFF.md").write_text("# Handoff\n", encoding="utf-8")
+    _ecrire(
+        tmp_path / "docs" / "live" / "a.md",
+        "---\nregime: live\naudience: [dev]\nreviewed: 2026-08-10\n---\n# A\n",
+    )
+    assert main(["--repo-root", str(tmp_path), "--today", "2026-08-10"]) == 1
+    capsys.readouterr()
+    assert main(["--repo-root", str(tmp_path), "--today", "2026-08-10", "--fix"]) == 0
+    assert (tmp_path / "docs" / "README.md").exists()
+
+
+def test_main_warning_ne_change_pas_le_code_de_sortie(tmp_path, capsys):
+    (tmp_path / "HANDOFF.md").write_text("# Handoff\n", encoding="utf-8")
+    _ecrire(
+        tmp_path / "docs" / "live" / "vieux.md",
+        "---\nregime: live\naudience: [dev]\nreviewed: 2026-01-01\n---\n# Vieux\n",
+    )
+    assert main(["--repo-root", str(tmp_path), "--today", "2026-08-10", "--fix"]) == 0
+    assert "WARN" in capsys.readouterr().out

@@ -285,3 +285,162 @@ def generate_index(
         lignes.append("")
 
     return "\n".join(lignes).rstrip() + "\n"
+
+
+HANDOFF_MAX_LINES = 150
+SPEC_MAX_AGE_DAYS = 30
+PENDING_MAX_AGE_DAYS = 90
+PENDING_STATUSES = {"draft", "proposed"}
+ALLOWED_DOCS_PREFIXES = ("docs/live/", "docs/dated/", "docs/superpowers/")
+DATE_PREFIX_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-")
+
+
+def check_handoff(repo_root: Path) -> list[str]:
+    """HANDOFF.md doit exister et tenir sous le plafond."""
+    chemin = repo_root / "HANDOFF.md"
+    if not chemin.is_file():
+        return [
+            "HANDOFF.md absent a la racine : le routeur d etat est obligatoire"
+        ]
+    nb = len(chemin.read_text(encoding="utf-8").splitlines())
+    if nb > HANDOFF_MAX_LINES:
+        return [
+            f"HANDOFF.md fait {nb} lignes, plafond {HANDOFF_MAX_LINES} : "
+            "deplacer le contenu vers docs/live/ ou docs/dated/"
+        ]
+    return []
+
+
+def check_docs_layout(repo_root: Path) -> list[str]:
+    """Interdit tout markdown dans docs/ hors des emplacements prevus."""
+    errors: list[str] = []
+    racine = repo_root / "docs"
+    if not racine.is_dir():
+        return errors
+    for chemin in sorted(racine.rglob("*.md")):
+        rel = chemin.relative_to(repo_root).as_posix()
+        if rel == "docs/README.md" or rel.startswith(ALLOWED_DOCS_PREFIXES):
+            continue
+        errors.append(
+            f"{rel}: emplacement interdit, attendu docs/live/, docs/dated/ "
+            "ou docs/superpowers/"
+        )
+    return errors
+
+
+def check_stale_specs(repo_root: Path, today: datetime.date) -> list[str]:
+    """Une spec de la zone de travail plus vieille que le seuil bloque."""
+    errors: list[str] = []
+    racine = repo_root / "docs" / "superpowers" / "specs"
+    if not racine.is_dir():
+        return errors
+    for chemin in sorted(racine.glob("*.md")):
+        match = DATE_PREFIX_RE.match(chemin.name)
+        if not match:
+            continue
+        jour = as_date(match.group(1))
+        if jour is None:
+            continue
+        age = (today - jour).days
+        if age > SPEC_MAX_AGE_DAYS:
+            rel = chemin.relative_to(repo_root).as_posix()
+            errors.append(
+                f"{rel}: spec de {age} jours dans la zone de travail "
+                f"(seuil {SPEC_MAX_AGE_DAYS}) : cloturer la branche ou "
+                "reecrire la spec en docs/dated/"
+            )
+    return errors
+
+
+def check_index(repo_root: Path, attendu: str, fix: bool) -> list[str]:
+    """Compare docs/README.md au rendu attendu, ou le reecrit si fix."""
+    chemin = repo_root / "docs" / "README.md"
+    actuel = chemin.read_text(encoding="utf-8") if chemin.is_file() else None
+    if actuel == attendu:
+        return []
+    if fix:
+        chemin.parent.mkdir(parents=True, exist_ok=True)
+        chemin.write_text(attendu, encoding="utf-8")
+        return []
+    return [
+        "docs/README.md n est pas a jour : regenerer via "
+        "python scripts/check_docs.py --fix"
+    ]
+
+
+def freshness_warnings(entries: list[dict], today: datetime.date) -> list[str]:
+    """Warnings de fraicheur : live perime, dated en attente trop longtemps."""
+    warnings: list[str] = []
+    for entree in entries:
+        meta = entree["meta"]
+        if meta["regime"] == "live":
+            revu = as_date(meta.get("reviewed"))
+            if revu is None:
+                continue
+            jours = int(str(meta.get("ttl", DEFAULT_TTL)).rstrip("d"))
+            if (today - revu).days > jours:
+                warnings.append(
+                    f"{entree['rel']}: revu le {revu}, ttl {jours}d depasse : "
+                    "relire et mettre a jour reviewed"
+                )
+        elif meta.get("status") in PENDING_STATUSES:
+            jour = as_date(meta.get("date"))
+            if jour is None:
+                continue
+            age = (today - jour).days
+            if age > PENDING_MAX_AGE_DAYS:
+                warnings.append(
+                    f"{entree['rel']}: status {meta['status']} depuis {age} "
+                    "jours : trancher ou passer en superseded"
+                )
+    return warnings
+
+
+def run(
+    repo_root: Path, fix: bool, today: datetime.date
+) -> tuple[list[str], list[str]]:
+    """Execute tous les checks. Retourne (erreurs bloquantes, warnings)."""
+    entries, errors = collect_entries(repo_root)
+    attendu = generate_index(entries, find_side_readmes(repo_root))
+    errors += check_index(repo_root, attendu, fix)
+    errors += check_links(repo_root)
+    errors += check_handoff(repo_root)
+    errors += check_docs_layout(repo_root)
+    errors += check_stale_specs(repo_root, today)
+    return errors, freshness_warnings(entries, today)
+
+
+def main(argv=None) -> int:
+    import argparse
+
+    parseur = argparse.ArgumentParser(
+        description="Verifie le standard de documentation Snetor."
+    )
+    parseur.add_argument(
+        "--repo-root", default=".", help="racine du repo a verifier"
+    )
+    parseur.add_argument(
+        "--fix", action="store_true", help="regenere docs/README.md"
+    )
+    parseur.add_argument(
+        "--today", default=None, help="date de reference ISO (tests)"
+    )
+    args = parseur.parse_args(argv)
+
+    today = as_date(args.today) or datetime.date.today()
+    errors, warnings = run(Path(args.repo_root).resolve(), args.fix, today)
+
+    for message in warnings:
+        print(f"WARN  {message}")
+    for message in errors:
+        print(f"ERROR {message}")
+
+    if errors:
+        print(f"\n{len(errors)} erreur(s) bloquante(s), {len(warnings)} warning(s).")
+        return 1
+    print(f"OK — 0 erreur, {len(warnings)} warning(s).")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
