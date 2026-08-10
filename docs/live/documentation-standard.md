@@ -57,6 +57,11 @@ status: decided
 Audiences : `agent`, `dev`, `newcomer`, `ops`, `business`.
 Statuts `dated` : `draft`, `proposed`, `decided`, `applied`, `superseded`.
 
+En `live`, `reviewed` est obligatoire ; `ttl` est **optionnel** et vaut `90d`
+quand il est absent. Son format est `<n>d`, en jours. Ne l ecrire que lorsque la
+peremption reelle du document s ecarte du defaut : `180d` pour une doctrine
+stable, `30d` pour un runbook qui suit une infrastructure mouvante.
+
 La distinction entre `decided` et `applied` compte : une decision prise dont
 rien n est deploye est un piege classique, et le champ le rend visible des
 l en-tete.
@@ -103,9 +108,13 @@ A la cloture d une branche, chaque spec recoit un arbitrage :
   `docs/live/` concerne, puis la supprimer ;
 - elle etait tactique : la supprimer.
 
-Reecrire, pas deplacer. Copier une spec de trois cents lignes reproduit le
-volume qu on cherche a supprimer ; une decision utile tient en quarante a cent
-lignes.
+Une spec n est **ni deplacee ni copiee : reecrite**. Copier une spec de trois
+cents lignes reproduit le volume qu on cherche a supprimer ; une decision utile
+tient en quarante a cent lignes.
+
+La suppression d une spec se confirme aupres de l utilisateur. Et le plan ne se
+supprime qu une fois entierement execute et l arbre commite : gitignore, il n a
+aucun blob git derriere lui.
 
 ## Le routeur et les taches
 
@@ -131,7 +140,8 @@ finit par regenerer l index et afficher le rapport du verificateur.
 Bloquant : frontmatter absent ou invalide, lien interne mort, `docs/README.md`
 non regenere, `HANDOFF.md` absent ou au-dela de 150 lignes, spec de plus de 30
 jours dans la zone de travail, markdown range ailleurs que dans `live/`,
-`dated/` ou `superpowers/`.
+`dated/` ou `superpowers/`, fichier markdown illisible — encodage non UTF-8,
+fichier verrouille, ou disparu entre le parcours et la lecture.
 
 Warning : document `live` dont le `ttl` est depasse, document `dated` en
 `draft` ou `proposed` depuis plus de 90 jours.
@@ -151,9 +161,18 @@ jobs:
     uses: snetor/snetor-ai-guidelines/.github/workflows/check-docs.yml@v1
 ```
 
+Le workflow pose un second checkout du repo standard dans `.docs-standard/`. Le
+verificateur ignore tout dossier dont le nom commence par un point, donc ce
+sous-checkout — comme `.terraform` ou `.venv` — reste hors de l index et hors du
+scan de liens. Le verdict est le meme en local et en CI.
+
 En local :
 
 ```
 python scripts/check_docs.py --repo-root .
 python scripts/check_docs.py --repo-root . --fix
 ```
+
+`--today` accepte une date ISO pour figer la reference des checks de fraicheur.
+Une valeur qui n est pas une date ISO fait echouer le verificateur, plutot que
+de retomber en silence sur la date du jour.

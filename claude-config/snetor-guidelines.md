@@ -137,6 +137,11 @@ tasks/lessons.md        journal append-only
 optionnel au format `<n>d` (defaut `90d`). En `dated` : `date` en date ISO,
 `status` parmi `draft`, `proposed`, `decided`, `applied`, `superseded`.
 
+Chainage `dated`, optionnel sauf mention : `supersedes` et `superseded_by`,
+chemins relatifs a la racine du repo. `superseded_by` est **obligatoire** des
+que `status` vaut `superseded`. Les deux doivent pointer un fichier qui existe :
+sinon la CI bloque.
+
 ## Cloture de branche — cinq etapes
 
 Utiliser le skill `snetor-docs-close`. A defaut, dans cet ordre : supprimer le
@@ -145,6 +150,16 @@ plan ; arbitrer chaque spec (reecrite en decision datee, fondue dans un fichier
 `tasks/todo.md` les items livres, sans les cocher ; reecrire `HANDOFF.md` sous
 150 lignes. Puis regenerer l index.
 
+Condition d entree, avant la moindre suppression : le plan doit etre
+**entierement execute** — toutes ses taches livrees — et l arbre de travail
+commite. `docs/superpowers/plans/` etant gitignore, un plan supprime en cours
+d execution emporte les taches restantes sans aucun blob git pour les rendre.
+Si l une des deux conditions manque, s arreter et le dire ; ne rien supprimer.
+
+La suppression d une spec **se confirme** aupres de l utilisateur : proposer
+l arbitrage, attendre l accord, puis seulement supprimer. Meme prudence sur
+`tasks/`, gitignore dans certains repos : ces editions y sont irrecuperables.
+
 ## Regles non negociables
 
 Ne jamais editer `docs/README.md` a la main : le regenerer par
@@ -152,8 +167,8 @@ Ne jamais editer `docs/README.md` a la main : le regenerer par
 
 Ne jamais commiter un plan d implementation.
 
-Une spec est **reecrite** vers sa destination, jamais copiee ni deplacee telle
-quelle : une decision utile tient en quarante a cent lignes.
+Une spec n est **ni deplacee ni copiee : reecrite** vers sa destination. Une
+decision utile tient en quarante a cent lignes.
 
 Un item de `tasks/todo.md` livre est supprime, pas coche.
 

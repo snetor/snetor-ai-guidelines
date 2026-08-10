@@ -8,6 +8,14 @@ ici : ce fichier ne contient que ce qui concerne le travail **dans** ce repo.
 
 Lire `HANDOFF.md` en premier, puis `docs/README.md` pour l index.
 
+## Ce depot est public
+
+Le `HANDOFF.md` d un repo public ne porte **ni inventaire de repos internes, ni
+topologie reseau, ni posture de securite du poste**. Dire ce qui vient ensuite
+sans dresser la carte. Le standard impose un routeur a la racine de tout repo :
+dans un repo public, ce routeur est lu par n importe qui. Cela vaut aussi pour
+`README.md` et les fichiers de `docs/`.
+
 ## Ce qui est distribue et comment
 
 | Artefact | Destination sur le poste | Vecteur |

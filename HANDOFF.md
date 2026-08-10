@@ -6,19 +6,21 @@ Routeur d etat, pas un journal. L historique vit dans `git log`.
 
 ## Ou on en est
 
-Le repo distribue la configuration Claude Code de Snetor : un `CLAUDE.md`
-d equipe, un style de sortie, un statusline, un script de deploiement poste,
-et le plugin `snetor-skills` (quatre skills) via le marketplace Claude Code.
+Le repo distribue la configuration Claude Code de Snetor : les regles d equipe
+de `claude-config/`, importees dans chaque session depuis le `CLAUDE.md`
+personnel du poste, un style de sortie, un statusline, un script de deploiement
+poste, et le plugin `snetor-skills` (quatre skills) via le marketplace Claude
+Code.
 
 Le standard de documentation est livre et applique a ce repo : `docs/live/`,
 `docs/dated/`, index genere, verificateur en CI.
 
 ## Prochaine action
 
-Brancher les quatre repos applicatifs sur le workflow `check-docs.yml@v1`, dans
-cet ordre : `snetor-ai-hub`, `client-matrix`, `snetor-pim`,
-`azure-landing-zone`. Chaque repo fait l objet d une pull request distincte.
-Le rapport du verificateur produit la liste de travail de chaque repo.
+Brancher les repos applicatifs internes sur le workflow `check-docs.yml@v1`,
+une pull request par repo. Le rapport du verificateur produit la liste de
+travail de chacun. L ordre de passage et le perimetre restant se suivent hors
+de ce depot, qui est public.
 
 ## Ou chercher
 
@@ -30,7 +32,8 @@ Le rapport du verificateur produit la liste de travail de chaque repo.
 | Brancher un repo sur la CI documentaire | `.github/workflows/check-docs.yml` |
 | Installer le poste d un nouveau developpeur | `README.md`, `scripts/README.md` |
 | Deployer la configuration Claude Code | `scripts/deploy-claude.ps1` |
-| Regles d equipe copiees sur les postes | `CLAUDE.md` |
+| Regles d equipe chargees dans chaque session | `claude-config/snetor-guidelines.md` |
+| Regles de travail propres a ce repo | `CLAUDE.md` |
 | Statusline | `statusline/README.md` |
 | Skills Snetor | `plugins/snetor-skills/README.md` |
 | Index complet de la documentation | `docs/README.md` |
@@ -44,9 +47,10 @@ runtime partage des applications internes.
 ## Pieges du poste
 
 Le shell de reference est PowerShell ; Git Bash est instable sur les postes
-Snetor. Le proxy d entreprise impose un bundle de certificats : ne pas
-reexporter la variable d environnement qui le designe, elle est deja posee par
-le deploiement.
+Snetor. Les variables d environnement dont Claude Code a besoin sont posees par
+`scripts/deploy-claude.ps1` : ne pas les redefinir a la main, sous peine de
+masquer la valeur deployee. Les specificites reseau du poste ne sont pas
+documentees ici, ce depot etant public.
 
 ## Sessions parallelles
 
