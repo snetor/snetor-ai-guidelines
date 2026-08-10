@@ -8,8 +8,8 @@
     {
       "name": "snetor-skills",
       "source": "./plugins/snetor-skills",
-      "description": "Snetor skills: branded visuals (HTML decks, Excalidraw diagrams) and a travel-report assistant for sales reps",
-      "version": "1.6.0"
+      "description": "Snetor skills: branded visuals (HTML decks, Excalidraw diagrams), a travel-report assistant for sales reps, and a branch-closing assistant for the documentation standard",
+      "version": "1.7.1"
     }
   ]
 }
