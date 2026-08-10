@@ -239,3 +239,23 @@ def test_check_links_resout_relativement_au_fichier_pas_au_repo(tmp_path):
         "[voisin](voisin.md)\n", encoding="utf-8"
     )
     assert check_links(tmp_path) == []
+
+
+def test_strip_code_bloc_ouvert_non_ferme_ne_mange_pas_le_lien_apres():
+    text = "[reel1](reel1.md)\n```\n[faux](fantome.md)\n[reel2](reel2.md)\n"
+    nettoye = strip_code(text)
+    assert find_internal_links(nettoye) == ["reel1.md"]
+
+
+def test_strip_code_bloc_avec_annotation_de_langage():
+    text = "```python\n[faux](fantome.md)\n```\n[vrai](reel.md)\n"
+    nettoye = strip_code(text)
+    assert "fantome.md" not in nettoye
+    assert find_internal_links(nettoye) == ["reel.md"]
+
+
+def test_strip_code_bloc_non_ferme_en_fin_de_fichier():
+    text = "[avant](avant.md)\n```\n[faux](fantome.md)\n"
+    nettoye = strip_code(text)
+    assert "fantome.md" not in nettoye
+    assert find_internal_links(nettoye) == ["avant.md"]

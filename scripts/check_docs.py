@@ -124,7 +124,6 @@ def validate_frontmatter(
     return errors
 
 
-FENCE_RE = re.compile(r"^```.*?^```", re.DOTALL | re.MULTILINE)
 SPAN_RE = re.compile(r"`[^`\n]*`")
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
 IGNORED_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".pytest_cache"}
@@ -133,7 +132,15 @@ EXTERNAL_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
 
 def strip_code(text: str) -> str:
     """Retire les blocs et spans de code pour ne pas y chercher de liens."""
-    return SPAN_RE.sub("", FENCE_RE.sub("", text))
+    lines: list[str] = []
+    in_fence = False
+    for line in text.split("\n"):
+        if line.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            lines.append(SPAN_RE.sub("", line))
+    return "\n".join(lines)
 
 
 def find_internal_links(text: str) -> list[str]:
