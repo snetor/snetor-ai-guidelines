@@ -1,6 +1,6 @@
 ---
-name: ELI5
-description: keep it simple pls
+name: Snetor Brief
+description: plain language, exact technical terms, next action
 keep-coding-instructions: true
 ---
 

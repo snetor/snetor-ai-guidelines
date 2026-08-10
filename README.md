@@ -118,7 +118,7 @@ Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
 An output style changes **how** Claude answers — tone, length, structure — without touching its
 coding instructions. Styles live in `~/.claude/output-styles`, one markdown file per style.
 
-`output-styles/eli5.md` is the Snetor default: short sentences and plain words, but the exact
+`output-styles/snetor-brief.md` is the Snetor default: short sentences and plain words, but the exact
 technical term is always kept and explained right after — written for people who know the stack and
 have no time to decode. Every answer ends with *what was done, whether it worked, what to do next*.
 Decisions come as 3 options max with a recommendation. Two things are never compressed: warnings
@@ -129,8 +129,8 @@ blocked / needs you).
 Copy-Item -Recurse output-styles "$env:USERPROFILE\.claude\output-styles" -Force
 ```
 
-Then restart Claude Code and pick it with `/config` → **Output style** → `ELI5`
-(or set `"outputStyle": "ELI5"` in `~/.claude/settings.json`).
+Then restart Claude Code and pick it with `/config` → **Output style** → `Snetor Brief`
+(or set `"outputStyle": "Snetor Brief"` in `~/.claude/settings.json`).
 
 > Write your own style: drop a `.md` file in that folder with a `name` / `description` frontmatter
 > and `keep-coding-instructions: true`, then reselect it via `/config`.
@@ -157,7 +157,7 @@ Reference block for `~/.claude/settings.json`:
 {
   "theme": "dark",
   "effortLevel": "medium",
-  "outputStyle": "ELI5",
+  "outputStyle": "Snetor Brief",
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
