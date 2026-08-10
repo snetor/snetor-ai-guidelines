@@ -65,7 +65,7 @@ def validate_frontmatter(
     posix = rel_path.replace("\\", "/")
 
     regime = meta.get("regime")
-    if regime not in REGIMES:
+    if not isinstance(regime, str) or regime not in REGIMES:
         errors.append(
             f"{rel_path}: regime absent ou invalide ({regime!r}), attendu "
             f"{sorted(REGIMES)}"
@@ -82,11 +82,15 @@ def validate_frontmatter(
     if not isinstance(audience, list) or not audience:
         errors.append(f"{rel_path}: audience doit etre une liste non vide")
     else:
-        inconnues = sorted(set(audience) - AUDIENCES)
+        inconnues = []
+        for valeur in audience:
+            connue = isinstance(valeur, str) and valeur in AUDIENCES
+            if not connue and valeur not in inconnues:
+                inconnues.append(valeur)
         if inconnues:
             errors.append(
-                f"{rel_path}: audience inconnue {inconnues}, attendu parmi "
-                f"{sorted(AUDIENCES)}"
+                f"{rel_path}: audience inconnue {sorted(inconnues, key=repr)}, attendu "
+                f"parmi {sorted(AUDIENCES)}"
             )
 
     if regime == "live":
@@ -102,7 +106,7 @@ def validate_frontmatter(
         if as_date(meta.get("date")) is None:
             errors.append(f"{rel_path}: date absente ou pas une date ISO (YYYY-MM-DD)")
         status = meta.get("status")
-        if status not in STATUSES:
+        if not isinstance(status, str) or status not in STATUSES:
             errors.append(
                 f"{rel_path}: status absent ou invalide ({status!r}), attendu "
                 f"{sorted(STATUSES)}"

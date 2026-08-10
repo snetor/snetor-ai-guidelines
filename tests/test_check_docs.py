@@ -31,6 +31,18 @@ def test_parse_frontmatter_delimiteur_de_fermeture_manquant_retourne_none():
     assert meta is None
 
 
+def test_parse_frontmatter_yaml_invalide_retourne_none():
+    text = "---\nfoo: [1, 2\n---\n"
+    meta, body = parse_frontmatter(text)
+    assert meta is None
+
+
+def test_parse_frontmatter_yaml_non_mapping_retourne_none():
+    text = "---\n- un\n- deux\n---\n# Titre\n"
+    meta, body = parse_frontmatter(text)
+    assert meta is None
+
+
 def test_as_date_accepte_une_date_yaml_et_une_chaine_iso():
     assert as_date(datetime.date(2026, 8, 10)) == datetime.date(2026, 8, 10)
     assert as_date("2026-08-10") == datetime.date(2026, 8, 10)
@@ -134,6 +146,29 @@ def test_validate_supersedes_pointant_un_fichier_inexistant(tmp_path):
     }
     errors = validate_frontmatter(meta, "docs/dated/decisions/a.md", tmp_path)
     assert any("supersedes" in e and "fantome" in e for e in errors)
+
+
+def test_validate_regime_non_hashable_est_une_erreur(tmp_path):
+    meta = {"regime": {"live": True}, "audience": ["dev"]}
+    errors = validate_frontmatter(meta, "docs/live/a.md", tmp_path)
+    assert any("regime" in e for e in errors)
+
+
+def test_validate_status_non_hashable_est_une_erreur(tmp_path):
+    meta = {
+        "regime": "dated",
+        "audience": ["dev"],
+        "date": "2026-08-10",
+        "status": {"decided": True},
+    }
+    errors = validate_frontmatter(meta, "docs/dated/decisions/a.md", tmp_path)
+    assert any("status" in e for e in errors)
+
+
+def test_validate_audience_element_non_hashable_est_une_erreur(tmp_path):
+    meta = {"regime": "live", "reviewed": "2026-08-10", "audience": [{"a": 1}]}
+    errors = validate_frontmatter(meta, "docs/live/a.md", tmp_path)
+    assert any("audience" in e for e in errors)
 
 
 def test_validate_supersedes_pointant_un_fichier_existant(tmp_path):
