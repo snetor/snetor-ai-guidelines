@@ -164,12 +164,30 @@ def iter_markdown(repo_root: Path):
         yield chemin
 
 
+def read_text_safe(chemin: Path) -> tuple[str | None, str | None]:
+    """Lit un fichier texte en UTF-8 sans jamais lever.
+
+    Retourne (contenu, erreur). En cas d echec de lecture — encodage
+    invalide, fichier disparu entre le parcours et la lecture, verrouille
+    ou inaccessible — contenu vaut None et erreur decrit la cause ; a
+    l appelant de l integrer a sa propre liste d erreurs de validation.
+    """
+    try:
+        return chemin.read_text(encoding="utf-8"), None
+    except (UnicodeDecodeError, OSError) as exc:
+        return None, f"lecture impossible ({exc})"
+
+
 def check_links(repo_root: Path) -> list[str]:
     """Signale tout lien markdown interne pointant un fichier inexistant."""
     errors: list[str] = []
     for chemin in iter_markdown(repo_root):
         rel = chemin.relative_to(repo_root).as_posix()
-        texte = strip_code(chemin.read_text(encoding="utf-8"))
+        contenu, erreur = read_text_safe(chemin)
+        if erreur is not None:
+            errors.append(f"{rel}: {erreur}")
+            continue
+        texte = strip_code(contenu)
         for cible in find_internal_links(texte):
             if not (chemin.parent / cible).exists():
                 errors.append(f"{rel}: lien interne mort vers {cible}")
@@ -200,7 +218,11 @@ def collect_entries(repo_root: Path) -> tuple[list[dict], list[str]]:
             continue
         for chemin in sorted(racine.rglob("*.md")):
             rel = chemin.relative_to(repo_root).as_posix()
-            meta, body = parse_frontmatter(chemin.read_text(encoding="utf-8"))
+            contenu, erreur = read_text_safe(chemin)
+            if erreur is not None:
+                errors.append(f"{rel}: {erreur}")
+                continue
+            meta, body = parse_frontmatter(contenu)
             fichier_errors = validate_frontmatter(meta, rel, repo_root)
             if fichier_errors:
                 errors.extend(fichier_errors)
@@ -220,8 +242,12 @@ def find_side_readmes(repo_root: Path) -> list[tuple[str, str]]:
             continue
         if rel.startswith("docs/"):
             continue
-        texte = chemin.read_text(encoding="utf-8")
-        _, body = parse_frontmatter(texte)
+        contenu, erreur = read_text_safe(chemin)
+        if erreur is not None:
+            # Illisible : deja signale comme erreur bloquante par check_links,
+            # qui parcourt le meme fichier. Pas d entree d index a construire.
+            continue
+        _, body = parse_frontmatter(contenu)
         trouves.append((rel, extract_title(body, chemin)))
     return sorted(trouves)
 
@@ -302,7 +328,10 @@ def check_handoff(repo_root: Path) -> list[str]:
         return [
             "HANDOFF.md absent a la racine : le routeur d etat est obligatoire"
         ]
-    nb = len(chemin.read_text(encoding="utf-8").splitlines())
+    contenu, erreur = read_text_safe(chemin)
+    if erreur is not None:
+        return [f"HANDOFF.md: {erreur}"]
+    nb = len(contenu.splitlines())
     if nb > HANDOFF_MAX_LINES:
         return [
             f"HANDOFF.md fait {nb} lignes, plafond {HANDOFF_MAX_LINES} : "
@@ -355,7 +384,12 @@ def check_stale_specs(repo_root: Path, today: datetime.date) -> list[str]:
 def check_index(repo_root: Path, attendu: str, fix: bool) -> list[str]:
     """Compare docs/README.md au rendu attendu, ou le reecrit si fix."""
     chemin = repo_root / "docs" / "README.md"
-    actuel = chemin.read_text(encoding="utf-8") if chemin.is_file() else None
+    if chemin.is_file():
+        actuel, erreur = read_text_safe(chemin)
+        if erreur is not None:
+            return [f"docs/README.md: {erreur}"]
+    else:
+        actuel = None
     if actuel == attendu:
         return []
     if fix:

@@ -564,3 +564,47 @@ def test_main_warning_ne_change_pas_le_code_de_sortie(tmp_path, capsys):
     )
     assert main(["--repo-root", str(tmp_path), "--today", "2026-08-10", "--fix"]) == 0
     assert "WARN" in capsys.readouterr().out
+
+
+from check_docs import read_text_safe
+
+
+def test_read_text_safe_gere_l_encodage_invalide(tmp_path):
+    chemin = tmp_path / "casse.md"
+    chemin.write_bytes(b"\xff\xfe invalide")
+    contenu, erreur = read_text_safe(chemin)
+    assert contenu is None
+    assert erreur is not None
+
+
+def test_read_text_safe_gere_le_fichier_absent(tmp_path):
+    contenu, erreur = read_text_safe(tmp_path / "absent.md")
+    assert contenu is None
+    assert erreur is not None
+
+
+def test_lecture_non_utf8_dans_docs_live_signalee_sans_lever(tmp_path):
+    _repo_conforme(tmp_path)
+    (tmp_path / "docs" / "live" / "casse.md").write_bytes(b"\xff\xfe invalide")
+
+    errors, _ = run(tmp_path, fix=False, today=AUJOURD_HUI)
+    assert any("docs/live/casse.md" in e.replace("\\", "/") for e in errors)
+    assert main(["--repo-root", str(tmp_path), "--today", "2026-08-10"]) == 1
+
+
+def test_lecture_non_utf8_hors_docs_signalee_par_check_links(tmp_path):
+    (tmp_path / "notes").mkdir()
+    (tmp_path / "notes" / "vieux.md").write_bytes(b"\xff\xfe invalide")
+
+    errors = check_links(tmp_path)
+    assert any("notes/vieux.md" in e.replace("\\", "/") for e in errors)
+
+
+def test_lecture_non_utf8_n_empeche_pas_de_rapporter_une_autre_erreur(tmp_path):
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "casse.md").write_bytes(b"\xff\xfe invalide")
+    _ecrire(tmp_path / "docs" / "source.md", "[mort](fantome.md)\n")
+
+    errors = check_links(tmp_path)
+    assert any("casse.md" in e for e in errors)
+    assert any("fantome.md" in e for e in errors)
