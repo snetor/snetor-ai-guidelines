@@ -37,6 +37,7 @@ de ce dépôt, qui est public.
 | Statusline | `statusline/README.md` |
 | Skills Snetor | `plugins/snetor-skills/README.md` |
 | Index complet de la documentation | `docs/README.md` |
+| Migrer un repo vers le standard | `docs/dated/decisions/2026-08-10-regles-de-migration-d-un-repo.md` |
 
 ## Décisions en attente
 
