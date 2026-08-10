@@ -3,3 +3,7 @@ tasks/
 # Python
 __pycache__/
 *.pyc
+.pytest_cache/
+
+# Espace de travail des sessions subagent-driven
+.superpowers/
