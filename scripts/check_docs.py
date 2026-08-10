@@ -213,8 +213,8 @@ def check_links(repo_root: Path) -> list[str]:
 
 
 INDEX_MARKER = (
-    "<!-- GENERATED — ne pas editer. "
-    "Regenerer via: python scripts/check_docs.py --fix -->"
+    "<!-- GENERATED — ne pas éditer. "
+    "Régénérer via: python scripts/check_docs.py --fix -->"
 )
 AUDIENCE_ORDER = ["agent", "dev", "newcomer", "ops", "business"]
 TITLE_RE = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
@@ -281,8 +281,8 @@ def generate_index(
     """Rend l index complet de docs/. Sortie deterministe."""
     lignes = [INDEX_MARKER, "", "# Index de la documentation", ""]
     lignes.append(
-        "Genere depuis les frontmatters de `docs/live/` et `docs/dated/`. "
-        "Toute modification manuelle sera ecrasee."
+        "Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. "
+        "Toute modification manuelle sera écrasée."
     )
     lignes.append("")
 
@@ -298,7 +298,7 @@ def generate_index(
             key=lambda e: e["title"].lower(),
         )
         if live:
-            lignes.append("### A jour")
+            lignes.append("### À jour")
             lignes.append("")
             for entree in live:
                 revu = as_date(entree["meta"].get("reviewed"))
@@ -312,7 +312,7 @@ def generate_index(
             reverse=True,
         )
         if dated:
-            lignes.append("### Date")
+            lignes.append("### Datés")
             lignes.append("")
             for entree in dated:
                 jour = as_date(entree["meta"].get("date"))

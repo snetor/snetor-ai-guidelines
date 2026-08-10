@@ -115,17 +115,17 @@
 # Documentation
 
 Standard complet : `docs/live/documentation-standard.md` du repo
-`snetor-ai-guidelines`. Les invariants, applicables a tous les repos Snetor :
+`snetor-ai-guidelines`. Les invariants, applicables à tous les repos Snetor :
 
 ## Structure
 
 ```
-HANDOFF.md              routeur d etat — 150 lignes maximum
-docs/live/              doit etre vrai maintenant, reecrit en place
-docs/dated/             vrai a sa date, jamais reecrit, remplace par un successeur
-docs/README.md          genere — ne jamais editer a la main
-docs/superpowers/specs/ zone de travail, videe a la cloture
-docs/superpowers/plans/ zone de travail, gitignoree
+HANDOFF.md              routeur d état — 150 lignes maximum
+docs/live/              doit être vrai maintenant, réécrit en place
+docs/dated/             vrai à sa date, jamais réécrit, remplacé par un successeur
+docs/README.md          généré — ne jamais éditer à la main
+docs/superpowers/specs/ zone de travail, vidée à la clôture
+docs/superpowers/plans/ zone de travail, gitignorée
 tasks/todo.md           items ouverts seulement
 tasks/lessons.md        journal append-only
 ```
@@ -134,43 +134,43 @@ tasks/lessons.md        journal append-only
 
 `regime` (`live` ou `dated`), `audience` (liste parmi `agent`, `dev`,
 `newcomer`, `ops`, `business`). En `live` : `reviewed` en date ISO, `ttl`
-optionnel au format `<n>d` (defaut `90d`). En `dated` : `date` en date ISO,
+optionnel au format `<n>d` (défaut `90d`). En `dated` : `date` en date ISO,
 `status` parmi `draft`, `proposed`, `decided`, `applied`, `superseded`.
 
-Chainage `dated`, optionnel sauf mention : `supersedes` et `superseded_by`,
-chemins relatifs a la racine du repo. `superseded_by` est **obligatoire** des
+Chaînage `dated`, optionnel sauf mention : `supersedes` et `superseded_by`,
+chemins relatifs à la racine du repo. `superseded_by` est **obligatoire** dès
 que `status` vaut `superseded`. Les deux doivent pointer un fichier qui existe :
 sinon la CI bloque.
 
-## Cloture de branche — cinq etapes
+## Clôture de branche — cinq étapes
 
-Utiliser le skill `snetor-docs-close`. A defaut, dans cet ordre : supprimer le
-plan ; arbitrer chaque spec (reecrite en decision datee, fondue dans un fichier
-`live`, ou supprimee) ; ajouter les lecons a `tasks/lessons.md` ; supprimer de
-`tasks/todo.md` les items livres, sans les cocher ; reecrire `HANDOFF.md` sous
-150 lignes. Puis regenerer l index.
+Utiliser le skill `snetor-docs-close`. À défaut, dans cet ordre : supprimer le
+plan ; arbitrer chaque spec (réécrite en décision datée, fondue dans un fichier
+`live`, ou supprimée) ; ajouter les leçons à `tasks/lessons.md` ; supprimer de
+`tasks/todo.md` les items livrés, sans les cocher ; réécrire `HANDOFF.md` sous
+150 lignes. Puis régénérer l index.
 
-Condition d entree, avant la moindre suppression : le plan doit etre
-**entierement execute** — toutes ses taches livrees — et l arbre de travail
-commite. `docs/superpowers/plans/` etant gitignore, un plan supprime en cours
-d execution emporte les taches restantes sans aucun blob git pour les rendre.
-Si l une des deux conditions manque, s arreter et le dire ; ne rien supprimer.
+Condition d entrée, avant la moindre suppression : le plan doit être
+**entièrement exécuté** — toutes ses tâches livrées — et l arbre de travail
+commité. `docs/superpowers/plans/` étant gitignoré, un plan supprimé en cours
+d exécution emporte les tâches restantes sans aucun blob git pour les rendre.
+Si l une des deux conditions manque, s arrêter et le dire ; ne rien supprimer.
 
-La suppression d une spec **se confirme** aupres de l utilisateur : proposer
-l arbitrage, attendre l accord, puis seulement supprimer. Meme prudence sur
-`tasks/`, gitignore dans certains repos : ces editions y sont irrecuperables.
+La suppression d une spec **se confirme** auprès de l utilisateur : proposer
+l arbitrage, attendre l accord, puis seulement supprimer. Même prudence sur
+`tasks/`, gitignoré dans certains repos : ces éditions y sont irrécupérables.
 
-## Regles non negociables
+## Règles non négociables
 
-Ne jamais editer `docs/README.md` a la main : le regenerer par
+Ne jamais éditer `docs/README.md` à la main : le régénérer par
 `python scripts/check_docs.py --repo-root . --fix`.
 
-Ne jamais commiter un plan d implementation.
+Ne jamais commiter un plan d implémentation.
 
-Une spec n est **ni deplacee ni copiee : reecrite** vers sa destination. Une
-decision utile tient en quarante a cent lignes.
+Une spec n est **ni déplacée ni copiée : réécrite** vers sa destination. Une
+décision utile tient en quarante à cent lignes.
 
-Un item de `tasks/todo.md` livre est supprime, pas coche.
+Un item de `tasks/todo.md` livré est supprimé, pas coché.
 
-Ne jamais creer un fichier par session (`handoff-2026-08-10.md`,
-`SUMMARY.md`, `PHASE2_COMPLETE.md`). Le routeur est unique et se reecrit.
+Ne jamais créer un fichier par session (`handoff-2026-08-10.md`,
+`SUMMARY.md`, `PHASE2_COMPLETE.md`). Le routeur est unique et se réécrit.

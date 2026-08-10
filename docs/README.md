@@ -1,34 +1,34 @@
-<!-- GENERATED — ne pas editer. Regenerer via: python scripts/check_docs.py --fix -->
+<!-- GENERATED — ne pas éditer. Régénérer via: python scripts/check_docs.py --fix -->
 
 # Index de la documentation
 
-Genere depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modification manuelle sera ecrasee.
+Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modification manuelle sera écrasée.
 
 ## agent
 
-### A jour
+### À jour
 
 - [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-08-10
 
 ## dev
 
-### A jour
+### À jour
 
 - [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-08-10
 
-### Date
+### Datés
 
 - [Skill de conversion d un artefact HTML en application interne](dated/decisions/2026-08-04-skill-artifact-to-app.md) — 2026-08-04, proposed
 
 ## newcomer
 
-### A jour
+### À jour
 
 - [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-08-10
 
 ## business
 
-### Date
+### Datés
 
 - [Skill de conversion d un artefact HTML en application interne](dated/decisions/2026-08-04-skill-artifact-to-app.md) — 2026-08-04, proposed
 

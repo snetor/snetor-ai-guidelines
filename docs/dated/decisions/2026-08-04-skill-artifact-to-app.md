@@ -11,26 +11,26 @@ status: proposed
 
 Les artefacts HTML produits en conversation servent de maquettes convaincantes
 mais ne sont pas des applications : pas d authentification, pas de persistance,
-pas de deploiement. Le passage de la maquette a l application interne est
-aujourd hui entierement manuel.
+pas de déploiement. Le passage de la maquette à l application interne est
+aujourd hui entièrement manuel.
 
 ## Proposition
 
 Un skill `snetor-artifact-to-app` qui prend un artefact HTML autonome et
-produit le squelette d une application interne conforme a la voie pavee :
-structure de projet, authentification d entreprise, manifeste de deploiement,
-et une pull request. Le skill genere du code et une pull request, jamais de
+produit le squelette d une application interne conforme à la voie pavée :
+structure de projet, authentification d entreprise, manifeste de déploiement,
+et une pull request. Le skill génère du code et une pull request, jamais de
 l infrastructure.
 
 ## Statut
 
-Proposition non implementee au 2026-08-10. Le sequencement retenu la place
-apres la voie pavee des applications internes : sans runtime partage deploye,
-le skill produirait du code qui n a nulle part ou aller.
+Proposition non implémentée au 2026-08-10. Le séquencement retenu la place
+après la voie pavée des applications internes : sans runtime partagé déployé,
+le skill produirait du code qui n a nulle part où aller.
 
-## Ce qui declenchera la reprise
+## Ce qui déclenchera la reprise
 
-La disponibilite du runtime partage des applications internes. La conception
-detaillee est a refaire a ce moment-la : la spec d origine de 288 lignes a ete
-ecrite avant la decision d execution de Terraform dans le reseau virtuel et
+La disponibilité du runtime partagé des applications internes. La conception
+détaillée est à refaire à ce moment-là : la spec d origine de 288 lignes a été
+écrite avant la décision d exécution de Terraform dans le réseau virtuel et
 n en tient pas compte.
