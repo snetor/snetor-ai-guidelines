@@ -103,13 +103,17 @@ Restart Claude Code — the status line is active.
 
 ---
 
-### Global CLAUDE.md
+### Team guidelines (snetor-guidelines.md)
 
-To apply Snetor conventions to all your projects:
+Copier les regles d equipe et les importer depuis votre `CLAUDE.md` personnel :
 
 ```powershell
-Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
+Copy-Item claude-config\snetor-guidelines.md "$env:USERPROFILE\.claude\snetor-guidelines.md"
+Add-Content "$env:USERPROFILE\.claude\CLAUDE.md" "`n@~/.claude/snetor-guidelines.md"
 ```
+
+Votre `CLAUDE.md` personnel n est jamais ecrase : il importe le fichier
+d equipe. Verifier le chargement avec `/context`, section « Memory files ».
 
 ---
 
