@@ -597,7 +597,7 @@ function Invoke-Phase5-Snetor {
     $snetorDefaults  = [ordered]@{
         theme        = 'dark'
         effortLevel  = 'medium'
-        outputStyle  = 'ELI5'
+        outputStyle  = 'Snetor Brief'
     }
 
     if (Test-Path $settingsPath) {
