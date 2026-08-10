@@ -174,3 +174,114 @@ def check_links(repo_root: Path) -> list[str]:
             if not (chemin.parent / cible).exists():
                 errors.append(f"{rel}: lien interne mort vers {cible}")
     return errors
+
+
+INDEX_MARKER = (
+    "<!-- GENERATED — ne pas editer. "
+    "Regenerer via: python scripts/check_docs.py --fix -->"
+)
+AUDIENCE_ORDER = ["agent", "dev", "newcomer", "ops", "business"]
+TITLE_RE = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
+
+
+def extract_title(body: str, chemin: Path) -> str:
+    """Titre = premier H1 du corps, sinon le nom du fichier sans extension."""
+    match = TITLE_RE.search(body)
+    return match.group(1).strip() if match else chemin.stem
+
+
+def collect_entries(repo_root: Path) -> tuple[list[dict], list[str]]:
+    """Lit docs/live/ et docs/dated/. Retourne (entrees valides, erreurs)."""
+    entries: list[dict] = []
+    errors: list[str] = []
+    for sous_dossier in ("live", "dated"):
+        racine = repo_root / "docs" / sous_dossier
+        if not racine.is_dir():
+            continue
+        for chemin in sorted(racine.rglob("*.md")):
+            rel = chemin.relative_to(repo_root).as_posix()
+            meta, body = parse_frontmatter(chemin.read_text(encoding="utf-8"))
+            fichier_errors = validate_frontmatter(meta, rel, repo_root)
+            if fichier_errors:
+                errors.extend(fichier_errors)
+                continue
+            entries.append(
+                {"rel": rel, "title": extract_title(body, chemin), "meta": meta}
+            )
+    return entries, errors
+
+
+def find_side_readmes(repo_root: Path) -> list[tuple[str, str]]:
+    """READMEs situes hors de docs/, indexes sans exiger de frontmatter."""
+    trouves: list[tuple[str, str]] = []
+    for chemin in iter_markdown(repo_root):
+        rel = chemin.relative_to(repo_root).as_posix()
+        if chemin.name != "README.md" or rel == "README.md":
+            continue
+        if rel.startswith("docs/"):
+            continue
+        texte = chemin.read_text(encoding="utf-8")
+        _, body = parse_frontmatter(texte)
+        trouves.append((rel, extract_title(body, chemin)))
+    return sorted(trouves)
+
+
+def _lien_depuis_docs(rel: str) -> str:
+    """Chemin relatif utilisable depuis docs/README.md."""
+    return rel[len("docs/") :] if rel.startswith("docs/") else "../" + rel
+
+
+def generate_index(
+    entries: list[dict], side_readmes: list[tuple[str, str]]
+) -> str:
+    """Rend l index complet de docs/. Sortie deterministe."""
+    lignes = [INDEX_MARKER, "", "# Index de la documentation", ""]
+    lignes.append(
+        "Genere depuis les frontmatters de `docs/live/` et `docs/dated/`. "
+        "Toute modification manuelle sera ecrasee."
+    )
+    lignes.append("")
+
+    for audience in AUDIENCE_ORDER:
+        concernes = [e for e in entries if audience in e["meta"].get("audience", [])]
+        if not concernes:
+            continue
+        lignes.append(f"## {audience}")
+        lignes.append("")
+
+        live = sorted(
+            (e for e in concernes if e["meta"]["regime"] == "live"),
+            key=lambda e: e["title"].lower(),
+        )
+        if live:
+            lignes.append("### A jour")
+            lignes.append("")
+            for entree in live:
+                revu = as_date(entree["meta"].get("reviewed"))
+                lien = _lien_depuis_docs(entree["rel"])
+                lignes.append(f"- [{entree['title']}]({lien}) — revu le {revu}")
+            lignes.append("")
+
+        dated = sorted(
+            (e for e in concernes if e["meta"]["regime"] == "dated"),
+            key=lambda e: (as_date(e["meta"].get("date")) or datetime.date.min),
+            reverse=True,
+        )
+        if dated:
+            lignes.append("### Date")
+            lignes.append("")
+            for entree in dated:
+                jour = as_date(entree["meta"].get("date"))
+                statut = entree["meta"].get("status")
+                lien = _lien_depuis_docs(entree["rel"])
+                lignes.append(f"- [{entree['title']}]({lien}) — {jour}, {statut}")
+            lignes.append("")
+
+    if side_readmes:
+        lignes.append("## READMEs techniques (hors docs/)")
+        lignes.append("")
+        for rel, titre in side_readmes:
+            lignes.append(f"- [{titre}](../{rel})")
+        lignes.append("")
+
+    return "\n".join(lignes).rstrip() + "\n"

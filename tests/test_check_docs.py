@@ -281,3 +281,117 @@ def test_strip_code_bloc_non_ferme_en_fin_de_fichier():
     nettoye = strip_code(text)
     assert "fantome.md" not in nettoye
     assert find_internal_links(nettoye) == ["avant.md"]
+
+
+from check_docs import (
+    INDEX_MARKER,
+    collect_entries,
+    extract_title,
+    find_side_readmes,
+    generate_index,
+)
+
+
+def _ecrire(chemin, contenu):
+    chemin.parent.mkdir(parents=True, exist_ok=True)
+    chemin.write_text(contenu, encoding="utf-8")
+
+
+def test_extract_title_prend_le_premier_titre_h1(tmp_path):
+    assert extract_title("\n# Mon titre\n\ncorps\n", tmp_path / "a.md") == "Mon titre"
+
+
+def test_extract_title_retombe_sur_le_nom_de_fichier(tmp_path):
+    assert extract_title("pas de titre\n", tmp_path / "mon-doc.md") == "mon-doc"
+
+
+def test_collect_entries_ramasse_live_et_dated_avec_erreurs(tmp_path):
+    _ecrire(
+        tmp_path / "docs" / "live" / "archi.md",
+        "---\nregime: live\naudience: [dev]\nreviewed: 2026-08-10\n---\n# Architecture\n",
+    )
+    _ecrire(
+        tmp_path / "docs" / "dated" / "decisions" / "2026-08-03-choix.md",
+        "---\nregime: dated\naudience: [business]\ndate: 2026-08-03\nstatus: decided\n---\n# Choix\n",
+    )
+    _ecrire(tmp_path / "docs" / "live" / "casse.md", "# Sans frontmatter\n")
+    entries, errors = collect_entries(tmp_path)
+    assert sorted(e["title"] for e in entries) == ["Architecture", "Choix"]
+    assert len(errors) == 1
+    assert "casse.md" in errors[0]
+
+
+def test_collect_entries_ignore_superpowers_et_le_readme(tmp_path):
+    _ecrire(tmp_path / "docs" / "README.md", "index\n")
+    _ecrire(tmp_path / "docs" / "superpowers" / "specs" / "2026-08-10-x-design.md", "spec\n")
+    entries, errors = collect_entries(tmp_path)
+    assert entries == []
+    assert errors == []
+
+
+def test_find_side_readmes_trouve_hors_docs(tmp_path):
+    _ecrire(tmp_path / "tests" / "README.md", "# Tests SQL\n")
+    _ecrire(tmp_path / "docs" / "live" / "README.md", "# Ignore\n")
+    assert find_side_readmes(tmp_path) == [("tests/README.md", "Tests SQL")]
+
+
+def test_generate_index_groupe_par_audience_et_porte_le_marqueur():
+    entries = [
+        {
+            "rel": "docs/live/archi.md",
+            "title": "Architecture",
+            "meta": {
+                "regime": "live",
+                "audience": ["dev", "ops"],
+                "reviewed": "2026-08-10",
+            },
+        },
+        {
+            "rel": "docs/dated/decisions/2026-08-03-choix.md",
+            "title": "Choix",
+            "meta": {
+                "regime": "dated",
+                "audience": ["dev"],
+                "date": "2026-08-03",
+                "status": "decided",
+            },
+        },
+    ]
+    sortie = generate_index(entries, [("tests/README.md", "Tests SQL")])
+    assert sortie.startswith(INDEX_MARKER)
+    assert "## dev" in sortie
+    assert "## ops" in sortie
+    assert "(live/archi.md)" in sortie
+    assert "(dated/decisions/2026-08-03-choix.md)" in sortie
+    assert "(../tests/README.md)" in sortie
+    assert "revu le 2026-08-10" in sortie
+    assert "2026-08-03, decided" in sortie
+    assert sortie.index("## dev") < sortie.index("## ops")
+
+
+def test_generate_index_trie_les_dated_par_date_decroissante():
+    entries = [
+        {
+            "rel": "docs/dated/a.md",
+            "title": "Ancien",
+            "meta": {"regime": "dated", "audience": ["dev"], "date": "2026-06-01", "status": "decided"},
+        },
+        {
+            "rel": "docs/dated/b.md",
+            "title": "Recent",
+            "meta": {"regime": "dated", "audience": ["dev"], "date": "2026-08-01", "status": "decided"},
+        },
+    ]
+    sortie = generate_index(entries, [])
+    assert sortie.index("Recent") < sortie.index("Ancien")
+
+
+def test_generate_index_stable_entre_deux_appels():
+    entries = [
+        {
+            "rel": "docs/live/a.md",
+            "title": "A",
+            "meta": {"regime": "live", "audience": ["dev"], "reviewed": "2026-08-10"},
+        }
+    ]
+    assert generate_index(entries, []) == generate_index(entries, [])
