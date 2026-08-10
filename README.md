@@ -30,7 +30,8 @@ a first PR to learn the branch → PR → CI plan → merge loop.
 
 | File / Folder | Description |
 |---|---|
-| `CLAUDE.md` | Global instructions injected into every Claude Code session |
+| `CLAUDE.md` | Repo-local rules — how to work inside this repo, not a template |
+| `claude-config/` | Team guidelines — imported into every Claude Code session |
 | `scripts/` | DSI deployment scripts — onboard a collaborator in one run |
 | `output-styles/` | Custom output styles — how Claude phrases its answers |
 | `statusline/` | Custom status line — context usage, rate limit, git branch |
