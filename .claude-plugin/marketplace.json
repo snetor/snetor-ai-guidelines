@@ -9,7 +9,7 @@
       "name": "snetor-skills",
       "source": "./plugins/snetor-skills",
       "description": "Snetor skills: branded visuals (HTML decks, Excalidraw diagrams) and a travel-report assistant for sales reps",
-      "version": "1.6.0"
+      "version": "1.7.0"
     }
   ]
 }
