@@ -567,16 +567,29 @@ function Invoke-Phase5-Snetor {
 
     if (-not (Test-Path $repoDir)) { throw "Impossible de récupérer le repo snetor-ai-guidelines" }
 
-    # 1. Regles d'equipe (snetor-guidelines.md), importees depuis le CLAUDE.md
-    # personnel. Le CLAUDE.md du poste n'est JAMAIS ecrase — seul le fichier
-    # importe l'est a chaque deploiement — sinon toute personnalisation locale
-    # du collab serait perdue (cf. commentaire Phase 5 ci-dessus).
-    $guidelinesSrc = Join-Path $repoDir 'claude-config\snetor-guidelines.md'
-    if (Test-Path $guidelinesSrc) {
-        Copy-Item $guidelinesSrc "$claudeDir\snetor-guidelines.md" -Force
-        Write-Ok "snetor-guidelines.md copié"
+    # 1. Regles d'equipe (workflow.md + snetor-guidelines.md), importees depuis
+    # le CLAUDE.md personnel. Le CLAUDE.md du poste n'est JAMAIS ecrase — seuls
+    # les fichiers importes le sont a chaque deploiement — sinon toute
+    # personnalisation locale du collab serait perdue (cf. commentaire Phase 5
+    # ci-dessus).
+    $guidelinesFiles = @(
+        @{ Name = 'workflow.md';          Import = '@~/.claude/workflow.md' }
+        @{ Name = 'snetor-guidelines.md'; Import = '@~/.claude/snetor-guidelines.md' }
+    )
 
-        $importLine      = '@~/.claude/snetor-guidelines.md'
+    $importLines = @()
+    foreach ($guidelinesFile in $guidelinesFiles) {
+        $guidelinesSrc = Join-Path $repoDir "claude-config\$($guidelinesFile.Name)"
+        if (Test-Path $guidelinesSrc) {
+            Copy-Item $guidelinesSrc "$claudeDir\$($guidelinesFile.Name)" -Force
+            Write-Ok "$($guidelinesFile.Name) copié"
+            $importLines += $guidelinesFile.Import
+        } else {
+            Write-Warn "claude-config\$($guidelinesFile.Name) introuvable dans le repo"
+        }
+    }
+
+    if ($importLines.Count -gt 0) {
         $personalClaudeMd = "$claudeDir\CLAUDE.md"
 
         # Ecriture sans BOM (System.Text.UTF8Encoding($false)) : meme precaution que
@@ -586,19 +599,24 @@ function Invoke-Phase5-Snetor {
             $lines = @(
                 '# Contexte personnel',
                 '',
-                "Regles d'equipe Snetor (ecrasees a chaque deploiement) :",
-                $importLine
-            )
+                "Regles d'equipe Snetor (ecrasees a chaque deploiement) :"
+            ) + $importLines
             [System.IO.File]::WriteAllText($personalClaudeMd, ($lines -join "`r`n") + "`r`n", (New-Object System.Text.UTF8Encoding($false)))
             Write-Ok "CLAUDE.md personnel créé avec l'import des règles d'équipe"
-        } elseif (-not (Select-String -Path $personalClaudeMd -SimpleMatch $importLine -Quiet)) {
-            [System.IO.File]::AppendAllText($personalClaudeMd, "`r`n$importLine`r`n", (New-Object System.Text.UTF8Encoding($false)))
-            Write-Ok "Import des règles d'équipe ajouté au CLAUDE.md personnel"
         } else {
-            Write-Ok "CLAUDE.md personnel — import déjà présent, inchangé"
+            # Detection ancree ligne entiere : une simple sous-chaine (Select-String
+            # -SimpleMatch) matcherait aussi l'import cite dans un commentaire, et
+            # l'import reel ne serait alors jamais ajoute.
+            $existingLines = Get-Content -Path $personalClaudeMd | ForEach-Object { $_.Trim() }
+            foreach ($importLine in $importLines) {
+                if ($existingLines -notcontains $importLine.Trim()) {
+                    [System.IO.File]::AppendAllText($personalClaudeMd, "`r`n$importLine`r`n", (New-Object System.Text.UTF8Encoding($false)))
+                    Write-Ok "Import de $importLine ajouté au CLAUDE.md personnel"
+                } else {
+                    Write-Ok "CLAUDE.md personnel — import $importLine déjà présent, inchangé"
+                }
+            }
         }
-    } else {
-        Write-Warn "claude-config\snetor-guidelines.md introuvable dans le repo"
     }
 
     # 2. Output styles (styles de réponse sélectionnables via /config)
