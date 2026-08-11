@@ -20,21 +20,31 @@ dans un repo public, ce routeur est lu par n importe qui. Cela vaut aussi pour
 
 | Artefact | Destination sur le poste | Vecteur |
 |---|---|---|
-| `claude-config/snetor-guidelines.md` | `~/.claude/snetor-guidelines.md` | `scripts/deploy-claude.ps1` |
+| `claude-config/workflow.md` | chaque profil `.claude*` / `.codex*` du poste, entreprise et personnel | `scripts/deploy-claude.ps1` |
+| `claude-config/snetor-guidelines.md` | profils d entreprise seulement (`.claude`, `.codex`) | `scripts/deploy-claude.ps1` |
 | `output-styles/*.md` | `~/.claude/output-styles/` | `scripts/deploy-claude.ps1` |
 | `plugins/snetor-skills/` | cache de plugins | marketplace Claude Code |
 | `statusline/` | `~/.claude/` | `statusline/install.ps1` |
 
-Le `CLAUDE.md` personnel de l utilisateur n est **jamais** écrasé : il importe
-`@~/.claude/snetor-guidelines.md`. Toute règle d équipe va dans le fichier
-importé, jamais dans le `CLAUDE.md` du poste.
+Deux familles, deux mécanismes : la famille Claude Code (fichier `CLAUDE.md`)
+charge les règles par la directive d import `@` ; la famille Codex (fichier
+`AGENTS.md`) n a pas d équivalent et régénère son fichier d instructions par
+concaténation à chaque déploiement. La phrase qui suit sur l import ne vaut
+que pour la famille Claude Code : le `CLAUDE.md` personnel de l utilisateur
+n est **jamais** écrasé en entier, seuls les imports manquants y sont ajoutés.
+Toute règle d équipe va dans un fichier importé ou régénéré, jamais écrite en
+dur dans le `CLAUDE.md` du poste. Détail des deux mécanismes et de la règle de
+portée entreprise/personnel : `README.md`, section installation.
 
 ## Conséquences à ne pas oublier
 
 Modifier `claude-config/snetor-guidelines.md` change le comportement de tous
-les agents Snetor. Modifier un `SKILL.md` du plugin le propage à tous les
-postes, le marketplace étant en mise à jour automatique. Dans les deux cas,
-bumper la version dans `plugins/snetor-skills/.claude-plugin/plugin.json` et
+les agents Snetor d entreprise. Modifier `claude-config/workflow.md` change
+aussi le comportement des profils **personnels**, ce qui n était pas le cas
+avant ce découpage en deux fichiers. Modifier un `SKILL.md` du plugin le
+propage à tous les postes, le marketplace étant en mise à jour automatique.
+Dans les deux cas, bumper la version dans
+`plugins/snetor-skills/.claude-plugin/plugin.json` et
 `.claude-plugin/marketplace.json`.
 
 Le workflow `.github/workflows/check-docs.yml` est consommé par les autres

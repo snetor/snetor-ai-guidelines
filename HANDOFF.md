@@ -33,6 +33,7 @@ de ce dépôt, qui est public.
 | Installer le poste d un nouveau développeur | `README.md`, `scripts/README.md` |
 | Déployer la configuration Claude Code | `scripts/deploy-claude.ps1` |
 | Règles d équipe chargées dans chaque session | `claude-config/snetor-guidelines.md` |
+| Comment les règles sont distribuées aux profils (import vs génération) | `README.md`, section installation |
 | Règles de travail propres à ce repo | `CLAUDE.md` |
 | Statusline | `statusline/README.md` |
 | Skills Snetor | `plugins/snetor-skills/README.md` |

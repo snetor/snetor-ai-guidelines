@@ -31,7 +31,7 @@ a first PR to learn the branch → PR → CI plan → merge loop.
 | File / Folder | Description |
 |---|---|
 | `CLAUDE.md` | Repo-local rules — how to work inside this repo, not a template |
-| `claude-config/` | Team guidelines — imported into every Claude Code session |
+| `claude-config/` | Team rules — two files of different scope: `workflow.md` (generic method) and `snetor-guidelines.md` (Snetor-specific) |
 | `scripts/` | DSI deployment scripts — onboard a collaborator in one run |
 | `output-styles/` | Custom output styles — how Claude phrases its answers |
 | `statusline/` | Custom status line — context usage, rate limit, git branch |
@@ -106,9 +106,38 @@ Restart Claude Code — the status line is active.
 
 ---
 
-### Team guidelines (snetor-guidelines.md)
+### Team guidelines (workflow.md / snetor-guidelines.md)
 
-Copy the team rules, then import them from your personal `CLAUDE.md`:
+`claude-config/` holds two rule files with different scope:
+
+- `workflow.md` — generic working method, valid on any project.
+- `snetor-guidelines.md` — Snetor-specific rules (git discipline, documentation standard). It
+  complements `workflow.md`, it does not replace it.
+
+`deploy-claude.ps1` distributes them to whatever agent profiles it finds on the machine, across two
+families, each with its own instructions file and its own delivery mechanism:
+
+- **Claude Code family** — directories named `.claude`, or `.claude` plus a suffix. Instructions file:
+  `CLAUDE.md`. The rule files are copied next to it and pulled in with Claude Code's `@path` import
+  directive — the personal `CLAUDE.md` is never rewritten wholesale, only missing import lines are
+  appended.
+- **Codex family** — directories named `.codex`, or `.codex` plus a suffix. Instructions file:
+  `AGENTS.md`. Codex CLI has no import directive to point at — the feature is requested but not
+  implemented upstream (tracked as [`openai/codex#17401`](https://github.com/openai/codex/issues/17401),
+  open). So `AGENTS.md` is **generated** on every deployment instead: the script concatenates
+  `contexte-perso.md` (personal context, never touched by the script) with the rule files, in that
+  order. `CODEX_HOME` controls where Codex looks for its configuration directory — it defaults to
+  `~/.codex` — and Codex reads `AGENTS.override.md` ahead of `AGENTS.md` when both are present.
+
+**Scope rule**, the same for both families: a directory named **exactly** `.claude` or `.codex` is the
+**enterprise** profile and receives both rule files. Any directory of the same family with a suffix —
+e.g. `.claude-foo` — is a **personal** profile specific to that workstation and receives `workflow.md`
+only. A machine with no suffixed directory simply has no personal profile to distribute to; that is
+the normal case, not an error.
+
+Running `deploy-claude.ps1` is the supported way to apply this — especially for the Codex family,
+where reproducing the generation step by hand is error-prone. For the Claude family only, the
+equivalent manual step is:
 
 ```powershell
 $claudeMd = "$env:USERPROFILE\.claude\CLAUDE.md"
@@ -126,14 +155,24 @@ duplicate it. It writes UTF-8 **without** BOM, like `deploy-claude.ps1` does, be
 head of `CLAUDE.md` can upset the memory-file parser. Check that it loads with `/context`, section
 **Memory files**.
 
-> **Migration note (team rules used to be inlined):** machines provisioned before this split had the
-> team rules **copied into** `~/.claude/CLAUDE.md` by the old `deploy-claude.ps1`. The current script
-> never overwrites that file — it only adds the import line — so those machines now load the team
-> rules **twice**: once from the inlined copy, which is frozen and will never be updated again, and
-> once from the import. Open `~/.claude/CLAUDE.md`, delete the inlined team-rules block by hand, and
-> keep only your own personal context plus the `@~/.claude/snetor-guidelines.md` line. This step is
-> deliberately manual: stripping a block of text out of a collaborator's personal file by script
-> risks losing local personalisations, which is a worse outcome than the duplicate it would fix.
+> **Migration note (team rules used to be inlined):** for the **Claude family**, machines provisioned
+> before this split had the team rules **copied into** `~/.claude/CLAUDE.md` by the old
+> `deploy-claude.ps1`. The current script never overwrites that file — it only adds the import line —
+> so those machines now load the team rules **twice**: once from the inlined copy, which is frozen and
+> will never be updated again, and once from the import. Open `~/.claude/CLAUDE.md`, delete the
+> inlined team-rules block by hand, and keep only your own personal context plus the
+> `@~/.claude/snetor-guidelines.md` line. This step is deliberately manual: stripping a block of text
+> out of a collaborator's personal file by script risks losing local personalisations, which is a
+> worse outcome than the duplicate it would fix.
+>
+> For the **Codex family**, the equivalent risk is sharper: `AGENTS.md` is regenerated wholesale on
+> every deployment, so on the first deployment under this mechanism whatever was in the existing
+> `AGENTS.md` is replaced outright unless it was moved first. Before that first run, move your
+> personal context out of `AGENTS.md` into `contexte-perso.md`, or the generated file will come out
+> amputated of it. The cut point: the team block starts at the `# Workflow Orchestration` heading;
+> everything above that heading is personal context. As above, this extraction is deliberately manual
+> and not something to script — pulling a block out of a collaborator's personal file programmatically
+> risks losing content the tool cannot tell apart from the block it means to remove.
 
 ---
 
