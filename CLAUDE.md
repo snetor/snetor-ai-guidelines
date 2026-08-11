@@ -1,8 +1,8 @@
 # snetor-ai-guidelines — règles projet
 
 Ce repo distribue la configuration Claude Code de Snetor. Les règles d équipe
-copiées sur les postes vivent dans `claude-config/snetor-guidelines.md`, pas
-ici : ce fichier ne contient que ce qui concerne le travail **dans** ce repo.
+copiées sur les postes vivent dans `claude-config/`, pas ici : ce fichier ne
+contient que ce qui concerne le travail **dans** ce repo.
 
 ## Point d entrée
 

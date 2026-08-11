@@ -119,16 +119,19 @@ $imports  = @('@~/.claude/workflow.md', '@~/.claude/snetor-guidelines.md')
 Copy-Item claude-config\workflow.md "$env:USERPROFILE\.claude\workflow.md" -Force
 Copy-Item claude-config\snetor-guidelines.md "$env:USERPROFILE\.claude\snetor-guidelines.md" -Force
 if (-not (Test-Path $claudeMd)) { New-Item -ItemType File $claudeMd | Out-Null }
+$existing = @(Get-Content $claudeMd | ForEach-Object { $_.Trim() })
 foreach ($import in $imports) {
-    if (-not (Select-String -Path $claudeMd -SimpleMatch $import -Quiet)) {
+    if ($existing -notcontains $import) {
         [System.IO.File]::AppendAllText($claudeMd, "`r`n$import`r`n", (New-Object System.Text.UTF8Encoding($false)))
     }
 }
 ```
 
 Your personal `CLAUDE.md` is never overwritten — it only imports the two team files. The snippet is
-idempotent: it appends each import line only if it is not already there, so running it twice does not
-duplicate them. It writes UTF-8 **without** BOM, like `deploy-claude.ps1` does, because a BOM at the
+idempotent: it appends an import only if that exact line is not already present, so running it twice
+does not duplicate anything. The check compares whole lines rather than searching for the text
+anywhere in the file, so an import quoted inside a comment does not make the real one look present —
+`deploy-claude.ps1` anchors its own check the same way. It writes UTF-8 **without** BOM, like `deploy-claude.ps1` does, because a BOM at the
 head of `CLAUDE.md` can upset the memory-file parser. Check that it loads with `/context`, section
 **Memory files**.
 
