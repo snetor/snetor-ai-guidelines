@@ -31,7 +31,7 @@ a first PR to learn the branch → PR → CI plan → merge loop.
 | File / Folder | Description |
 |---|---|
 | `CLAUDE.md` | Repo-local rules — how to work inside this repo, not a template |
-| `claude-config/` | Team guidelines — imported into every Claude Code session |
+| `claude-config/` | Team guidelines — two files, generic workflow and Snetor-specific rules — both imported into every Claude Code session |
 | `scripts/` | DSI deployment scripts — onboard a collaborator in one run |
 | `output-styles/` | Custom output styles — how Claude phrases its answers |
 | `statusline/` | Custom status line — context usage, rate limit, git branch |
@@ -106,34 +106,44 @@ Restart Claude Code — the status line is active.
 
 ---
 
-### Team guidelines (snetor-guidelines.md)
+### Team guidelines (workflow.md + snetor-guidelines.md)
 
-Copy the team rules, then import them from your personal `CLAUDE.md`:
+Two files, two purposes: `workflow.md` is a generic working method, valid on any project;
+`snetor-guidelines.md` is Snetor-specific (git discipline, documentation standard). Splitting them
+this way lets the generic method be reused outside this context, separate from the company-specific
+rules. Copy both, then import both from your personal `CLAUDE.md`:
 
 ```powershell
 $claudeMd = "$env:USERPROFILE\.claude\CLAUDE.md"
-$import   = '@~/.claude/snetor-guidelines.md'
+$imports  = @('@~/.claude/workflow.md', '@~/.claude/snetor-guidelines.md')
+Copy-Item claude-config\workflow.md "$env:USERPROFILE\.claude\workflow.md" -Force
 Copy-Item claude-config\snetor-guidelines.md "$env:USERPROFILE\.claude\snetor-guidelines.md" -Force
 if (-not (Test-Path $claudeMd)) { New-Item -ItemType File $claudeMd | Out-Null }
-if (-not (Select-String -Path $claudeMd -SimpleMatch $import -Quiet)) {
-    [System.IO.File]::AppendAllText($claudeMd, "`r`n$import`r`n", (New-Object System.Text.UTF8Encoding($false)))
+$existing = @(Get-Content $claudeMd | ForEach-Object { $_.Trim() })
+foreach ($import in $imports) {
+    if ($existing -notcontains $import) {
+        [System.IO.File]::AppendAllText($claudeMd, "`r`n$import`r`n", (New-Object System.Text.UTF8Encoding($false)))
+    }
 }
 ```
 
-Your personal `CLAUDE.md` is never overwritten — it only imports the team file. The snippet is
-idempotent: it appends the import line only if it is not already there, so running it twice does not
-duplicate it. It writes UTF-8 **without** BOM, like `deploy-claude.ps1` does, because a BOM at the
+Your personal `CLAUDE.md` is never overwritten — it only imports the two team files. The snippet is
+idempotent: it appends an import only if that exact line is not already present, so running it twice
+does not duplicate anything. The check compares whole lines rather than searching for the text
+anywhere in the file, so an import quoted inside a comment does not make the real one look present —
+`deploy-claude.ps1` anchors its own check the same way. It writes UTF-8 **without** BOM, like `deploy-claude.ps1` does, because a BOM at the
 head of `CLAUDE.md` can upset the memory-file parser. Check that it loads with `/context`, section
 **Memory files**.
 
 > **Migration note (team rules used to be inlined):** machines provisioned before this split had the
 > team rules **copied into** `~/.claude/CLAUDE.md` by the old `deploy-claude.ps1`. The current script
-> never overwrites that file — it only adds the import line — so those machines now load the team
+> never overwrites that file — it only adds the import lines — so those machines now load the team
 > rules **twice**: once from the inlined copy, which is frozen and will never be updated again, and
-> once from the import. Open `~/.claude/CLAUDE.md`, delete the inlined team-rules block by hand, and
-> keep only your own personal context plus the `@~/.claude/snetor-guidelines.md` line. This step is
-> deliberately manual: stripping a block of text out of a collaborator's personal file by script
-> risks losing local personalisations, which is a worse outcome than the duplicate it would fix.
+> once from the imports. Open `~/.claude/CLAUDE.md`, delete the inlined team-rules block by hand, and
+> keep only your own personal context plus the `@~/.claude/workflow.md` and
+> `@~/.claude/snetor-guidelines.md` lines. This step is deliberately manual: stripping a block of text
+> out of a collaborator's personal file by script risks losing local personalisations, which is a
+> worse outcome than the duplicate it would fix.
 
 ---
 
