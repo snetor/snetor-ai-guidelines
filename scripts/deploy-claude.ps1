@@ -567,38 +567,160 @@ function Invoke-Phase5-Snetor {
 
     if (-not (Test-Path $repoDir)) { throw "Impossible de récupérer le repo snetor-ai-guidelines" }
 
-    # 1. Regles d'equipe (snetor-guidelines.md), importees depuis le CLAUDE.md
-    # personnel. Le CLAUDE.md du poste n'est JAMAIS ecrase — seul le fichier
-    # importe l'est a chaque deploiement — sinon toute personnalisation locale
-    # du collab serait perdue (cf. commentaire Phase 5 ci-dessus).
-    $guidelinesSrc = Join-Path $repoDir 'claude-config\snetor-guidelines.md'
-    if (Test-Path $guidelinesSrc) {
-        Copy-Item $guidelinesSrc "$claudeDir\snetor-guidelines.md" -Force
-        Write-Ok "snetor-guidelines.md copié"
+    # 1. Regles d'equipe, par FAMILLE de profil decouverte sur le poste — jamais
+    # de nom de profil personnel en dur ici, ce repo est public.
+    #
+    # Une famille = un prefixe de dossier ('.claude' ou '.codex'), un fichier
+    # d'instructions, un mecanisme :
+    #   - Claude Code resout la directive d'import '@' dans ses fichiers de
+    #     memoire : le fichier d'instructions n'est jamais reecrit en entier,
+    #     seulement complete des imports manquants.
+    #   - Codex CLI n'a aucun equivalent (issue openai/codex#17401, ouverte, non
+    #     implementee) — ecrire '@chemin' dans un AGENTS.md produirait du texte
+    #     mort. Son fichier d'instructions est donc regenere par concatenation
+    #     a chaque deploiement : contexte-perso.md du profil (jamais touche par
+    #     ce script) puis les fichiers de regles, dans l'ordre.
+    #
+    # Regle de portee, par nom de repertoire — pas de table statique de profils :
+    # le repertoire nomme EXACTEMENT '.claude' ou '.codex' est le profil
+    # d'entreprise (recoit workflow.md + snetor-guidelines.md) ; tout repertoire
+    # de la famille portant un suffixe est un profil personnel propre au poste
+    # (recoit workflow.md seul). Un poste sans profil suffixe n'en decouvre
+    # aucun : rien a signaler, rien de plus a faire.
+    #
+    # INVARIANT : le fichier de contexte personnel n'est jamais ecrase ni tronque.
+    #   - Profil a import     : le fichier d'instructions n'est jamais reecrit en
+    #     entier, seulement complete des imports manquants — sinon toute
+    #     personnalisation locale du collab serait perdue.
+    #   - Profil a generation : contexte-perso.md est intouchable ; le fichier
+    #     d'instructions, lui, est regenere a chaque fois — c'est voulu.
+    #
+    # Le nom d'un profil suffixe (donc personnel) n'est jamais journalise : ce
+    # script tourne parfois en SYSTEM sous un outil de gestion de parc dont les
+    # journaux remontent cote DSI.
+    $noBomEncoding = New-Object System.Text.UTF8Encoding($false)
+    $genWarning    = '<!-- GENERE par deploy-claude.ps1 — ne pas editer. Le contexte personnel vit dans contexte-perso.md -->'
 
-        $importLine      = '@~/.claude/snetor-guidelines.md'
-        $personalClaudeMd = "$claudeDir\CLAUDE.md"
+    $enterpriseRules = @('workflow.md', 'snetor-guidelines.md')
+    $personalRules   = @('workflow.md')
 
-        # Ecriture sans BOM (System.Text.UTF8Encoding($false)) : meme precaution que
-        # Set-JsonFile plus haut, un BOM en tete de CLAUDE.md pourrait perturber le
-        # parseur de memory files de Claude Code.
-        if (-not (Test-Path $personalClaudeMd)) {
-            $lines = @(
-                '# Contexte personnel',
-                '',
-                "Regles d'equipe Snetor (ecrasees a chaque deploiement) :",
-                $importLine
-            )
-            [System.IO.File]::WriteAllText($personalClaudeMd, ($lines -join "`r`n") + "`r`n", (New-Object System.Text.UTF8Encoding($false)))
-            Write-Ok "CLAUDE.md personnel créé avec l'import des règles d'équipe"
-        } elseif (-not (Select-String -Path $personalClaudeMd -SimpleMatch $importLine -Quiet)) {
-            [System.IO.File]::AppendAllText($personalClaudeMd, "`r`n$importLine`r`n", (New-Object System.Text.UTF8Encoding($false)))
-            Write-Ok "Import des règles d'équipe ajouté au CLAUDE.md personnel"
-        } else {
-            Write-Ok "CLAUDE.md personnel — import déjà présent, inchangé"
+    $families = @(
+        [PSCustomObject]@{ Prefix = '.claude'; InstructionsFile = 'CLAUDE.md'; Mechanism = 'import' }
+        [PSCustomObject]@{ Prefix = '.codex';  InstructionsFile = 'AGENTS.md'; Mechanism = 'generate' }
+    )
+
+    foreach ($family in $families) {
+        # -Directory exclut les fichiers de config du meme prefixe (ex. .claude.json).
+        $profileDirs = @(Get-ChildItem -Path (Join-Path $TargetProfile "$($family.Prefix)*") `
+                           -Directory -Force -ErrorAction SilentlyContinue)
+        if ($profileDirs.Count -eq 0) {
+            # Rien de sensible ici : ca ne dit que l'absence de la famille
+            # (ex. Codex jamais installe sur ce poste), pas un nom de profil.
+            Write-Info "$($family.Prefix)* : aucun profil trouvé sur ce poste"
+            continue
         }
-    } else {
-        Write-Warn "claude-config\snetor-guidelines.md introuvable dans le repo"
+        $personalCount = 0
+
+        foreach ($dir in $profileDirs) {
+            $isEnterprise = $dir.Name -eq $family.Prefix
+            $rules        = if ($isEnterprise) { $enterpriseRules } else { $personalRules }
+            # Libelle de log : le chemin d'un profil d'entreprise est public
+            # (nom fixe) ; celui d'un profil personnel ne l'est jamais.
+            $label        = if ($isEnterprise) { $dir.FullName } else { "profil personnel ($($family.Prefix)*)" }
+            $currentOp    = 'initialisation'
+
+            try {
+                # Copie des fichiers de regles concernes : ecrases a chaque
+                # deploiement, c'est leur raison d'etre.
+                foreach ($ruleFile in $rules) {
+                    $currentOp = "copie de $ruleFile"
+                    $ruleSrc = Join-Path $repoDir "claude-config\$ruleFile"
+                    if (Test-Path $ruleSrc) {
+                        Copy-Item $ruleSrc (Join-Path $dir.FullName $ruleFile) -Force
+                    } else {
+                        Write-Warn "claude-config\$ruleFile introuvable dans le repo"
+                    }
+                }
+
+                $instructionsPath = Join-Path $dir.FullName $family.InstructionsFile
+                $importLines      = $rules | ForEach-Object { "@~/$($dir.Name)/$_" }
+
+                if ($family.Mechanism -eq 'import') {
+                    # Le fichier d'instructions n'est jamais reecrit en entier : seuls
+                    # les imports manquants sont ajoutes, le reste est preserve intact.
+                    if (-not (Test-Path $instructionsPath)) {
+                        $currentOp = "creation de $($family.InstructionsFile)"
+                        $lines = @('# Contexte personnel', '') + $importLines
+                        [System.IO.File]::WriteAllText($instructionsPath, ($lines -join "`r`n") + "`r`n", $noBomEncoding)
+                        Write-Ok "$($family.InstructionsFile) créé avec l'import des règles ($label)"
+                    } else {
+                        # Ancrage sur la ligne entiere (apres trim) : une sous-chaine
+                        # trouvee n'importe ou (ex. dans un commentaire qui mentionne
+                        # l'import) ne doit jamais compter comme un import present.
+                        $currentOp = "lecture de $($family.InstructionsFile)"
+                        $existingLines = [System.IO.File]::ReadAllText($instructionsPath) -split "`r?`n" | ForEach-Object { $_.Trim() }
+                        $missing  = $importLines | Where-Object { $existingLines -notcontains $_ }
+                        if ($missing) {
+                            $currentOp = "ajout d'import(s) dans $($family.InstructionsFile)"
+                            [System.IO.File]::AppendAllText($instructionsPath, "`r`n$($missing -join "`r`n")`r`n", $noBomEncoding)
+                            Write-Ok "$($family.InstructionsFile) — import(s) manquant(s) ajouté(s) ($label)"
+                        } else {
+                            Write-Ok "$($family.InstructionsFile) — imports déjà présents, inchangé ($label)"
+                        }
+                    }
+                } else {
+                    # Generation : contexte-perso.md est intouchable. S'il est absent, on
+                    # cree seulement son en-tete — jamais son contenu, qui releve d'une
+                    # migration manuelle depuis l'ancien fichier d'instructions.
+                    $contextePersoPath = Join-Path $dir.FullName 'contexte-perso.md'
+                    if (-not (Test-Path $contextePersoPath)) {
+                        $currentOp = "creation de contexte-perso.md"
+                        $header = "<!-- Contexte personnel de ce profil. Jamais ecrase ni genere par deploy-claude.ps1 : ecrire ici, pas dans $($family.InstructionsFile). -->`r`n"
+                        [System.IO.File]::WriteAllText($contextePersoPath, $header, $noBomEncoding)
+                        Write-Warn "contexte-perso.md absent — créé vide ($label), migration manuelle à faire"
+                    }
+
+                    $currentOp = "lecture de contexte-perso.md"
+                    $sections = @($genWarning, '', [System.IO.File]::ReadAllText($contextePersoPath).TrimEnd())
+                    foreach ($ruleFile in $rules) {
+                        $rulePath = Join-Path $dir.FullName $ruleFile
+                        if (Test-Path $rulePath) {
+                            $currentOp = "lecture de $ruleFile"
+                            $sections += ''
+                            $sections += [System.IO.File]::ReadAllText($rulePath).TrimEnd()
+                        }
+                    }
+                    $currentOp = "ecriture de $($family.InstructionsFile)"
+                    $generated = ($sections -join "`r`n") + "`r`n"
+                    [System.IO.File]::WriteAllText($instructionsPath, $generated, $noBomEncoding)
+                    Write-Ok "$($family.InstructionsFile) régénéré ($label)"
+                }
+
+                if (-not $isEnterprise) { $personalCount++ }
+            } catch {
+                # Un profil en echec ne bloque jamais les autres. Le message
+                # .NET brut ($_ / $_.Exception.Message) contient souvent le
+                # chemin complet : jamais interpole pour un profil personnel,
+                # dont le nom (suffixe) ne doit jamais atteindre les journaux
+                # DSI. Pour un profil d'entreprise, rien de personnel dans
+                # '.claude'/'.codex' : le detail complet reste le plus utile.
+                if ($isEnterprise) {
+                    Write-Fail "$($dir.FullName) — échec ($currentOp) : $_"
+                } else {
+                    # PowerShell enveloppe les exceptions d'appel de methode .NET
+                    # direct dans une MethodInvocationException generique : on
+                    # deballe l'InnerException pour garder un type exploitable
+                    # (ex. UnauthorizedAccessException) sans jamais toucher au
+                    # message brut, qui porterait le chemin.
+                    $exceptionType = if ($_.Exception.InnerException) { $_.Exception.InnerException.GetType().Name } else { $_.Exception.GetType().Name }
+                    Write-Fail "profil personnel ($($family.Prefix)*) — échec ($currentOp), $exceptionType"
+                }
+            }
+        }
+
+        if ($personalCount -gt 0) {
+            Write-Info "$personalCount profil(s) personnel(s) de la famille $($family.Prefix) traité(s)"
+        }
     }
 
     # 2. Output styles (styles de réponse sélectionnables via /config)
