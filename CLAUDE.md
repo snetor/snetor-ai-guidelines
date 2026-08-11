@@ -1,8 +1,8 @@
 # snetor-ai-guidelines — règles projet
 
 Ce repo distribue la configuration Claude Code de Snetor. Les règles d équipe
-copiées sur les postes vivent dans `claude-config/snetor-guidelines.md`, pas
-ici : ce fichier ne contient que ce qui concerne le travail **dans** ce repo.
+copiées sur les postes vivent dans `claude-config/`, pas ici : ce fichier ne
+contient que ce qui concerne le travail **dans** ce repo.
 
 ## Point d entrée
 
@@ -20,22 +20,26 @@ dans un repo public, ce routeur est lu par n importe qui. Cela vaut aussi pour
 
 | Artefact | Destination sur le poste | Vecteur |
 |---|---|---|
+| `claude-config/workflow.md` | `~/.claude/workflow.md` | `scripts/deploy-claude.ps1` |
 | `claude-config/snetor-guidelines.md` | `~/.claude/snetor-guidelines.md` | `scripts/deploy-claude.ps1` |
 | `output-styles/*.md` | `~/.claude/output-styles/` | `scripts/deploy-claude.ps1` |
 | `plugins/snetor-skills/` | cache de plugins | marketplace Claude Code |
 | `statusline/` | `~/.claude/` | `statusline/install.ps1` |
 
 Le `CLAUDE.md` personnel de l utilisateur n est **jamais** écrasé : il importe
-`@~/.claude/snetor-guidelines.md`. Toute règle d équipe va dans le fichier
-importé, jamais dans le `CLAUDE.md` du poste.
+`@~/.claude/workflow.md` et `@~/.claude/snetor-guidelines.md`. Toute règle
+d équipe va dans l un des deux fichiers importés, jamais dans le `CLAUDE.md`
+du poste.
 
 ## Conséquences à ne pas oublier
 
-Modifier `claude-config/snetor-guidelines.md` change le comportement de tous
-les agents Snetor. Modifier un `SKILL.md` du plugin le propage à tous les
-postes, le marketplace étant en mise à jour automatique. Dans les deux cas,
-bumper la version dans `plugins/snetor-skills/.claude-plugin/plugin.json` et
-`.claude-plugin/marketplace.json`.
+`workflow.md` porte la méthode de travail générique, valable sur n importe
+quel projet ; `snetor-guidelines.md` porte les règles maison (discipline git,
+standard de documentation). Modifier l un ou l autre change le comportement
+de tous les agents Snetor. Modifier un `SKILL.md` du plugin le propage à tous
+les postes, le marketplace étant en mise à jour automatique. Dans les deux
+cas, bumper la version dans `plugins/snetor-skills/.claude-plugin/plugin.json`
+et `.claude-plugin/marketplace.json`.
 
 Le workflow `.github/workflows/check-docs.yml` est consommé par les autres
 repos via le tag `v1`. Toute modification du vérificateur exige de redéplacer
