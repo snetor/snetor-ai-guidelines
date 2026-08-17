@@ -62,12 +62,16 @@ One UAC prompt. Everything else is automatic. See [`scripts/README.md`](scripts/
 
 ### Plugin snetor-skills
 
-Four skills for Snetor teams: **`snetor-html-slides`** (animated HTML decks) and
+Five skills for Snetor teams: **`snetor-html-slides`** (animated HTML decks) and
 **`snetor-excalidraw-diagrams`** (architecture diagrams with embedded service icons) for branded
 visuals, **`snetor-travel-report`** — helps sales reps dictate client-visit reports (in any
-language) and drafts them in English, Outlook-ready — and **`snetor-docs-close`**, which closes a
+language) and drafts them in English, Outlook-ready — **`snetor-docs-close`**, which closes a
 branch against the Snetor documentation standard: plan purge, spec arbitration, lessons, todo
-cleanup, `HANDOFF.md` rewrite, then index regeneration and verification.
+cleanup, `HANDOFF.md` rewrite, then index regeneration and verification — and
+**`snetor-deploy-artefact`**, which ships a business artifact (a power user's standalone HTML page)
+onto an internal container platform: auditing what a new version quietly re-embeds, moving personal
+data out of the image and into shared state, wiring identity onto the platform's own sign-in, and
+proving the result runs before it is published.
 
 #### Via the marketplace (recommended)
 
