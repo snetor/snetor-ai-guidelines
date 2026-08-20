@@ -50,7 +50,6 @@ Le deck et ses assets forment un couple qui se déplace ensemble.
     └── <deck-slug>/
         ├── snetor_full_logo.png
         ├── snetor_full_logo_reversed.png
-        ├── snetor_globe.png
         ├── Hero-banner-abstrait.jpg
         └── Raleway-*.ttf
 ```
@@ -60,7 +59,6 @@ Dans le CSS, les chemins deviennent donc `assets/<deck-slug>/…` (et non `../as
 ```css
 --logo: url("assets/<deck-slug>/snetor_full_logo.png");
 --logo-reversed: url("assets/<deck-slug>/snetor_full_logo_reversed.png");
---globe: url("assets/<deck-slug>/snetor_globe.png");
 --hero: url("assets/<deck-slug>/Hero-banner-abstrait.jpg");
 ```
 

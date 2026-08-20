@@ -50,7 +50,6 @@ Slide classes:
       <div class="hero-line"></div>
     </div>
   </div>
-  <div class="globe" aria-hidden="true"></div>
   <footer class="footer">
     <div>Version — deck HTML animé.</div>
     <div class="progress" aria-hidden="true"></div>
@@ -966,7 +965,7 @@ When generating a deck, copy needed assets into `03-Outputs/assets/<deck-name>/`
 `s4-hana.png`, `opentext.png`, `kantox.png`, `xeneta.png`, `buyco.png`, `datasur.png`, `alpega-tms.png`
 
 **Branding assets** (in `assets/branding/`):
-`snetor_full_logo.png`, `snetor_full_logo_reversed.png`, `snetor_globe.png`, `snetor_colors.png`, `snetor_shapes.png`, `Hero-banner-abstrait.jpg`
+`snetor_full_logo.png`, `snetor_full_logo_reversed.png`, `snetor_colors.png`, `snetor_shapes.png`, `Hero-banner-abstrait.jpg`
 
 Reference logos inline:
 ```html

@@ -116,7 +116,7 @@ And the primary component:
 1. Identify which logos and branding assets are needed based on the topic.
 2. Create the output assets folder: `03-Outputs/assets/<deck-slug>/`
 3. Copy from the skill's `assets/` folder:
-   - Always: `snetor_full_logo.png`, `snetor_full_logo_reversed.png`, `snetor_globe.png`, `Hero-banner-abstrait.jpg`
+   - Always: `snetor_full_logo.png`, `snetor_full_logo_reversed.png`, `Hero-banner-abstrait.jpg`
    - Topic-specific: relevant tech logos from `assets/logos/`
 
 **Path convention:** The HTML file is at `03-Outputs/slides/<file>.html`.
@@ -290,7 +290,11 @@ The skill maintainer (Clément Peponnet) can commit improvements back to `snetor
 ## Available assets quick reference
 
 **Branding** (always copy to deck assets folder):
-`snetor_full_logo.png` · `snetor_full_logo_reversed.png` · `snetor_globe.png` · `Hero-banner-abstrait.jpg`
+`snetor_full_logo.png` · `snetor_full_logo_reversed.png` · `Hero-banner-abstrait.jpg`
+
+> **Règle de marque :** le globe Snetor ne s'utilise **jamais** seul. Il fait partie du logotype et ne
+> doit pas être détouré comme mark autonome ou comme décor. Utiliser `snetor_full_logo.png` (ou sa
+> version reversed sur fond foncé). Aucun asset globe n'est distribué avec ce skill.
 `snetor_shapes.png` (optional — decorative wavy backdrop for the `foundation` band and `deco-shapes` on closing slides; copy when used)
 
 **Technology logos available** (copy only those needed):
