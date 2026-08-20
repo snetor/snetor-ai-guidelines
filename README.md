@@ -260,7 +260,7 @@ Switch model in session: `/model`
 ---
 
 <div align="center">
-  <img src="assets/snetor_globe.png" alt="Snetor" height="32" />
+  <img src="assets/snetor_full_logo.png" alt="Snetor" height="32" />
   <br />
   <sub>Snetor Group — distributing polymers across 60+ countries since 1989.</sub>
 </div>

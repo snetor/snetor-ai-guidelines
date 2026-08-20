@@ -2,7 +2,7 @@
 
 This file contains the full CSS and design tokens for Snetor-branded HTML presentations.
 Always include this CSS verbatim in generated slides (inside a `<style>` tag in `<head>`).
-Adapt only the `--logo`, `--logo-reversed`, `--globe`, `--hero` and provider logo paths
+Adapt only the `--logo`, `--logo-reversed`, `--hero` and provider logo paths
 to match the actual relative path from the output file to the assets folder.
 
 ---
@@ -63,7 +63,6 @@ Per-slide accent (rhythm): add `dark` to a slide in a light deck, or `light` to 
   /* PATHS: adjust relative to the output HTML file location */
   --logo: url("../assets/DECK_NAME/snetor_full_logo.png");
   --logo-reversed: url("../assets/DECK_NAME/snetor_full_logo_reversed.png");
-  --globe: url("../assets/DECK_NAME/snetor_globe.png");
   --hero: url("../assets/DECK_NAME/Hero-banner-abstrait.jpg");
   --shapes: url("../assets/DECK_NAME/snetor_shapes.png");
 }
@@ -148,10 +147,6 @@ li { margin:7px 0; }
 .lead { max-width:850px; font-size:22px; line-height:1.45; color:rgba(255,255,255,.84); margin-top:20px; }
 .hero-line { width:172px; height:4px; background:linear-gradient(90deg, var(--pastel), var(--white)); margin-top:34px; transform-origin:left center; }
 .slide.active .hero-line { animation: growLine 720ms var(--ease) 360ms both; }
-
-/* GLOBE DECORATION */
-.globe { position:absolute; right:72px; bottom:80px; width:210px; height:210px; background:var(--globe) center / contain no-repeat; opacity:.9; z-index:1; }
-.slide.active .globe { animation: fadeScale 760ms var(--ease) 220ms both; }
 
 /* STATEMENT */
 .statement { max-width:1040px; padding-left:24px; border-left:4px solid var(--green); font-size:28px; line-height:1.34; color:var(--navy); font-weight:600; }
@@ -758,7 +753,6 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
   .foundation { flex-direction:column; align-items:flex-start; }
   .foundation .f-logos { margin-left:0; }
   .gantt { grid-template-columns:120px repeat(7,1fr); }
-  .globe { opacity:.25; right:16px; bottom:40px; width:150px; height:150px; }
   .footer { margin-top:24px; }
   .nav { display:none; }
   .section-divider .sd-title { font-size: 34px; } .section-divider .sd-index { font-size: 56px; }
