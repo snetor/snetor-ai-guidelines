@@ -8,8 +8,9 @@ up-to-date list. If something is missing, add a transparent-background PNG to th
 > Names are the actual file names (including `azure-ressource-group.png`, which keeps its spelling).
 
 ## Snetor brand (`branding/`)
-`snetor_full_logo.png` (header), `snetor_full_logo_reversed.png` (on dark), `snetor_globe.png`
-(compact mark), `snetor_colors.png`, `snetor_shapes.png`, `Hero-banner-abstrait.jpg`.
+`snetor_full_logo.png` (header), `snetor_full_logo_reversed.png` (on dark), `snetor_colors.png`,
+`snetor_shapes.png`, `Hero-banner-abstrait.jpg`. Le globe seul est proscrit par la charte : il ne
+s'utilise jamais sans le logotype, donc il n'est pas distribué.
 
 ## Azure — services (use for resource-group / service boxes)
 | File | Use for |
