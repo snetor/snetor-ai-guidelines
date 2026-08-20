@@ -43,7 +43,7 @@ The skills `snetor-skills:snetor-html-slides`, `snetor-skills:snetor-excalidraw-
 The two **visual** skills (`snetor-html-slides` and `snetor-excalidraw-diagrams`) read the same
 brand assets, maintained in **one place**:
 
-- `skills/snetor-html-slides/assets/branding/` — Snetor logos, globe, hero banner
+- `skills/snetor-html-slides/assets/branding/` — Snetor logos, hero banner
 - `skills/snetor-html-slides/assets/logos/` — technology / vendor / Azure service icons
 
 `snetor-excalidraw-diagrams` references these logos (no duplication) — update a logo once and both
