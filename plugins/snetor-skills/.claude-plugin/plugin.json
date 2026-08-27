@@ -1,6 +1,6 @@
 {
   "name": "snetor-skills",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Snetor skills for Claude Code: branded visuals using the official Snetor design system (animated HTML presentation decks AND Excalidraw architecture diagrams with embedded service icons), a travel-report assistant that helps sales reps dictate client-visit reports and drafts them in Snetor format, a branch-closing assistant that applies the Snetor documentation standard, and a deployment assistant that ships a business artifact onto an internal container platform.",
   "author": {
     "name": "Snetor",
