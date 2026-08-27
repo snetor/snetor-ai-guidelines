@@ -2,7 +2,7 @@
 name: snetor-html-slides
 description: >
   Generate Snetor-branded animated HTML presentation decks using the official Snetor design system
-  (Raleway font, green/navy palette, animated components, logos, hero imagery).
+  (Raleway 400/500/600/700, green/navy palette, animated components, logos, hero imagery).
   USE THIS SKILL whenever someone asks for: slides, a presentation deck, a COMEX deck,
   a stakeholder presentation, a pitch deck, a slide on [any topic] for Snetor,
   or any request that would result in a set of slides or a presentation.
@@ -254,6 +254,7 @@ Une slide doit respirer. Règles dures, appliquées à toute génération :
 29. **Coût / TCO** — pour un slide coût exécutif, préférer le `macro cost-code` (barres CSS colorées par macro-composant + gros total, ≤ 3-4 codes couleur sémantiques) au chart empilé multi-séries. Le stacked multi-séries reste pour un deep-dive. Voir `references/components.md`.
 30. **Scope ribbon** — quand un chiffrage / une décision couvre plusieurs livrables ou un périmètre non évident, rappeler le périmètre via un `scope-ribbon` sous le titre, répété sur les slides coût / programme / décision.
 31. **Stand-alone (sur demande)** — quand le deck doit être autonome / hors ligne, appliquer `references/standalone.md` **intégralement** : polices `Raleway` embarquées (les 3 `<link>` Google Fonts supprimés), assets dans un dossier **adjacent** au HTML, zéro CDN, pas de `world-map`. **La vérification en 3 contrôles est obligatoire** (aucune référence réseau résiduelle, chaque asset présent sur le disque, rendu réel contrôlé) — un deck stand-alone ne se suppose pas, il se vérifie. Ne pas activer ce mode par défaut : il alourdit le package et interdit les charts Chart.js.
+32. **Graisses de police (charte)** — n'utiliser que `400` (Regular, corps), `500` (Medium, sous-titres), `600` (SemiBold, titres) et `700` (Bold, accents / micro-labels / chiffres). **Jamais `800` ni `900`** : ces graisses ne sont pas chargées (`wght@400;500;600;700`), le navigateur épaissit alors le 700 en **gras synthétique** — ce n'est plus du Raleway. Voir `references/css-system.md` → Échelle typographique. Le texte est en navy `#152B47`, jamais en noir.
 
 ---
 
@@ -305,8 +306,10 @@ The skill maintainer (Clément Peponnet) can commit improvements back to `snetor
 `kantox.png` · `xeneta.png` · `buyco.png` · `datasur.png` · `alpega-tms.png`
 
 **Polices** (mode stand-alone uniquement, dans `assets/fonts/`) :
-`Raleway-Regular.ttf` · `Raleway-Medium.ttf` · `Raleway-SemiBold.ttf` · `Raleway-Bold.ttf`
+`Raleway-Regular.ttf` (400, corps) · `Raleway-Medium.ttf` (500, sous-titres) ·
+`Raleway-SemiBold.ttf` (600, titres) · `Raleway-Bold.ttf` (700, accents et micro-labels).
 En mode connecté, ne pas les copier : Google Fonts fait le travail.
+**Ces quatre graisses sont les seules disponibles** — aucun `font-weight:800/900` (règle 32).
 
 **Iconography:** use [Phosphor Icons](https://phosphoricons.com) via CDN — see `references/external-libs.md` for the recommended icon set per topic and weight variants. No copy needed; the script tag pulls all weights. *(Indisponible en stand-alone — voir `references/standalone.md` §5.)*
 
