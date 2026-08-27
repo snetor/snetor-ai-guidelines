@@ -853,12 +853,12 @@ Deux options en vis-à-vis, une mise en avant en vert (`.good`), l'autre en gard
 <div class="tradeoff-grid animate d2">
   <article class="tradeoff-card">
     <i class="ph ph-shopping-cart-simple ph-icon navy" style="margin-bottom:14px;"></i>
-    <h3>Acheter — Akeneo <small style="color:var(--subtle);font-weight:800;">· score 87</small></h3>
+    <h3>Acheter — Akeneo <small style="color:var(--subtle);font-weight:700;">· score 87</small></h3>
     <p>Importer la maturité : couverture native, pérennisation, support éditeur.</p>
   </article>
   <article class="tradeoff-card good">
     <i class="ph ph-wrench ph-icon" style="margin-bottom:14px;"></i>
-    <h3>Construire — full custom <small style="color:var(--subtle);font-weight:800;">· score 86</small></h3>
+    <h3>Construire — full custom <small style="color:var(--subtle);font-weight:700;">· score 86</small></h3>
     <p>Internaliser la compétence : adoption, fondation data, autonomie.</p>
   </article>
 </div>

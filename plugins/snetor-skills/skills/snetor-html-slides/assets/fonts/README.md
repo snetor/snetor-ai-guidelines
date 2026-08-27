@@ -5,10 +5,16 @@ En mode connecté, le deck charge Raleway depuis Google Fonts et ces fichiers ne
 
 | Fichier | Graisse | Usage dans le design system |
 |---|---|---|
-| `Raleway-Regular.ttf` | 400 | corps de texte |
-| `Raleway-Medium.ttf` | 500 | — (réservé) |
-| `Raleway-SemiBold.ttf` | 600 | `h1`, `h2`, `.statement` |
-| `Raleway-Bold.ttf` | 700 | `h3`, `.metric`, labels, `.eyebrow` |
+| `Raleway-Regular.ttf` | 400 | corps de texte (`p`, `li`, `.sources`, captions) |
+| `Raleway-Medium.ttf` | 500 | sous-titres (`.lead`, `.sd-sub`), tooltips |
+| `Raleway-SemiBold.ttf` | 600 | titres (`h1`, `h2`, `.statement`, `.closing-title`) |
+| `Raleway-Bold.ttf` | 700 | accents, micro-labels, chiffres (`h3`, `.eyebrow`, `.metric`, `.pill`) |
+
+Ces quatre graisses sont les **seules** que le design system autorise, en stand-alone comme en mode
+connecté. Un `font-weight:800` / `900` n'a pas de fonte correspondante : le navigateur épaissit le
+700 en gras synthétique et le rendu n'est plus du Raleway. Pour ajouter un ExtraBold, il faut la
+fonte **et** le `800` dans l'URL Google Fonts — voir `references/css-system.md` → Échelle
+typographique.
 
 ## Provenance et licence
 
