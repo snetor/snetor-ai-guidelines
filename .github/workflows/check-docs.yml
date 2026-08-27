@@ -18,6 +18,11 @@ permissions:
 jobs:
   check-docs:
     runs-on: ubuntu-latest
+    # Les quatre depots appelants sont prives, et les minutes d un workflow reutilisable sont
+    # facturees a l appelant : ce job pese donc sur le quota de 2000 min/mois de l organisation,
+    # epuise le 18/08/2026. Sans cette ligne, le defaut GitHub est 360 minutes — 18 % du quota
+    # mensuel brule par un seul job bloque, dans quatre depots a la fois.
+    timeout-minutes: 10
     steps:
       - name: Checkout du repo appelant
         uses: actions/checkout@v4
@@ -28,6 +33,10 @@ jobs:
           repository: snetor/snetor-ai-guidelines
           ref: v1
           path: .docs-standard
+          # Seul `scripts/` est lu. Cloner le depot entier tirait aussi les skills et leurs
+          # references, pour rien.
+          sparse-checkout: scripts
+          sparse-checkout-cone-mode: true
 
       - name: Installer Python
         uses: actions/setup-python@v5
