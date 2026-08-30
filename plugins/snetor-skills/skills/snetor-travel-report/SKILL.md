@@ -1,20 +1,17 @@
 ---
 name: snetor-travel-report
 description: >
-  Aide un commercial Snetor à constituer son rapport de voyage en dictant au fil de ses
+  Constitue le rapport de voyage d'un commercial Snetor à partir de sa dictée au fil de ses
   visites client, puis rédige le rapport final prêt à envoyer à travel-report@snetor.com.
-  Connaît le jargon Snetor (familles/grades polymères, produits chemicals, incoterms,
-  conditions de paiement) et les champs attendus par la matrice client. Interroge le sales
-  pour combler ce qui manque, sans le harceler. Les sales Snetor sont partout dans le monde et
-  dictent dans n'importe quelle langue (FR, EN, ES, TR, PT, IT, AR…) ; le skill comprend toutes
-  ces langues et produit toujours le rapport final en anglais. USE THIS SKILL dès qu'un
-  commercial Snetor raconte/dicte une visite client, un déplacement, une tournée, un rendez-vous
-  prospect, ou demande un rapport de voyage dans n'importe quelle langue ("travel report",
-  "rapport de voyage", "compte rendu de visite", "rapport de mission", "informe de viaje",
-  "seyahat raporu", "relatório de viagem", "report di viaggio"…) — même s'il commence juste par
-  "aujourd'hui j'ai vu [client]…" / "today I visited…" sans demander de rapport explicitement.
-  Ne pas utiliser pour des slides (snetor-html-slides) ni des schémas d'architecture
-  (snetor-excalidraw-diagrams).
+  Connaît le jargon Snetor (familles/grades polymères, chemicals, incoterms, conditions de
+  paiement) et les champs attendus par la matrice client ; interroge le sales pour combler
+  les manques. Comprend la dictée dans n'importe quelle langue (FR, EN, ES, TR, PT, IT, AR…)
+  et produit toujours le rapport final en anglais. USE THIS SKILL dès qu'un commercial raconte
+  une visite client, une tournée ou un rendez-vous prospect, ou demande un rapport de voyage
+  ("travel report", "compte rendu de visite", "informe de viaje", "seyahat raporu"…) dans
+  n'importe quelle langue — même s'il commence juste par "aujourd'hui j'ai vu [client]" sans
+  demander de rapport explicitement. Ne pas utiliser pour des slides (snetor-html-slides) ni
+  des schémas d'architecture (snetor-excalidraw-diagrams).
 ---
 
 # Snetor — Rapport de voyage
