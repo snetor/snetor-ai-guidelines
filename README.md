@@ -183,7 +183,6 @@ Enable via `/config` in Claude Code or directly in `~/.claude/settings.json`.
 |---|---|
 | `superpowers@claude-plugins-official` | Advanced workflows — brainstorming, TDD, debugging, plans, code review |
 | `context7@claude-plugins-official` | Up-to-date library docs injected directly into context |
-| `frontend-design@claude-plugins-official` | Production-quality frontend UI generation |
 
 ---
 
@@ -199,7 +198,6 @@ Reference block for `~/.claude/settings.json`:
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
     "snetor-skills@snetor-ai-guidelines": true
   }
 }
