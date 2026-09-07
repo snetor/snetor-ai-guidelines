@@ -54,6 +54,13 @@ Snetor. Les variables d environnement dont Claude Code a besoin sont posées par
 masquer la valeur déployée. Les spécificités réseau du poste ne sont pas
 documentées ici, ce dépôt étant public.
 
+Le déploiement copie `claude-config/`, `output-styles/` et `statusline/` du repo
+vers `~/.claude/`, à sens unique. Ne jamais éditer la copie du poste : elle
+prend effet tout de suite mais ne part vers personne, et le prochain
+déploiement l écrase sans le dire. Éditer le repo, puis redéployer — et avant
+de modifier un de ces fichiers, comparer les deux copies (`diff -q`), le poste
+pouvant être en avance sur le repo.
+
 ## Sessions parallèlles
 
 Un worktree par tâche. Ne jamais changer la branche du checkout principal, ne
