@@ -61,6 +61,37 @@ Set the theme on `<main class="deck ...">`:
 
 Per-slide accent (rhythm): add `dark` to a slide in a light deck, or `light` to a slide in a dark deck. `.light` opts the slide out of `theme-dark` back to the light styling.
 
+### Lisibilité sur fond foncé — l'invariant des deux chemins
+
+Trois surfaces sont foncées : `.cover`, une slide d'accent `.dark` dans un deck
+clair, et une slide de contenu d'un deck `theme-dark`. **Toute règle de couleur
+écrite pour l'une doit être écrite pour les autres**, dans la couche
+« COUCHE FONCÉE COMMUNE » du bloc CSS, avec les deux sélecteurs sur la même
+règle. La couche `theme-dark` a été créée par duplication de la cascade `.dark`,
+et les règles ajoutées ensuite ne sont parties que d'un côté : `.statement
+strong` restait en `--green` `#007D36` sur navy, soit **2,11:1**, sous le
+plancher WCAG AA de 3:1 en gros texte. Invisible en séance.
+
+Seuls les composants dont le texte se pose **à même le fond de slide** ont
+besoin d'une variante foncée. Un composant qui porte son propre fond clair
+(`card`, `check-card`, `chart-card`, `agenda-item`, `brick`, `mini-table`,
+`market-cell`, `readiness-rail`, `pill`, `provider-tag`) n'en a pas besoin :
+son backdrop n'est pas le dégradé.
+
+Correspondances à respecter quand un nouveau composant arrive :
+
+| Sur fond clair | Sur fond foncé |
+|---|---|
+| `var(--navy)` (titre, valeur) | `white` |
+| `var(--muted)` (corps, légende) | `rgba(255,255,255,.78)` |
+| `var(--subtle)` (caption, en-tête de colonne) | `rgba(255,255,255,.72)` à `.78` |
+| `var(--green)` (accent, lien, icône) | `var(--pastel)` |
+| `var(--border)` (filet) | `rgba(255,255,255,.24)` |
+
+Le blanc est le plafond : quand un texte blanc ne passe toujours pas, ce n'est
+plus un problème de palette mais de fond — c'est le cas de l'en-tête de cover,
+traité par un voile navy et documenté à sa règle.
+
 ---
 
 ## Full CSS Block
@@ -156,6 +187,18 @@ li { margin:7px 0; }
 .cover {
   color: white;
   background: linear-gradient(90deg, rgba(21,43,71,.94), rgba(0,125,54,.78)), var(--hero) center / cover no-repeat;
+}
+/* Voile de l'en-tête de cover. La cover est le SEUL fond dont le dégradé est en
+   90deg : le vert #007D36 court le long de tout le bord droit, là où se pose le
+   texte méta de l'en-tête (blanc 16px). Mesuré sans voile : 4,07:1, sous le
+   plancher WCAG AA de 4,5 — et le blanc est déjà la couleur de contraste
+   maximal, donc aucune règle de couleur ne peut le corriger. Le voile ramène le
+   fond sous l'en-tête à 4,90:1. Une slide d'accent `.dark` n'en a pas besoin :
+   son dégradé est en 135deg, le vert n'atteint que le coin bas-droit, et son
+   en-tête mesure 6,36:1. z-index 1 : au-dessus du fond, sous `.brand` (z-index 2). */
+.cover::before {
+  content:""; position:absolute; inset:0 0 auto 0; height:108px; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg, rgba(21,43,71,.40), rgba(21,43,71,0));
 }
 .cover::after, .dark::after {
   content:""; position:absolute; right:-120px; top:-120px; width:520px; height:520px;
@@ -703,6 +746,62 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .deck.theme-dark .slide:not(.cover):not(.light) .tab.active { color: var(--pastel); }
 .deck.theme-dark .slide:not(.cover):not(.light) .tab.active { border-bottom-color: var(--pastel); }
 .deck.theme-dark .slide:not(.cover):not(.light) .tabs { border-bottom-color: rgba(255,255,255,.18); }
+
+/* === COUCHE FONCÉE COMMUNE — lisibilité sur fond foncé ===
+
+   Trois surfaces sont foncées et ne diffèrent que par le sélecteur qui les
+   désigne : `.cover`, une slide d'accent `.dark` dans un deck clair, et une
+   slide de contenu d'un deck `theme-dark`. Le fond est le même dégradé
+   navy #152B47 -> blue-green #2A5458 -> green #007D36.
+
+   INVARIANT : toute règle de cette couche porte les sélecteurs des DEUX
+   chemins foncés. La couche ci-dessus a été écrite par duplication et elle a
+   dérivé — `.statement strong` n'avait reçu sa variante pastel que du côté
+   `theme-dark`, et sur une slide d'accent `dark` d'un deck clair le gras
+   restait en `--green` #007D36 sur navy, mesuré à 2,11:1 (plancher WCAG AA en
+   gros texte : 3:1). Illisible de loin, donc inutilisable en séance.
+
+   PÉRIMÈTRE : seuls les composants dont le texte se pose À MÊME le fond de
+   slide ont besoin d'une variante ici. Un composant qui porte son propre fond
+   clair — `card`, `check-card`, `chart-card`, `agenda-item`, `brick`,
+   `mini-table`, `market-cell`, `readiness-rail`, `pill`, `provider-tag` — n'en
+   a pas besoin : son backdrop n'est pas le dégradé. Ajouter un composant posé
+   à même le fond sans sa variante foncée le rend invisible sur une slide
+   d'accent : c'est le mode de défaillance que cette couche existe pour fermer. */
+
+/* rattrapage de l'asymétrie — n'existait que du côté theme-dark */
+.dark .statement, .cover .statement { color: white; border-left-color: var(--pastel); }
+.dark .statement strong, .cover .statement strong { color: var(--pastel); }
+.dark .source-note, .cover .source-note { color: rgba(255,255,255,.72); }
+.dark .source-note a, .cover .source-note a { color: var(--pastel); }
+
+/* composants posés à même le fond — cassés dans les DEUX chemins jusqu'ici */
+.dark .legend-item, .cover .legend-item,
+.deck.theme-dark .slide:not(.cover):not(.light) .legend-item { color: rgba(255,255,255,.78); }
+.dark .cat-row .n, .cover .cat-row .n,
+.deck.theme-dark .slide:not(.cover):not(.light) .cat-row .n { color: white; }
+.dark .cat-row .l, .cover .cat-row .l,
+.deck.theme-dark .slide:not(.cover):not(.light) .cat-row .l { color: rgba(255,255,255,.78); }
+.dark .scope-ribbon strong, .cover .scope-ribbon strong,
+.deck.theme-dark .slide:not(.cover):not(.light) .scope-ribbon strong { color: var(--pastel); }
+.dark .gantt .g-label, .cover .gantt .g-label,
+.deck.theme-dark .slide:not(.cover):not(.light) .gantt .g-label { color: white; }
+.dark .gantt .g-label i, .cover .gantt .g-label i,
+.deck.theme-dark .slide:not(.cover):not(.light) .gantt .g-label i { color: var(--pastel); }
+.dark .gantt .g-head, .cover .gantt .g-head,
+.deck.theme-dark .slide:not(.cover):not(.light) .gantt .g-head { color: rgba(255,255,255,.78); border-bottom-color: rgba(255,255,255,.24); }
+.dark .j-step strong, .cover .j-step strong,
+.deck.theme-dark .slide:not(.cover):not(.light) .j-step strong { color: white; }
+.dark .j-step span, .cover .j-step span,
+.deck.theme-dark .slide:not(.cover):not(.light) .j-step span { color: rgba(255,255,255,.78); }
+.dark .cost-row .cr-label span, .dark .cost-row .cr-total span,
+.cover .cost-row .cr-label span, .cover .cost-row .cr-total span,
+.deck.theme-dark .slide:not(.cover):not(.light) .cost-row .cr-label span,
+.deck.theme-dark .slide:not(.cover):not(.light) .cost-row .cr-total span { color: rgba(255,255,255,.78); }
+/* guillemet ouvrant de la citation : décoratif, mais en --green à .55 d'opacité
+   il tombe à 1,65:1 sur navy — présent dans le DOM, absent à l'écran */
+.quote.dark blockquote::before, .quote.cover blockquote::before,
+.deck.theme-dark .slide.quote:not(.light) blockquote::before { color: var(--pastel); }
 
 /* === SLIDE ARCHETYPES (aerated, low-density — spec §2) ===
    Theme-adaptive via color:inherit + opacity. Reuse existing animations only. */
