@@ -1,6 +1,6 @@
 # HANDOFF — snetor-ai-guidelines
 
-**Dernière révision :** 2026-08-10
+**Dernière révision :** 2026-09-07
 
 Routeur d état, pas un journal. L historique vit dans `git log`.
 
@@ -9,7 +9,7 @@ Routeur d état, pas un journal. L historique vit dans `git log`.
 Le repo distribue la configuration Claude Code de Snetor : les règles d équipe
 de `claude-config/`, importées dans chaque session depuis le `CLAUDE.md`
 personnel du poste, un style de sortie, un statusline, un script de déploiement
-poste, et le plugin `snetor-skills` (quatre skills) via le marketplace Claude
+poste, et le plugin `snetor-skills` (cinq skills) via le marketplace Claude
 Code.
 
 Le standard de documentation est livré et appliqué à ce repo : `docs/live/`,
@@ -36,6 +36,7 @@ de ce dépôt, qui est public.
 | Règles de travail propres à ce repo | `CLAUDE.md` |
 | Statusline | `statusline/README.md` |
 | Skills Snetor | `plugins/snetor-skills/README.md` |
+| Couleurs et lisibilité d un deck sur fond foncé | `plugins/snetor-skills/skills/snetor-html-slides/references/css-system.md` -> Lisibilité sur fond foncé |
 | Index complet de la documentation | `docs/README.md` |
 | Migrer un repo vers le standard | `docs/dated/decisions/2026-08-10-regles-de-migration-d-un-repo.md` |
 
