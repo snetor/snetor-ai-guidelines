@@ -78,6 +78,14 @@ besoin d'une variante foncée. Un composant qui porte son propre fond clair
 `market-cell`, `readiness-rail`, `pill`, `provider-tag`) n'en a pas besoin :
 son backdrop n'est pas le dégradé.
 
+⚠️ **`step` est l'exception qui prouve la règle.** Il porte bien une carte
+blanche, mais il ne redéclare pas la couleur de son texte, contrairement à
+`card` qui a sa variante `dark-card`. Sur une slide d'accent, son `h3` et son
+`p` héritaient donc du `color:white` de la cascade foncée : blanc sur blanc, la
+slide paraissait vide à l'écran. Sa variante est désormais dans la couche
+commune. Porter son propre fond ne suffit pas — **il faut aussi porter sa
+couleur de texte.**
+
 Correspondances à respecter quand un nouveau composant arrive :
 
 | Sur fond clair | Sur fond foncé |
@@ -798,6 +806,16 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .cover .cost-row .cr-label span, .cover .cost-row .cr-total span,
 .deck.theme-dark .slide:not(.cover):not(.light) .cost-row .cr-label span,
 .deck.theme-dark .slide:not(.cover):not(.light) .cost-row .cr-total span { color: rgba(255,255,255,.78); }
+/* `.step` porte une carte BLANCHE, et son texte heritait du blanc de la cascade
+   foncee : blanc sur blanc, la slide paraissait vide. Rencontre en seance.
+   `.step` n est donc PAS dans la liste des composants qui n ont besoin de rien —
+   il porte son propre fond clair, mais il ne redeclare pas la couleur de son
+   texte, contrairement a `.card` qui a sa variante `.dark-card`. */
+.dark .step h3, .cover .step h3,
+.deck.theme-dark .slide:not(.cover):not(.light) .step h3 { color: var(--navy); }
+.dark .step p, .cover .step p,
+.deck.theme-dark .slide:not(.cover):not(.light) .step p { color: var(--muted); }
+
 /* guillemet ouvrant de la citation : décoratif, mais en --green à .55 d'opacité
    il tombe à 1,65:1 sur navy — présent dans le DOM, absent à l'écran */
 .quote.dark blockquote::before, .quote.cover blockquote::before,
@@ -851,6 +869,264 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
 .section-divider.dark .sd-title, .deck.theme-dark .slide.section-divider:not(.light) .sd-title { color: white; }
 .big-number.dark .bn-metric, .deck.theme-dark .slide.big-number:not(.light) .bn-metric { color: var(--pastel); }
 
+/* === ACCENT ROUGE SUR UNE CARTE DE CONSTAT ===
+   Trois `card.accent-warn` remplacent avantageusement `loss-list` quand les
+   constats sont au nombre de trois : voir le piege de mise en page documente
+   dans `components.md` a l entree Loss / Problem Hero. */
+.card.accent-warn::before { background:#B0301F; }
+.card.accent-warn { background:linear-gradient(180deg, rgba(176,48,31,.05), #fff); }
+
+/* === CHIFFRES NUS — `.stat-row` et `.duo` ===
+   Des chiffres poses a meme le fond, sans cadre, sans barre, sans remplissage.
+   A preferer chaque fois que la GRANDEUR du nombre n est pas le message : une
+   barre de composition dit "volume", et sur un montant faible c est le
+   contresens exact. Deux chiffres poses sur du blanc ne disent rien d autre
+   qu eux-memes.
+   `.stat-row` pour trois reperes, `.duo` pour deux chiffres heros. */
+.stat-row { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:2.3rem; }
+.stat { padding-left:1.5rem; border-left:.18rem solid var(--green-20); }
+.stat b { display:block; font-size:5.5rem; line-height:.95; font-weight:700; color:var(--green); letter-spacing:-.025em; }
+.stat span { display:block; margin-top:1rem; font-size:1.5rem; font-weight:600; line-height:1.32; color:var(--muted); }
+.slide.active .stat { animation: rise 600ms var(--ease) both; }
+.slide.active .stat:nth-child(1){animation-delay:140ms}
+.slide.active .stat:nth-child(2){animation-delay:240ms}
+.slide.active .stat:nth-child(3){animation-delay:340ms}
+
+.duo { display:grid; grid-template-columns:1fr 1fr; gap:3.7rem; }
+.duo .d-item { padding-left:1.7rem; border-left:.24rem solid var(--green); }
+.duo .d-item b { display:block; font-size:7.4rem; line-height:.92; font-weight:700; color:var(--green); letter-spacing:-.035em; }
+.duo .d-item span { display:block; margin-top:1rem; font-size:1.56rem; font-weight:600; line-height:1.3; color:var(--navy); }
+.duo .d-item em { display:block; margin-top:.5rem; font-style:normal; font-size:1.31rem; font-weight:600; line-height:1.35; color:var(--subtle); }
+.slide.active .d-item { animation: rise 640ms var(--ease) both; }
+.slide.active .d-item:nth-child(1){animation-delay:150ms}
+.slide.active .d-item:nth-child(2){animation-delay:300ms}
+
+/* === `.footnote` — la ligne discrete qui suit un bloc heros === */
+.footnote { font-size:1.56rem; font-weight:600; line-height:1.4; color:var(--subtle); }
+
+/* === `.ratio` — une proportion DESSINEE, pas ecrite ===
+   Dix pastilles, une pleine, pour dire "un sur dix". Un pourcentage se lit, un
+   dessin se voit : de loin, personne n a besoin de convertir 10 % en une
+   proportion. Le nombre de pastilles est libre ; garder un denominateur qui se
+   compte d un coup d oeil (5, 10, 20 au maximum). */
+.ratio { display:flex; align-items:center; gap:.95rem; flex-wrap:wrap; }
+.ratio .rd { width:3.1rem; height:3.1rem; border-radius:50%; border:.18rem solid var(--green-20); background:transparent; flex:0 0 auto; }
+.ratio .rd.on { background:var(--green); border-color:var(--green); }
+.slide.active .ratio .rd { animation: fadeScale 460ms var(--ease) both; }
+.slide.active .ratio .rd:nth-child(1){animation-delay:80ms}
+.slide.active .ratio .rd:nth-child(2){animation-delay:130ms}
+.slide.active .ratio .rd:nth-child(3){animation-delay:180ms}
+.slide.active .ratio .rd:nth-child(4){animation-delay:230ms}
+.slide.active .ratio .rd:nth-child(5){animation-delay:280ms}
+.slide.active .ratio .rd:nth-child(6){animation-delay:330ms}
+.slide.active .ratio .rd:nth-child(7){animation-delay:380ms}
+.slide.active .ratio .rd:nth-child(8){animation-delay:430ms}
+.slide.active .ratio .rd:nth-child(9){animation-delay:480ms}
+.slide.active .ratio .rd:nth-child(10){animation-delay:530ms}
+
+/* === `.calc` — L ECHELLE DE CALCUL ===
+   Le composant de cout a preferer des que l audience doit pouvoir REFAIRE le
+   calcul. Un badge d operation a gauche, le libelle au milieu, le montant a
+   droite ; les dernieres lignes surlignees sont les seules a retenir.
+   Deux regles dures, apprises en seance :
+   1. Afficher des MONTANTS, pas des grandeurs intermediaires. Un tableau de
+      volumes ne repond pas a "combien coute une unite".
+   2. Les montants affiches doivent TOMBER JUSTE a l ecran, quitte a mettre les
+      valeurs exactes en notes. Un calcul dont les lignes ne s additionnent pas
+      fait douter de tout le reste, meme quand l ecart n est qu un arrondi. */
+.calc { display:grid; border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  background:#fff; box-shadow:var(--shadow); }
+.calc-row { display:grid; grid-template-columns:3.2rem 1fr auto; align-items:center; gap:1.4rem;
+  padding:1.25rem 1.75rem; border-bottom:1px solid var(--border); }
+.calc-row:last-child { border-bottom:0; }
+.calc-row .op { width:3rem; height:3rem; border-radius:50%; display:grid; place-items:center;
+  font-size:2.3rem; font-weight:700; line-height:1; color:var(--green);
+  background:var(--green-10); border:1px solid var(--green-20); }
+/* Les glyphes + et x de Raleway ont une hauteur d oeil bien moindre qu une
+   lettre : a taille egale ils paraissent minuscules dans leur pastille. Passer
+   par une icone, dont l epaisseur de trait est constante. */
+.calc-row .op i { font-size:2.1rem; }
+.calc-row .lab { font-size:1.63rem; font-weight:600; color:var(--navy); line-height:1.25; }
+.calc-row .lab small { display:block; margin-top:.25rem; font-size:1.25rem; font-weight:600; color:var(--subtle); }
+.calc-row .amt { font-size:2.63rem; font-weight:700; color:var(--navy); white-space:nowrap;
+  font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+.calc-row.sum { background:var(--green-05); }
+.calc-row.sum .op { color:#fff; background:var(--green); border-color:var(--green); }
+.calc-row.sum .amt { color:var(--green); font-size:3.5rem; }
+.calc-row.final .amt { font-size:4.25rem; }
+.slide.active .calc-row { animation: rise 500ms var(--ease) both; }
+.slide.active .calc-row:nth-child(1){animation-delay:140ms}
+.slide.active .calc-row:nth-child(2){animation-delay:240ms}
+.slide.active .calc-row:nth-child(3){animation-delay:340ms}
+.slide.active .calc-row:nth-child(4){animation-delay:440ms}
+
+/* === `.sieves` — DEUX ETAGES DE TRI, AVEC LEUR TRANSITION CHIFFREE ===
+   Pour la slide qui explique comment un dispositif filtre, et surtout ou il est
+   perfectible. Chaque tamis porte son libelle, sa transition (`289 -> 14`), son
+   principe, et une ligne de LIMITE. Cette derniere ligne est le composant :
+   une slide qui nomme sa faiblesse desarme le challenge au lieu de l attendre. */
+.sieves { display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; }
+.sieve { padding:1.6rem 1.75rem; border:1px solid var(--border); border-radius:8px; background:#fff; box-shadow:var(--shadow); }
+.sieve .sv-lab { display:block; margin-bottom:.85rem; font-size:1.25rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--subtle); }
+.sieve .sv-num { display:block; margin-bottom:1rem; font-size:3.38rem; line-height:1; font-weight:700; color:var(--green); letter-spacing:-.02em; }
+.sieve h3 { font-size:1.81rem; margin-bottom:.6rem; }
+.sieve p { font-size:1.44rem; line-height:1.42; }
+.sieve .sv-limit { margin-top:1.1rem; padding-top:1rem; border-top:1px solid var(--border); font-size:1.38rem; font-weight:600; color:var(--muted); }
+.sieve.ai .sv-num { color:var(--emerald); }
+.slide.active .sieve { animation: rise 600ms var(--ease) both; }
+.slide.active .sieve:nth-child(1){animation-delay:150ms}
+.slide.active .sieve:nth-child(2){animation-delay:280ms}
+
+/* === `.edition-item` — UN EXTRAIT REEL DU PRODUIT ===
+   Montrer le produit vaut mieux que le decrire. Cette carte porte la source
+   CLIQUABLE, le contenu non retouche, et un encart de mise en perspective.
+   La source cliquable est le composant : c est la demonstration la plus rapide
+   que rien n est invente. */
+.edition-item { padding:1.7rem 2rem; border:1px solid var(--border); border-radius:8px;
+  background:var(--white); box-shadow:var(--shadow); }
+.edition-item .ei-src { display:inline-flex; align-items:center; gap:.6rem; margin-bottom:1rem;
+  font-size:1.31rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--green);
+  text-decoration:none; border-bottom:2px solid var(--green-20); }
+.edition-item a.ei-src:hover { border-bottom-color:var(--green); }
+.edition-item h3 { font-size:2.06rem; line-height:1.2; margin-bottom:.7rem; color:var(--navy); }
+.edition-item p { font-size:1.5rem; line-height:1.45; color:var(--muted); }
+.edition-item .ei-why { margin-top:1.3rem; padding:1rem 1.4rem; border-left:4px solid var(--green);
+  background:var(--green-05); border-radius:0 6px 6px 0; }
+.edition-item .ei-why b { display:block; margin-bottom:.6rem; font-size:1.25rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--green); }
+.edition-item .ei-why p { font-size:1.56rem; font-weight:600; color:var(--navy); }
+/* Le titre de l extrait, cite tel quel, pose a meme le fond. */
+.edition-head { font-size:2.06rem; line-height:1.3; font-weight:600; color:var(--navy);
+  padding-left:1.5rem; border-left:.24rem solid var(--green-20); max-width:69rem; }
+.dark .edition-head, .cover .edition-head,
+.deck.theme-dark .slide:not(.cover):not(.light) .edition-head { color:#fff; border-left-color:rgba(255,255,255,.28); }
+
+/* === `.cols-list` — LISTE D ANNEXE EN COLONNES ===
+   Une annexe reste une annexe : elle liste. Mais elle se lit de loin comme le
+   reste. Puce PLEINE pour ce qui existe, puce CREUSE pour ce qui reste a faire
+   — un vert et un navy se distinguent mal a distance, un plein et un creux se
+   voient toujours. */
+.cols-list { column-count:3; column-gap:2.3rem; margin:0; padding:0; }
+.cols-list li { list-style:none; break-inside:avoid; margin:0 0 .7rem; padding-left:1.05rem;
+  position:relative; font-size:1.63rem; font-weight:600; line-height:1.3; color:var(--navy); }
+.cols-list li::before { content:""; position:absolute; left:0; top:.52em; width:.44rem; height:.44rem;
+  border-radius:50%; background:var(--green); }
+.cols-list.two { column-count:2; }
+.cols-list.one { column-count:1; }
+.cols-list.todo li::before { background:transparent; border:.13rem solid var(--navy); width:.7rem; height:.7rem; top:.44em; }
+.cols-list li em { font-style:normal; font-weight:600; color:var(--subtle); }
+.annex-block h3 { font-size:1.81rem; margin-bottom:1.25rem; color:var(--green); }
+.dark .annex-block h3, .cover .annex-block h3,
+.deck.theme-dark .slide:not(.cover):not(.light) .annex-block h3 { color:var(--pastel); }
+.dark .cols-list li, .cover .cols-list li,
+.deck.theme-dark .slide:not(.cover):not(.light) .cols-list li { color:#fff; }
+.dark .cols-list li::before, .cover .cols-list li::before,
+.deck.theme-dark .slide:not(.cover):not(.light) .cols-list li::before { background:var(--pastel); }
+.dark .cols-list.todo li::before, .cover .cols-list.todo li::before,
+.deck.theme-dark .slide:not(.cover):not(.light) .cols-list.todo li::before { background:transparent; border-color:var(--pastel); }
+.dark .cols-list li em, .cover .cols-list li em,
+.deck.theme-dark .slide:not(.cover):not(.light) .cols-list li em { color:rgba(255,255,255,.7); }
+/* Une annexe porte plus de blocs qu une slide de seance : elle respire moins. */
+.slide.annex .body { gap:2rem; justify-content:center; }
+.slide.annex h2 { font-size:3.13rem; }
+
+/* === `.fn-tag` — L ETAT D UNE ETAPE, POSE SUR LE SCHEMA ===
+   Une etiquette par noeud de `.flow` pour dire ce qui tourne deja et ce qui
+   reste a construire. Elle remplace une slide d inventaire entiere : le schema
+   porte lui-meme son etat d avancement. */
+.flow-node .fn-tag { display:inline-block; margin-top:.8rem; padding:.35rem .85rem; border-radius:999px;
+  font-size:1.13rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+.fn-tag.ok { color:var(--green); background:var(--green-10); border:1px solid var(--green-20); }
+.fn-tag.todo { color:var(--blue-gray); background:rgba(21,43,71,.06); border:1px solid rgba(21,43,71,.20); }
+.dark .fn-tag.ok, .cover .fn-tag.ok,
+.deck.theme-dark .slide:not(.cover):not(.light) .fn-tag.ok { color:var(--navy); background:var(--pastel); border-color:var(--pastel); }
+.dark .fn-tag.todo, .cover .fn-tag.todo,
+.deck.theme-dark .slide:not(.cover):not(.light) .fn-tag.todo { color:#fff; background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.30); }
+
+/* Un `.flow` a cinq etapes : la grille de base en porte quatre. */
+.flow.five { grid-template-columns:repeat(5, minmax(0,1fr)); gap:1.1rem; }
+.flow.five::before { left:10%; right:10%; }
+.flow.five .ph-icon { width:4.8rem; height:4.8rem; font-size:2.5rem; }
+.flow.five h3 { font-size:1.56rem; line-height:1.2; }
+.flow.five p { font-size:1.31rem; }
+
+/* ============================================================================
+   ECHELLE RELATIVE A L ECRAN — a garder telle quelle
+   ============================================================================
+   **C est la correction la plus importante de ce fichier, et elle a coute
+   quatre relevements de police inutiles avant d etre comprise.**
+
+   Tout ce qui precede est calibre en pixels sur une base de 1600 px de large.
+   Un titre de `60px` ne rapetisse pas sur une tele 4K : il occupe
+   proportionnellement DEUX FOIS MOINS de place, donc il paraît deux fois plus
+   petit. Grossir les pixels ne corrige rien — le rapport au format reste le
+   meme. Le collaborateur qui repete "la police est trop petite" apres trois
+   corrections a raison, et ce n est pas la valeur qui est en cause, c est
+   l unite.
+
+   La taille de base suit donc la fenetre. `min(vw, vh)` prend la dimension la
+   plus CONTRAIGNANTE : un ecran large mais bas ne peut plus faire grandir le
+   texte au-dela de ce que sa hauteur accepte. Sans ce `min`, une slide dense
+   deborde en `1366x768` et `.slide { overflow:hidden }` la coupe sans rien
+   dire — c est arrive, sur la derniere ligne d un calcul, donc sur sa
+   conclusion.
+
+   | Fenetre | `1 rem` | rapport a la base |
+   |---|---|---|
+   | 1366 x 768 | 14,2 px | 0,89 |
+   | 1600 x 1000 | 18,4 px | 1,00 |
+   | 1920 x 1080 | 20,0 px | 1,09 |
+   | 3840 x 2160 | 26,0 px | 1,41 (plafond) |
+
+   Les composants ci-dessus sont deja exprimes en `rem`, taille ET espacement.
+   **Un demi-passage a l echelle est pire qu aucun** : si le texte grandit mais
+   pas les marges, le contenu deborde. Tout nouveau composant se declare donc
+   en `rem`, sans exception. */
+
+html { font-size: clamp(10px, min(1.15vw, 1.85vh), 26px); }
+
+/* Le socle typographique, remis a l echelle. */
+h1 { font-size:4.63rem; line-height:1.02; max-width:71rem; }
+h2 { font-size:3.75rem; line-height:1.07; max-width:74rem; }
+h3 { font-size:1.5rem; }
+p, li { font-size:1.44rem; line-height:1.45; }
+.lead { font-size:1.69rem; line-height:1.4; max-width:54rem; margin-top:1.5rem; }
+.statement { font-size:2.13rem; line-height:1.28; padding-left:1.6rem; max-width:69rem; }
+.eyebrow { font-size:1.19rem; letter-spacing:.16em; gap:.9rem; }
+/* Le filet de l eyebrow etait un bloc de 3x18 px fixes : a l echelle haute il
+   touchait la premiere lettre, et on lisait "ICE QUE CA COUTE". */
+.eyebrow::before { width:.2rem; height:1.3rem; }
+.footer { font-size:1.31rem; line-height:1.36; }
+.slide { padding:2.9rem 5.1rem 2rem; gap:1.3rem; }
+.body { gap:2.4rem; }
+.hero-line { width:12rem; height:.3rem; margin-top:2.2rem; }
+.big-message { padding:1.4rem 1.75rem; font-size:1.63rem; line-height:1.26; }
+.card.tight { min-height:0; padding:1.6rem 1.5rem 1.5rem; display:flex; flex-direction:column; }
+.card .metric { font-size:4.13rem; margin-bottom:.6rem; letter-spacing:-.03em; }
+.card h3 { font-size:1.56rem; line-height:1.22; margin-bottom:.6rem; }
+.card p { font-size:1.38rem; line-height:1.4; }
+.step-tag { display:block; margin-top:auto; padding-top:1rem; font-size:1.13rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--subtle); }
+.card.dark-card .step-tag { color:rgba(255,255,255,.52); }
+.card.dark-card .step-tag.ia { color:var(--pastel); }
+.flow { gap:1.5rem; }
+.flow::before { top:2.75rem; left:12%; right:12%; }
+.flow-node .ph-icon { margin:0 auto 1.4rem; width:5.5rem; height:5.5rem; font-size:2.8rem; }
+.flow-node h3 { font-size:2.88rem; line-height:1; font-weight:700; color:var(--green); margin-bottom:.7rem; letter-spacing:-.02em; }
+.flow-node p { font-size:1.38rem; line-height:1.35; }
+.dark .flow-node h3, .cover .flow-node h3,
+.deck.theme-dark .slide:not(.cover):not(.light) .flow-node h3 { color:var(--pastel); }
+.pill { padding:.85rem 1.45rem; font-size:1.25rem; }
+.scope-ribbon { margin-top:.8rem; padding:.7rem 1.3rem; font-size:1.4rem; gap:.7rem; }
+.scope-ribbon em { font-size:1.25rem; }
+.annex-tag { font-size:1.13rem; padding:.5rem 1.15rem; }
+.source-note { font-size:1.13rem; }
+.two-col { gap:1.4rem; }
+.closing .closing-title { font-size:3.63rem; }
+.closing .closing-contact { font-size:1.44rem; }
+.closing .closing-contact i { font-size:1.75rem; }
+.closing .body { gap:1.8rem; }
+
 /* RESPONSIVE */
 @media (max-width: 980px) {
   body { overflow: auto; }
@@ -881,6 +1157,11 @@ a.metric:hover, a.share:hover, a.figure-link:hover { text-decoration:underline; 
   .section-divider .sd-title { font-size: 34px; } .section-divider .sd-index { font-size: 56px; }
   .quote blockquote { font-size: 26px; } .closing .closing-title { font-size: 30px; }
   .big-number .bn-metric { font-size: 92px; } .agenda .agenda-list { max-width: none; }
+  .stat-row, .duo, .sieves, .two-col.even { grid-template-columns:1fr; }
+  .flow.five { grid-template-columns:1fr; }
+  .calc-row { grid-template-columns:2.4rem 1fr auto; gap:.8rem; padding:.9rem 1rem; }
+  .ratio .rd { width:1.9rem; height:1.9rem; }
+  .cols-list { column-count:1; }
 }
 
 @media print {
