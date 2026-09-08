@@ -108,6 +108,14 @@ And the primary component:
 - `tradeoff-grid` — pros/cons, good/watch (ex. acheter vs construire)
 - `macro cost-code` — coût / TCO exécutif : barres de composition CSS colorées par macro-composant + gros total, lisible de loin ; **préféré aux charts empilés multi-séries pour un COMEX** (voir `references/components.md`)
 - `scope-ribbon` — bandeau de périmètre rappelé sous le titre des slides coût / programme / décision (ex. « PIM + CRM interne »)
+- `calc` — **échelle de calcul** : le coût ligne par ligne, en euros, avec ses opérateurs. Le composant de coût à préférer dès que l'audience doit pouvoir refaire l'opération (règle 36)
+- `stat-row` / `duo` — **chiffres nus**, sans cadre ni barre : trois repères, ou deux chiffres héros. À préférer quand la grandeur du nombre n'est pas le message
+- `ratio` — une **proportion dessinée** (dix pastilles, une pleine) plutôt qu'un pourcentage écrit
+- `sieves` — les **deux étages d'un tri** avec leur transition chiffrée et, surtout, leur ligne de limite (règle 39)
+- `edition-item` — un **extrait réel du produit** avec sa source cliquable, à préférer à une slide de mécanisme (règle 38)
+- `flow` + `fn-tag` — un schéma d'étapes qui **porte lui-même son état d'avancement** (règle 40)
+- `cols-list` — liste d'annexe en colonnes, puce pleine pour l'existant, creuse pour le reste à faire
+- `card accent-warn` — trois cartes de constat à liseré rouge, le remplaçant sûr de `loss-list`
 
 ---
 
@@ -257,6 +265,96 @@ Une slide doit respirer. Règles dures, appliquées à toute génération :
 32. **Graisses de police (charte)** — n'utiliser que `400` (Regular, corps), `500` (Medium, sous-titres), `600` (SemiBold, titres) et `700` (Bold, accents / micro-labels / chiffres). **Jamais `800` ni `900`** : ces graisses ne sont pas chargées (`wght@400;500;600;700`), le navigateur épaissit alors le 700 en **gras synthétique** — ce n'est plus du Raleway. Voir `references/css-system.md` → Échelle typographique. Le texte est en navy `#152B47`, jamais en noir.
 33. **Couleurs sur fond foncé (charte)** — `.cover`, une slide d'accent `.dark` et une slide de deck `theme-dark` sont le même fond, et une règle de couleur écrite pour l'un des trois doit l'être pour les autres. Le CSS livré porte cette couche : **ne pas réécrire une couleur claire à la main sur une slide foncée**, et ne pas inventer de variante inline. Correspondances : `--navy` → `white`, `--muted` → `rgba(255,255,255,.78)`, `--subtle` → `rgba(255,255,255,.72)`, `--green` → `var(--pastel)`, `--border` → `rgba(255,255,255,.24)`. Un composant qui porte son propre fond clair (`card`, `check-card`, `chart-card`, `agenda-item`, `brick`, `mini-table`) n'a aucune variante à recevoir. **Si un nouveau composant pose du texte à même le fond de slide, sa variante foncée s'ajoute dans `references/css-system.md` → « COUCHE FONCÉE COMMUNE », avec les deux sélecteurs sur la même règle** — pas dans le deck. Détail et raison d'être : `references/css-system.md` → Lisibilité sur fond foncé.
 
+34. **Échelle relative à l'écran — ne jamais revenir aux pixels.** Le CSS livré porte
+    `html { font-size: clamp(10px, min(1.15vw, 1.85vh), 26px) }` et exprime tout en `rem`,
+    taille **et** espacement. Raison : en pixels fixes, un titre de `60px` ne rapetisse pas
+    sur une grande télé, il occupe proportionnellement deux fois moins de place — donc il
+    paraît deux fois plus petit, et grossir les pixels n'y change rien. **Tout nouveau
+    composant se déclare en `rem`, sans exception.** Un demi-passage à l'échelle est pire
+    qu'aucun : si le texte grandit mais pas les marges, le contenu déborde et
+    `.slide { overflow:hidden }` le coupe en silence.
+
+35. **Plancher typographique : rien sous `1.1rem`.** Soit ~`20px` à l'échelle de référence.
+    Cela vaut aussi pour le chrome — pied de page, `eyebrow`, étiquettes. Et quand une ligne
+    de sources dépasse une ligne à l'écran, ce n'est pas la police qu'il faut réduire :
+    **c'est le texte qu'il faut raccourcir**, le détail allant en notes du présentateur. Un
+    pied de page de trois lignes ne peut pas être gros.
+
+36. **Coût : jamais une barre pour un montant faible.** Une barre de composition dit
+    « volume » ; sur un coût dérisoire, elle donne l'impression exactement inverse. Préférer
+    `calc` (l'échelle de calcul, quand l'audience doit pouvoir refaire l'opération) ou `duo`
+    (deux chiffres nus). Le `macro cost-code` de la règle 29 reste le bon composant pour
+    **comparer des scénarios** dont les masses diffèrent, pas pour démontrer qu'un coût est
+    négligeable. Et un slide de coût affiche des **montants**, jamais seulement des
+    grandeurs intermédiaires : un tableau de volumes ne répond pas à « combien coûte une
+    unité ».
+
+37. **Une proportion se dessine.** Pour un ratio marquant — un sur dix, un sur cinq —
+    utiliser `ratio` plutôt qu'un pourcentage écrit. De loin, personne ne convertit `10 %`
+    en une proportion.
+
+38. **Montrer le produit avant de l'expliquer.** Quand le sujet est un livrable existant, une
+    slide `edition-item` avec un extrait réel et sa **source cliquable** vaut mieux qu'une
+    slide de mécanisme. Le mécanisme descend en annexe. Corollaire : **le titre ne doit pas
+    laisser croire à une adoption qui n'existe pas** — dire « la bêta actuelle » quand c'est
+    une bêta.
+
+39. **Nommer la faiblesse du dispositif.** Sur un sujet IA, la question « comment savez-vous
+    que c'est bon » arrive toujours. Une slide `sieves` qui porte ses lignes de limite, plus
+    l'exemple concret du défaut et le chantier qui le fermerait, désarme le challenge au lieu
+    de l'attendre. Un deck qui ne nomme aucune limite se fait démonter sur la première.
+
+40. **Faire porter l'avancement par le schéma.** Une étiquette `fn-tag` sur chaque nœud de
+    `flow` (`Déjà là` / `À construire`) plus un `big-message` qui en donne le compte remplace
+    une slide d'inventaire entière.
+
+41. **Nommer le décideur de chaque demande.** Une demande sans décideur ni préalable n'est pas
+    actionnable et se solde par « voyez ça entre vous ». Si le collaborateur ne veut pas de
+    slide de décision, la clôture porte la demande en une ligne et les préalables dans un
+    `statement` — pas rien.
+
+---
+
+## Step 4.b — Vérifier le rendu, ne pas le supposer
+
+**Un deck qui n'a pas été regardé n'est pas fini.** Trois défauts de cette session étaient
+invisibles à la lecture du HTML et évidents à l'écran : du texte blanc sur carte blanche, du
+texte coupé mot par mot, une dernière ligne de calcul tombée hors de la slide.
+
+Les captures en mode sans interface attrapent les animations **en vol** : une slide paraît
+vide alors qu'elle est simplement à `opacity:0`. Passer donc par une copie temporaire dont
+les animations sont neutralisées.
+
+```bash
+python -c "
+src = open('<deck>.html', encoding='utf-8').read()
+kill = '<style>*,*::before,*::after{animation:none !important;transition:none !important}</style>'
+open('zz-tmp-check.html','w',encoding='utf-8').write(src.replace('</head>', kill + '</head>', 1))
+"
+```
+
+Puis capturer, et **aux deux bouts de la plage** :
+
+```powershell
+$edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+$u = "file:///<chemin>/zz-tmp-check.html"
+# 1366x768 : la taille la plus CONTRAIGNANTE, celle qui revele les debordements
+& $edge --headless=new --disable-gpu --window-size=1366,768 --screenshot="chk.png" --virtual-time-budget=6000 "$u`?slide=6"
+# 1920x1080 : la taille de salle, celle qui revele les polices trop petites
+& $edge --headless=new --disable-gpu --window-size=1920,1080 --screenshot="chk-hd.png" --virtual-time-budget=6000 "$u`?slide=6"
+```
+
+Regarder chaque slide, puis **supprimer la copie temporaire**. Le paramètre `?slide=N` de la
+navigation permet de capturer n'importe quelle slide directement.
+
+Ce qu'on cherche, dans cet ordre :
+
+1. du texte invisible — même couleur que son fond ;
+2. du contenu coupé en bas de slide, `overflow:hidden` ne prévient pas ;
+3. du texte qui se coupe mot par mot — le piège `loss-item` ;
+4. des glyphes manquants — un carré vide à la place d'une icône ;
+5. des polices trop petites par rapport au format.
+
 ---
 
 ## Step 5 — Save and link back
@@ -297,7 +395,13 @@ The skill maintainer (Clément Peponnet) can commit improvements back to `snetor
 > **Règle de marque :** le globe Snetor ne s'utilise **jamais** seul. Il fait partie du logotype et ne
 > doit pas être détouré comme mark autonome ou comme décor. Utiliser `snetor_full_logo.png` (ou sa
 > version reversed sur fond foncé). Aucun asset globe n'est distribué avec ce skill.
-`snetor_shapes.png` (optional — decorative wavy backdrop for the `foundation` band and `deco-shapes` on closing slides; copy when used)
+`snetor_shapes.png` (optional — decorative backdrop for the `foundation` band; copy when used)
+
+> ⚠️ **`snetor_shapes.png` n'est pas une texture, c'est une planche de charte** — carte,
+> blocs de texte, pictogrammes. Dans le `foundation`, à `.16` d'opacité et recadré à droite,
+> il passe. En `deco-shapes` sur une slide de clôture, à `.10` d'opacité, **il se voit
+> comme un rectangle parasite** et ressemble à un défaut de rendu. Ne pas l'utiliser en
+> fond de slide.
 
 **Technology logos available** (copy only those needed):
 `azure.png` · `microsoft.png` · `microsoft_fabric.png` · `gcp.png` · `google.png` · `aws.png` · `amazon.png`
