@@ -134,6 +134,19 @@ Add to `<head>` once if the deck uses any `<i class="ph ...">` icon:
 
 The script auto-loads all six weight stylesheets. Single line, no bootstrap needed.
 
+⚠️ **En pratique, seule la graisse `regular` rend.** Mesuré en rendu réel : un
+`<i class="ph-fill ph-paperclip">` affiche un **carré vide** — la feuille de la
+graisse `fill` n'est pas servie, malgré ce que la doc amont annonce. Utiliser
+`ph` (regular) partout, y compris là où la règle 19 suggérait `ph-fill` pour
+donner du poids à une carte de KPI. Si un poids visuel est nécessaire, jouer sur
+la taille de l'icône et le fond de la pastille, pas sur la graisse.
+
+⚠️ **Ne jamais poser un glyphe texte d'opération dans une pastille ronde.** Les
+`+`, `×` et `=` de Raleway ont une hauteur d'œil bien moindre qu'une lettre : à
+`38px` dans un cercle de `52px`, ils paraissent minuscules. Passer par
+`ph-plus`, `ph-x`, `ph-equals`, dont l'épaisseur de trait est constante. C'est
+le défaut qui a fait reprendre le composant `calc` deux fois.
+
 ### Component on fact-card
 
 ```html
