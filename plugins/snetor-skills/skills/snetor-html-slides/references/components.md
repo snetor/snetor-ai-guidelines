@@ -135,7 +135,12 @@ Use `a.metric` when the stat comes from a citable external source. Link to the s
 
 ## Loss / Problem Hero (left big panel + right problem list)
 
-> ⚠️ **Layout pitfall**: placing `loss-item` elements inside a nested `display:grid` that is itself a flex or grid item can cause text to wrap word-by-word in some browsers (the inner `1fr` column collapses to 0px). Avoid nesting `loss-item` inside a second-level `display:grid` column. Use the `market-facts` pattern below instead when you have exactly 4 problems — it is bulletproof.
+> ⚠️ **Piège de mise en page, rencontré en séance et non hypothétique.** `loss-list` est un `display:grid`, et `.body` est un `display:flex; flex-direction:column`. Un `loss-item` posé là voit sa colonne `1fr` s'effondrer à `0px` : **le texte se coupe mot par mot, un mot par ligne.** La condition suffisante est donc simplement « `loss-list` dans un `.body` », c'est-à-dire l'usage normal — pas un cas tordu.
+>
+> **Alternatives sûres**, dans l'ordre de préférence :
+> - **trois constats** → trois `card accent-warn` en `grid cols-3` (liseré rouge, fond dégradé rouge très pâle). Une `card` porte son propre fond et ne s'effondre pas.
+> - **quatre constats** → le patron `market-facts` ci-dessous.
+> - `loss-hero` + `loss-list` seulement si le panneau dramatique est vraiment nécessaire, et alors en testant le rendu.
 
 Use this pattern only when you have fewer than 4 items and the `loss-hero` drama panel is essential:
 
@@ -949,6 +954,220 @@ Wrap items in `<a class="agenda-item" href="?slide=N">` to jump to a slide; use 
   <footer class="footer"><div class="sources"></div><div class="progress" aria-hidden="true"></div></footer>
 </section>
 ```
+
+---
+
+## Constats — trois cartes à liseré rouge
+
+Le remplaçant sûr de `loss-list` quand les constats sont au nombre de trois. Voir l'avertissement de la section Loss / Problem Hero.
+
+```html
+<div class="grid cols-3 animate d2">
+  <article class="card accent-warn tight">
+    <h3>Le constat, en une phrase courte.</h3>
+    <p>La précision qui le rend crédible, et sa provenance si elle tient en quelques mots.</p>
+  </article>
+  <!-- deux autres -->
+</div>
+```
+
+---
+
+## Chiffres nus — `stat-row` et `duo`
+
+**À préférer chaque fois que la grandeur du nombre n'est pas le message.** Une barre de composition dit « volume » : sur un montant faible, c'est le contresens exact — le rendu donne l'impression que ça coûte cher. Deux chiffres posés sur du blanc ne disent rien d'autre qu'eux-mêmes.
+
+`stat-row` porte trois repères, `duo` deux chiffres héros.
+
+```html
+<div class="stat-row animate d2">
+  <div class="stat">
+    <b>06h30</b>
+    <span>Chaque matin, du lundi au vendredi.</span>
+  </div>
+  <div class="stat">
+    <b>2</b>
+    <span>Langues : français et anglais.</span>
+  </div>
+  <div class="stat">
+    <b>15</b>
+    <span>Destinataires inscrits aujourd'hui.</span>
+  </div>
+</div>
+```
+
+```html
+<div class="duo animate d2">
+  <div class="d-item">
+    <b>0,34 €</b>
+    <span>Par itération.</span>
+    <em>Précision ou périmètre, une ligne.</em>
+  </div>
+  <div class="d-item">
+    <b>18 €</b>
+    <span>Par an, 52 semaines.</span>
+  </div>
+</div>
+<p class="footnote animate d3">La ligne discrète qui suit un bloc héros.</p>
+```
+
+---
+
+## Ratio — une proportion dessinée
+
+Dix pastilles, une pleine, pour dire « un sur dix ». **Un pourcentage se lit, un dessin se voit** : de loin, personne n'a besoin de convertir `10 %` en une proportion. Garder un dénominateur qui se compte d'un coup d'œil — 5, 10, 20 au maximum.
+
+```html
+<div class="ratio animate d2">
+  <span class="rd on"></span><span class="rd"></span><span class="rd"></span><span class="rd"></span><span class="rd"></span>
+  <span class="rd"></span><span class="rd"></span><span class="rd"></span><span class="rd"></span><span class="rd"></span>
+</div>
+```
+
+Fonctionne sur slide claire comme sur slide d'accent. Pairer avec un `statement` qui donne la raison du ratio, jamais avec un second chiffre.
+
+---
+
+## Échelle de calcul — `calc`
+
+**Le composant de coût à préférer dès que l'audience doit pouvoir refaire le calcul elle-même.** Un badge d'opération à gauche, le libellé au milieu, le montant à droite. Les lignes `sum` sont les seules à retenir ; les précédentes expliquent comment on y arrive.
+
+```html
+<div class="calc animate d2">
+  <div class="calc-row">
+    <span class="op" aria-hidden="true"><i class="ph ph-book-open-text"></i></span>
+    <span class="lab">Le poste fixe, une fois<small>La précision qui le justifie</small></span>
+    <span class="amt">0,10 €</span>
+  </div>
+  <div class="calc-row">
+    <span class="op" aria-hidden="true"><i class="ph ph-plus"></i></span>
+    <span class="lab">Douze unités<small>0,02 € l'unité × 4 zones × 3 langues</small></span>
+    <span class="amt">0,24 €</span>
+  </div>
+  <div class="calc-row sum">
+    <span class="op" aria-hidden="true"><i class="ph ph-equals"></i></span>
+    <span class="lab">Une semaine</span>
+    <span class="amt">0,34 €</span>
+  </div>
+  <div class="calc-row sum final">
+    <span class="op" aria-hidden="true"><i class="ph ph-x"></i></span>
+    <span class="lab">52 semaines<small>Une année complète</small></span>
+    <span class="amt">18 €</span>
+  </div>
+</div>
+```
+
+**Deux règles dures, apprises en séance :**
+
+1. **Afficher des montants, pas des grandeurs intermédiaires.** Un tableau de volumes — tokens, lignes, heures — ne répond pas à « combien coûte une unité », qui est la seule question posée. Le détail des volumes va en notes du présentateur.
+2. **Les montants affichés doivent tomber juste à l'écran.** `0,10 + 0,24 = 0,34`, puis `0,34 × 52 = 18`. Si les valeurs exactes ne s'additionnent pas proprement, choisir les arrondis qui tombent juste et mettre les valeurs exactes en notes. Un calcul dont les lignes ne s'additionnent pas fait douter de tout le reste, même quand l'écart n'est qu'un arrondi.
+
+**Ne pas utiliser de glyphe texte dans le badge.** Les `+` et `×` de Raleway ont une hauteur d'œil bien moindre qu'une lettre : à taille égale ils paraissent minuscules dans leur pastille. Passer par `ph-plus`, `ph-equals`, `ph-x`, dont l'épaisseur de trait est constante.
+
+---
+
+## Deux étages de tri — `sieves`
+
+Pour la slide qui explique **comment un dispositif filtre, et surtout où il est perfectible**. Chaque tamis porte son libellé, sa transition chiffrée, son principe, et une ligne de limite.
+
+```html
+<div class="sieves animate d2">
+  <div class="sieve">
+    <span class="sv-lab">Tamis 1 — mécanique</span>
+    <span class="sv-num">289 → 14</span>
+    <h3>Des mots-clés</h3>
+    <p>Ce qu'il fait, et à quel coût. Gratuit, instantané, zéro token.</p>
+    <div class="sv-limit">Il compare des lettres, pas du sens.</div>
+  </div>
+  <div class="sieve ai">
+    <span class="sv-lab">Tamis 2 — éditorial</span>
+    <span class="sv-num">14 → 7</span>
+    <h3>Un analyste IA</h3>
+    <p>Ce qu'il fait, et pour qui. C'est lui qui fait la qualité.</p>
+    <div class="sv-limit">Il ne voit que ce que le tamis 1 lui a laissé.</div>
+  </div>
+</div>
+```
+
+**La ligne `sv-limit` est le composant.** Une slide qui nomme sa propre faiblesse désarme le challenge au lieu de l'attendre — et sur un sujet IA, la question « comment savez-vous que le tri est bon » arrive toujours. Pairer avec un `big-message` qui porte l'exemple concret du défaut et le chantier d'amélioration qui le fermerait.
+
+---
+
+## Extrait réel du produit — `edition-item`
+
+**Montrer le produit vaut mieux que le décrire.** Une carte qui porte la source **cliquable**, le contenu non retouché, et un encart de mise en perspective.
+
+```html
+<p class="edition-head animate d2">« Le titre du livrable, cité tel quel. »</p>
+<div class="edition-item animate d3">
+  <a class="ei-src" href="https://…" target="_blank" rel="noreferrer"><i class="ph ph-link-simple"></i>Éditeur · date — ouvrir la source</a>
+  <h3>Le titre de l'élément cité.</h3>
+  <p>Son contenu, non retouché.</p>
+  <div class="ei-why">
+    <b>Ce qu'il faut en faire</b>
+    <p>La mise en perspective, telle que le produit la formule.</p>
+  </div>
+</div>
+```
+
+**La source cliquable est le composant** : c'est la démonstration la plus rapide que rien n'est inventé, et elle vaut mieux qu'une slide d'explication du mécanisme.
+
+⚠️ **Le titre de la slide ne doit pas laisser croire à une adoption qui n'existe pas.** « L'édition de ce matin, telle qu'elle est partie » suggère un service installé ; « La bêta actuelle : à quoi ressemble une édition » décrit le design. Quand le dispositif est en test, le dire dans le titre — un sponsor qui découvre l'écart en séance ne croira plus le reste du deck.
+
+---
+
+## Liste d'annexe — `cols-list`
+
+Une annexe reste une annexe : elle liste. Mais elle se lit de loin comme le reste du deck.
+
+```html
+<div class="annex-block animate d2">
+  <h3>Ce qui existe déjà</h3>
+  <ul class="cols-list one">
+    <li>Un élément, six mots au plus</li>
+    <li>Un autre</li>
+  </ul>
+</div>
+<div class="annex-block animate d3">
+  <h3>Ce qui reste à faire</h3>
+  <ul class="cols-list one todo">
+    <li>Un élément non fait</li>
+  </ul>
+</div>
+```
+
+`cols-list` est en trois colonnes par défaut, `two` et `one` réduisent. **Puce pleine pour ce qui existe, puce creuse (`todo`) pour ce qui reste à faire** : un vert et un navy se distinguent mal à distance, un plein et un creux se voient toujours.
+
+Poser `annex` sur la slide (`class="slide annex"`) resserre le corps et réduit le `h2` — une annexe porte plus de blocs qu'une slide de séance.
+
+---
+
+## État d'une étape, posé sur le schéma — `fn-tag`
+
+Une étiquette par nœud de `flow` pour dire ce qui tourne déjà et ce qui reste à construire.
+
+```html
+<div class="flow five animate d2">
+  <div class="flow-node">
+    <i class="ph ph-envelope-simple ph-icon teal"></i>
+    <h3>1 · Recevoir</h3>
+    <p>Quatre mots.</p>
+    <span class="fn-tag todo">À construire</span>
+  </div>
+  <div class="flow-node">
+    <i class="ph ph-paper-plane-tilt ph-icon"></i>
+    <h3>2 · Diffuser</h3>
+    <p>Quatre mots.</p>
+    <span class="fn-tag ok">Déjà là</span>
+  </div>
+  <!-- jusqu'a cinq noeuds avec `flow five` -->
+</div>
+<div class="big-message animate d3">Trois étapes sur cinq tournent déjà.</div>
+```
+
+**Cela remplace une slide d'inventaire entière.** Le schéma porte lui-même son état d'avancement, et le `big-message` en donne le compte. Sur un deck de proposition, c'est le composant qui dit « une bonne partie est déjà faite » sans y consacrer une slide.
+
+`flow five` porte cinq étapes ; la grille de base en porte quatre.
 
 ---
 
