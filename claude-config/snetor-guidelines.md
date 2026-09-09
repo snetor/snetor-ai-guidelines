@@ -27,8 +27,12 @@ docs/README.md          généré — ne jamais éditer à la main
 docs/superpowers/specs/ zone de travail, vidée à la clôture
 docs/superpowers/plans/ zone de travail, gitignorée
 tasks/todo.md           items ouverts seulement
-tasks/lessons.md        journal append-only
+tasks/lessons.md        règles encore actives — 300 lignes maximum
+tasks/lessons/          archive mensuelle AAAA-MM.md, jamais plafonnée
 ```
+
+Les deux plafonds (`HANDOFF.md` 150, `tasks/lessons.md` 300) sont vérifiés par
+`scripts/check_docs.py` et bloquent la CI.
 
 ## Frontmatter obligatoire dans docs/live/ et docs/dated/
 
@@ -46,9 +50,10 @@ sinon la CI bloque.
 
 Utiliser le skill `snetor-docs-close`. À défaut, dans cet ordre : supprimer le
 plan ; arbitrer chaque spec (réécrite en décision datée, fondue dans un fichier
-`live`, ou supprimée) ; ajouter les leçons à `tasks/lessons.md` ; supprimer de
-`tasks/todo.md` les items livrés, sans les cocher ; réécrire `HANDOFF.md` sous
-150 lignes. Puis régénérer l index.
+`live`, ou supprimée) ; ajouter les leçons à `tasks/lessons.md` — et si le
+plafond de 300 lignes est franchi, basculer les sessions closes dans
+`tasks/lessons/AAAA-MM.md` ; supprimer de `tasks/todo.md` les items livrés, sans
+les cocher ; réécrire `HANDOFF.md` sous 150 lignes. Puis régénérer l index.
 
 Condition d entrée, avant la moindre suppression : le plan doit être
 **entièrement exécuté** — toutes ses tâches livrées — et l arbre de travail
@@ -59,6 +64,42 @@ Si l une des deux conditions manque, s arrêter et le dire ; ne rien supprimer.
 La suppression d une spec **se confirme** auprès de l utilisateur : proposer
 l arbitrage, attendre l accord, puis seulement supprimer. Même prudence sur
 `tasks/`, gitignoré dans certains repos : ces éditions y sont irrécupérables.
+
+## Mémoire — deux magasins, deux métiers
+
+Claude Code dispose de **deux** endroits où il capitalise. Les confondre est la
+cause des `lessons.md` de 3 000 lignes que plus personne ne lit.
+
+| | `tasks/lessons.md` | `memory/` |
+|---|---|---|
+| Emplacement | dans le repo, versionné | `%USERPROFILE%\.claude\projects\<repo>\memory\` |
+| Chargement | **jamais** en entier — on y `grep` | injecté automatiquement au démarrage |
+| Contenu | la règle **et l incident qui la justifie** | un fait par fichier, formulation courte |
+| Survit à un changement de poste | oui | **non** — ni versionné, ni sauvegardé |
+| Plafond | 300 lignes, CI bloquante | `MEMORY.md` reste un index d une ligne par fait |
+
+Conséquence pratique : ce qui doit survivre au poste s écrit **aussi** dans
+`tasks/lessons.md`. `memory/` est un cache de travail, pas une archive.
+
+### Consolider `memory/` avec `/dream`
+
+`/dream` relit les fichiers de `memory/`, fusionne les doublons, remplace ce qui
+a été démenti par la dernière valeur connue et réécrit l index. `AutoDream` fait
+la même chose tout seul après environ 24 h d inactivité. La commande **ne touche
+jamais** `tasks/lessons.md`.
+
+Avant le premier passage sur un projet, sauvegarder le dossier : `/dream`
+réécrit tous les fichiers, et `memory/` n est pas dans Git.
+
+```powershell
+Copy-Item -Recurse "$env:USERPROFILE\.claude\projects\<projet>\memory" `
+  "$env:USERPROFILE\.claude\backups\memory-<projet>-$(Get-Date -Format yyyy-MM-dd)"
+```
+
+Au moment où `/dream` propose son résultat, protéger les mémoires qui portent une
+**correction** (« j avais conclu l inverse », « mon premier classement était
+faux »). Compacter une correction en ne gardant que sa conclusion supprime le
+garde-fou : c est la trace de l erreur qui empêche de la refaire.
 
 ## Règles non négociables
 
