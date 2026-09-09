@@ -8,7 +8,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### À jour
 
-- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-08-10
+- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-09
 
 ### Datés
 
@@ -18,7 +18,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### À jour
 
-- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-08-10
+- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-09
 
 ### Datés
 
@@ -29,7 +29,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### À jour
 
-- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-08-10
+- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-09
 
 ## business
 

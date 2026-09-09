@@ -31,13 +31,33 @@ par `deploy-claude.ps1` et **écrasées à chaque déploiement**.
 
 ## 3. Self-Improvement Loop
 
-- After ANY correction from the user: update `tasks/lessons.md` with the pattern
+Two stores, two jobs. Do not confuse them.
 
-- Write rules for yourself that prevent the same mistake
+**`tasks/lessons.md` — the active rules, in Git, capped at 300 lines.**
 
-- Ruthlessly iterate on these lessons until mistake rate drops
+- After ANY correction from the user: write the anti-recurrence rule here, with the
+  incident that justifies it. The *why* is the payload — a rule without its incident
+  gets deleted by the next reader who doesn't understand it.
 
-- Review lessons at session start for relevant project
+- **Never read it wholesale at session start.** It is a reference you `grep` when
+  something breaks or when you touch an area you don't know, not a preamble you load.
+  Loading it whole costs more context than it returns.
+
+- When it passes 300 lines, `check_docs.py` blocks: move the closed sessions to
+  `tasks/lessons/AAAA-MM.md` (archive, never capped) and keep only what is still true.
+
+**The `memory/` directory — the loaded working set, outside Git.**
+
+- One file per fact, auto-injected at session start. This is what you actually carry.
+  Write here what is not derivable from the code, the git history, or a CLAUDE.md.
+
+- It lives under the user profile: not versioned, not shared, not backed up. Anything
+  that must survive a machine change belongs in `tasks/lessons.md` as well.
+
+- Consolidate it with `/dream` (merges duplicates, drops what has been disproved).
+  Back the directory up before the first run — `/dream` rewrites every file.
+  When it proposes the result, protect the entries that carry a correction
+  ("I had concluded the opposite"): the verdict alone is not the guardrail.
 
 ---
 
