@@ -399,11 +399,13 @@ def test_generate_index_stable_entre_deux_appels():
 
 from check_docs import (
     HANDOFF_MAX_LINES,
+    LESSONS_MAX_LINES,
     PENDING_MAX_AGE_DAYS,
     SPEC_MAX_AGE_DAYS,
     check_docs_layout,
     check_handoff,
     check_index,
+    check_lessons,
     check_stale_specs,
     freshness_warnings,
     main,
@@ -415,6 +417,7 @@ AUJOURD_HUI = datetime.date(2026, 8, 10)
 
 def test_seuils_conformes_a_la_spec():
     assert HANDOFF_MAX_LINES == 150
+    assert LESSONS_MAX_LINES == 300
     assert SPEC_MAX_AGE_DAYS == 30
     assert PENDING_MAX_AGE_DAYS == 90
 
@@ -433,6 +436,33 @@ def test_check_handoff_trop_long_est_une_erreur(tmp_path):
 def test_check_handoff_dans_le_plafond_passe(tmp_path):
     (tmp_path / "HANDOFF.md").write_text("ligne\n" * 150, encoding="utf-8")
     assert check_handoff(tmp_path) == []
+
+
+def test_check_lessons_absent_nest_pas_une_erreur(tmp_path):
+    assert check_lessons(tmp_path) == []
+
+
+def test_check_lessons_trop_long_est_une_erreur(tmp_path):
+    (tmp_path / "tasks").mkdir()
+    (tmp_path / "tasks" / "lessons.md").write_text("regle\n" * 301, encoding="utf-8")
+    errors = check_lessons(tmp_path)
+    assert any("301" in e and "300" in e for e in errors)
+    assert any("tasks/lessons/AAAA-MM.md" in e for e in errors)
+
+
+def test_check_lessons_dans_le_plafond_passe(tmp_path):
+    (tmp_path / "tasks").mkdir()
+    (tmp_path / "tasks" / "lessons.md").write_text("regle\n" * 300, encoding="utf-8")
+    assert check_lessons(tmp_path) == []
+
+
+def test_check_lessons_ignore_les_archives(tmp_path):
+    """L archive n est pas plafonnee : seul lessons.md l est."""
+    (tmp_path / "tasks" / "lessons").mkdir(parents=True)
+    (tmp_path / "tasks" / "lessons" / "2026-06.md").write_text(
+        "regle\n" * 5000, encoding="utf-8"
+    )
+    assert check_lessons(tmp_path) == []
 
 
 def test_check_docs_layout_refuse_un_markdown_hors_des_dossiers_autorises(tmp_path):
