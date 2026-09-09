@@ -332,6 +332,7 @@ def generate_index(
 
 
 HANDOFF_MAX_LINES = 150
+LESSONS_MAX_LINES = 300
 SPEC_MAX_AGE_DAYS = 30
 PENDING_MAX_AGE_DAYS = 90
 PENDING_STATUSES = {"draft", "proposed"}
@@ -354,6 +355,25 @@ def check_handoff(repo_root: Path) -> list[str]:
         return [
             f"HANDOFF.md fait {nb} lignes, plafond {HANDOFF_MAX_LINES} : "
             "deplacer le contenu vers docs/live/ ou docs/dated/"
+        ]
+    return []
+
+
+def check_lessons(repo_root: Path) -> list[str]:
+    """tasks/lessons.md ne porte que les regles actives : il tient sous le
+    plafond. L historique part dans tasks/lessons/AAAA-MM.md, non plafonne."""
+    chemin = repo_root / "tasks" / "lessons.md"
+    if not chemin.is_file():
+        return []
+    contenu, erreur = read_text_safe(chemin)
+    if erreur is not None:
+        return [f"tasks/lessons.md: {erreur}"]
+    nb = len(contenu.splitlines())
+    if nb > LESSONS_MAX_LINES:
+        return [
+            f"tasks/lessons.md fait {nb} lignes, plafond {LESSONS_MAX_LINES} : "
+            "archiver les sessions closes dans tasks/lessons/AAAA-MM.md et ne "
+            "garder ici que les regles encore actives"
         ]
     return []
 
@@ -457,6 +477,7 @@ def run(
     errors += check_index(repo_root, attendu, fix)
     errors += check_links(repo_root)
     errors += check_handoff(repo_root)
+    errors += check_lessons(repo_root)
     errors += check_docs_layout(repo_root)
     errors += check_stale_specs(repo_root, today)
     return errors, freshness_warnings(entries, today)

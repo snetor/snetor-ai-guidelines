@@ -1,7 +1,7 @@
 ---
 regime: live
 audience: [agent, dev, newcomer]
-reviewed: 2026-08-10
+reviewed: 2026-09-09
 ttl: 180d
 ---
 
@@ -126,8 +126,21 @@ destination au lieu de l empiler dans le fichier déjà ouvert.
 `tasks/todo.md` ne contient que des items ouverts. Un item livré est
 **supprimé**, pas coché : sa trace vit dans le numéro de pull request.
 
-`tasks/lessons.md` est un journal append-only. C est l artefact le mieux tenu
-de tous les repos Snetor, parce que son format est constant. Ne pas y toucher.
+`tasks/lessons.md` ne porte que les règles **encore actives**, plafonné à 300
+lignes et vérifié par la CI. Les sessions closes partent dans
+`tasks/lessons/AAAA-MM.md`, jamais plafonné.
+
+Le plafond corrige une erreur de conception mesurée le 09/09/2026 : en régime
+append-only, `lessons.md` atteignait 2 680 lignes dans `snetor-pim` et 3 218
+dans `client-matrix` — environ 42 000 tokens chacun, un cinquième d une fenêtre
+de contexte. Le standard demandait de le relire au démarrage de chaque session ;
+à ce prix-là, personne ne le faisait, agent compris. C était l artefact le mieux
+tenu de tous les repos Snetor, et le moins lu. Un fichier de référence se
+`grep`, il ne se précharge pas.
+
+La mémoire chargée à chaque session, elle, vit ailleurs : dans `memory/`, hors
+Git, sous le profil utilisateur. Le partage des rôles entre les deux magasins
+est décrit dans `claude-config/snetor-guidelines.md`, section « Mémoire ».
 
 ## Clôturer une branche
 
@@ -138,7 +151,8 @@ finit par régénérer l index et afficher le rapport du vérificateur.
 ## Ce que la CI refuse
 
 Bloquant : frontmatter absent ou invalide, lien interne mort, `docs/README.md`
-non régénéré, `HANDOFF.md` absent ou au-delà de 150 lignes, spec de plus de 30
+non régénéré, `HANDOFF.md` absent ou au-delà de 150 lignes, `tasks/lessons.md`
+au-delà de 300 lignes, spec de plus de 30
 jours dans la zone de travail, markdown rangé ailleurs que dans `live/`,
 `dated/` ou `superpowers/`, fichier markdown illisible — encodage non UTF-8,
 fichier verrouillé, ou disparu entre le parcours et la lecture.
