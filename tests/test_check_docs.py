@@ -717,3 +717,28 @@ def test_main_refuse_un_today_qui_n_est_pas_une_date_iso(tmp_path, capsys):
     sortie = capsys.readouterr().out
     assert "--today" in sortie
     assert "ISO" in sortie
+
+
+def test_check_index_ignore_un_depot_sans_dossier_docs(tmp_path):
+    """Un depot sans `docs/` n'a pas d index a tenir.
+
+    Sans cette sortie il etait definitivement rouge : on lui reclamait l index d une
+    documentation inexistante, et `--fix` lui creait un `docs/README.md` ne listant rien.
+    Rencontre le 2026-09-10 sur `office-air-conditioning-agent`.
+    """
+    assert check_index(tmp_path, "peu importe", fix=False) == []
+    assert not (tmp_path / "docs").exists()
+
+
+def test_check_index_ignore_un_depot_sans_docs_meme_en_fix(tmp_path):
+    """`--fix` ne doit pas CREER un dossier docs/ la ou il n y en a pas."""
+    assert check_index(tmp_path, "peu importe", fix=True) == []
+    assert not (tmp_path / "docs").exists()
+
+
+def test_un_depot_minimal_sans_docs_est_conforme(tmp_path):
+    """Bout en bout : HANDOFF present, pas de docs/ -> 0 erreur."""
+    (tmp_path / "HANDOFF.md").write_text("# HANDOFF\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text("# projet\n", encoding="utf-8")
+    errors, _ = run(tmp_path, fix=False, today=AUJOURD_HUI)
+    assert errors == [], errors
