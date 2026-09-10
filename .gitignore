@@ -10,3 +10,6 @@ __pycache__/
 
 # Plans d implementation superpowers : zone de travail, jamais versionnee
 docs/superpowers/plans/
+
+# Worktrees et scratch des sessions Claude Code (ne concerne pas .claude-plugin/, versionne)
+.claude/
