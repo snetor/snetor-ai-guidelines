@@ -630,6 +630,22 @@ function Invoke-Phase5-Snetor {
         Write-Warn "output-styles introuvable dans le repo — skip"
     }
 
+    # 2 bis. Garde-fou PreToolUse (hooks/guard.py)
+    #
+    # Il vivait dans `snetor-pim/ingestion/scripts/claude/` jusqu'au 2026-09-10 : neuf règles
+    # protégeaient un dépôt sur quatorze, pendant que les treize autres n'avaient contre les mêmes
+    # erreurs que de la prose. Les règles sont étroites — celles qui ne concernent pas un dépôt ne
+    # s'y déclenchent jamais.
+    $hooksSrc = Join-Path $repoDir 'hooks'
+    if (Test-Path $hooksSrc) {
+        $hooksDst = "$claudeDir\hooks"
+        New-Item -ItemType Directory -Path $hooksDst -Force | Out-Null
+        Copy-Item "$hooksSrc\*.py" $hooksDst -Force
+        Write-Ok "Garde-fou copié ($hooksDst\guard.py)"
+    } else {
+        Write-Warn "hooks/ introuvable dans le repo — skip"
+    }
+
     # 3. settings.json (fusion si existant)
     $settingsPath    = "$claudeDir\settings.json"
     $snetorPlugins   = [ordered]@{
@@ -668,6 +684,48 @@ function Invoke-Phase5-Snetor {
     }
     foreach ($plugin in $snetorPlugins.Keys) {
         $cfg.enabledPlugins | Add-Member -MemberType NoteProperty -Name $plugin -Value $true -Force
+    }
+
+    # Brancher le garde-fou en PreToolUse, sans toucher aux autres hooks du poste.
+    #
+    # ⚠️ Le détour par `runpy` n'est pas de la coquetterie : appeler le script directement
+    # verrouille la session dès qu'il est absent. `python fichier-inexistant.py` sort en code 2,
+    # et 2 est précisément le code qui BLOQUE l'appel d'outil — un poste sans le fichier ne
+    # pourrait plus lancer une seule commande (rencontré le 2026-08-14). On teste la présence
+    # avant d'exécuter, et on ne garde le code 2 que quand c'est le garde-fou qui le décide.
+    $gardeCommande = @'
+python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/guard.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
+'@.Trim()
+
+    if (-not ($cfg.PSObject.Properties.Name -contains 'hooks')) {
+        $cfg | Add-Member -MemberType NoteProperty -Name 'hooks' -Value ([PSCustomObject]@{})
+    }
+    if (-not ($cfg.hooks.PSObject.Properties.Name -contains 'PreToolUse')) {
+        $cfg.hooks | Add-Member -MemberType NoteProperty -Name 'PreToolUse' -Value @()
+    }
+
+    # Idempotent : on reconnaît notre entrée à `hooks/guard.py` dans sa commande. Une exécution
+    # répétée du déployeur ne doit pas empiler dix fois le même garde-fou.
+    $dejaBranche = $false
+    foreach ($entree in @($cfg.hooks.PreToolUse)) {
+        foreach ($h in @($entree.hooks)) {
+            if ($h.command -and $h.command -match 'hooks[\\/]guard\.py') { $dejaBranche = $true }
+        }
+    }
+
+    if ($dejaBranche) {
+        Write-Info "Garde-fou déjà branché dans settings.json — inchangé"
+    } else {
+        $entreeGarde = [PSCustomObject]@{
+            matcher = 'Bash|PowerShell|Write|Edit|NotebookEdit'
+            hooks   = @([PSCustomObject]@{
+                type    = 'command'
+                command = $gardeCommande
+                timeout = 10
+            })
+        }
+        $cfg.hooks.PreToolUse = @($cfg.hooks.PreToolUse) + $entreeGarde
+        Write-Ok "Garde-fou branché en PreToolUse"
     }
 
     Set-JsonFile -Object $cfg -Path $settingsPath

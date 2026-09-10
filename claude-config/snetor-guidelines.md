@@ -101,6 +101,36 @@ Au moment où `/dream` propose son résultat, protéger les mémoires qui porten
 faux »). Compacter une correction en ne gardant que sa conclusion supprime le
 garde-fou : c est la trace de l erreur qui empêche de la refaire.
 
+## Le garde-fou — une règle vérifiable ne reste pas en prose
+
+`~/.claude/hooks/guard.py` refuse, avant exécution, les gestes qui ont déjà coûté quelque chose :
+commit ou écriture sur `main`, push sur une branche dont la PR est mergée, `Set-Content` sur du
+contenu accentué, heredoc ou `git commit -m "…"` en PowerShell, pipe tronquant derrière
+`gh pr checks` ou `az`. `gh pr merge` et `git push --force` remontent à l'humain.
+
+Il est déployé par `scripts/deploy-claude.ps1`, donc **actif sur tous les dépôts** ouverts avec
+Claude Code. Un dépôt qui a besoin d'une règle en propre pose son propre hook dans son
+`.claude/settings.json` : il s'ajoute au garde global, il ne le remplace pas.
+
+**Le partage des rôles avec `tasks/lessons.md` est le point important.** Une règle qu'un programme
+peut vérifier n'a rien à faire en prose : elle y sera lue une fois, puis enfreinte. Chaque règle
+qui migre du fichier vers le garde-fou est une règle qu'on **retire du texte** et qui devient
+**vraiment respectée** — le seul mouvement qui allège la doctrine et durcit la pratique en même
+temps. `lessons.md` garde ce qu'aucune machine ne saura juger.
+
+⚠️ **Un blocage n'est pas un bug.** Chaque règle cite l'incident qui la justifie : lire le motif,
+pas contourner. Si le motif est manifestement à côté, c'est le garde-fou qu'on corrige — avec son
+test — pas le geste qu'on déguise.
+
+Deux limites connues, à savoir avant de crier au faux positif :
+
+- Le garde lit la commande **privée du corps de ses heredocs** : un texte qui *cite* `git push`
+  n'est pas un `git push`. En revanche un `echo '… | tail …'` reste vu comme une commande. Écrire
+  la charge dans un fichier lève l'ambiguïté.
+- Il résout le `cd` de tête avec `pathlib` **côté Windows** : un chemin Git Bash `/c/Users/…` n'y
+  est pas absolu et le garde retombe sur le checkout partagé, souvent `main`. En worktree, écrire
+  `cd "C:/Users/…"`.
+
 ## Règles non négociables
 
 Ne jamais éditer `docs/README.md` à la main : le régénérer par
