@@ -420,7 +420,19 @@ def check_stale_specs(repo_root: Path, today: datetime.date) -> list[str]:
 
 
 def check_index(repo_root: Path, attendu: str, fix: bool) -> list[str]:
-    """Compare docs/README.md au rendu attendu, ou le reecrit si fix."""
+    """Compare docs/README.md au rendu attendu, ou le reecrit si fix.
+
+    ⚠️ Un depot SANS dossier `docs/` n'a pas d'index a tenir. Sans cette sortie, il etait
+    definitivement rouge : on lui reclamait l'index d'une documentation inexistante, et `--fix`
+    lui creait un `docs/README.md` ne listant rien. Rencontre le 2026-09-10 sur
+    `office-air-conditioning-agent`, en branchant le verificateur sur le reste du parc.
+
+    Un depot qu'aucun geste ne peut rendre vert est un check desactive dans la semaine — c'est la
+    regle que ce fichier applique partout ailleurs, elle vaut aussi pour lui.
+    """
+    if not (repo_root / "docs").is_dir():
+        return []
+
     chemin = repo_root / "docs" / "README.md"
     if chemin.is_file():
         actuel, erreur = read_text_safe(chemin)
