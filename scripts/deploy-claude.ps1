@@ -630,7 +630,7 @@ function Invoke-Phase5-Snetor {
         Write-Warn "output-styles introuvable dans le repo — skip"
     }
 
-    # 2 bis. Garde-fou PreToolUse (hooks/guard.py)
+    # 2 bis. Hooks (hooks/*.py) : garde-fou PreToolUse, mémoire de worktree SessionStart
     #
     # Il vivait dans `snetor-pim/ingestion/scripts/claude/` jusqu'au 2026-09-10 : neuf règles
     # protégeaient un dépôt sur quatorze, pendant que les treize autres n'avaient contre les mêmes
@@ -641,7 +641,8 @@ function Invoke-Phase5-Snetor {
         $hooksDst = "$claudeDir\hooks"
         New-Item -ItemType Directory -Path $hooksDst -Force | Out-Null
         Copy-Item "$hooksSrc\*.py" $hooksDst -Force
-        Write-Ok "Garde-fou copié ($hooksDst\guard.py)"
+        $hooksCopies = (Get-ChildItem "$hooksDst\*.py" | ForEach-Object { $_.Name }) -join ', '
+        Write-Ok "Hooks copiés dans $hooksDst : $hooksCopies"
     } else {
         Write-Warn "hooks/ introuvable dans le repo — skip"
     }
@@ -726,6 +727,45 @@ python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/guard.py')
         }
         $cfg.hooks.PreToolUse = @($cfg.hooks.PreToolUse) + $entreeGarde
         Write-Ok "Garde-fou branché en PreToolUse"
+    }
+
+    # Brancher la mémoire de worktree en SessionStart.
+    #
+    # Claude Code range la mémoire d'un projet dans un dossier nommé d'après le CHEMIN du
+    # répertoire de travail. Un worktree est le même dépôt dans un autre chemin, donc un autre
+    # dossier, vide. Or Git Hygiene impose de travailler en worktree : la règle désarmait la
+    # mémoire à chaque chantier sérieux (mesuré le 2026-09-14 sur `snetor-pim` — 52 fichiers de
+    # mémoire côté checkout principal, 0 dans les trois projets worktree, 8 sessions).
+    #
+    # Même précaution `runpy` que pour le garde-fou : un poste sans le fichier ne doit pas voir
+    # ses sessions échouer au démarrage.
+    $memoireCommande = @'
+python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/worktree_memory.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
+'@.Trim()
+
+    if (-not ($cfg.hooks.PSObject.Properties.Name -contains 'SessionStart')) {
+        $cfg.hooks | Add-Member -MemberType NoteProperty -Name 'SessionStart' -Value @()
+    }
+
+    $memoireDejaBranchee = $false
+    foreach ($entree in @($cfg.hooks.SessionStart)) {
+        foreach ($h in @($entree.hooks)) {
+            if ($h.command -and $h.command -match 'worktree_memory\.py') { $memoireDejaBranchee = $true }
+        }
+    }
+
+    if ($memoireDejaBranchee) {
+        Write-Info "Mémoire de worktree déjà branchée dans settings.json — inchangé"
+    } else {
+        $entreeMemoire = [PSCustomObject]@{
+            hooks = @([PSCustomObject]@{
+                type    = 'command'
+                command = $memoireCommande
+                timeout = 15
+            })
+        }
+        $cfg.hooks.SessionStart = @($cfg.hooks.SessionStart) + $entreeMemoire
+        Write-Ok "Mémoire de worktree branchée en SessionStart"
     }
 
     Set-JsonFile -Object $cfg -Path $settingsPath
