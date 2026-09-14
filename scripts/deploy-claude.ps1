@@ -556,7 +556,23 @@ function Invoke-Phase5-Snetor {
 
     if ($gitCmd) {
         Write-Info "Clone du repo snetor-ai-guidelines ..."
-        & git clone --depth=1 'https://github.com/snetor/snetor-ai-guidelines.git' $repoDir 2>&1 | Out-Null
+        # ⚠️ Ni `2>&1`, ni pipe vers Out-Null sur un exécutable natif.
+        #
+        # `git clone` écrit son « Cloning into 'x'... » sur **stderr**, y compris quand tout va
+        # bien. En PowerShell 5.1, `2>&1` emballe chaque ligne de stderr dans un ErrorRecord ;
+        # avec le `$ErrorActionPreference = 'Stop'` posé en tête de ce script, cet ErrorRecord
+        # devient **terminant**. La phase mourait donc sur sa toute première action, et le
+        # `try/catch` de l'exécution principale l'affichait en « Phase 5 échouée » sans que
+        # rien — règles d'équipe, hooks, settings.json, status line — ne soit jamais copié.
+        #
+        # Diagnostiqué le 2026-09-14 : le poste de l'auteur du dépôt tournait depuis des
+        # semaines sans `workflow.md` ni `snetor-guidelines.md`, avec un `CLAUDE.md` portant une
+        # copie collée à la main. `--quiet` supprime le message à la source ; le code de retour
+        # est lu explicitement plutôt qu'avalé.
+        & git clone --quiet --depth=1 'https://github.com/snetor/snetor-ai-guidelines.git' $repoDir
+        if ($LASTEXITCODE -ne 0) {
+            throw "git clone a echoue (code $LASTEXITCODE) — verifier l'acces reseau a github.com"
+        }
     } else {
         Write-Info "git absent — téléchargement du zip ..."
         $zipPath = Join-Path $Tmp 'repo.zip'
