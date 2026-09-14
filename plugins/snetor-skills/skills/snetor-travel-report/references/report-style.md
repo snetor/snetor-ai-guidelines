@@ -1,14 +1,16 @@
-# Style de rapport Snetor — extraits réels
+# Snetor report style — real excerpts
 
-Trois extraits de vrais rapports pour calibrer **ton, langue et niveau de détail**. À imiter
-pour le rendu final, pas à copier mot pour mot. Observe : la langue suit le sales (FR ou EN),
-le statut et le secteur sont en tête de chaque client, les volumes sont précis quand connus,
-le **plan d'action (PA)** est concret, et la richesse narrative (intel marché, relationnel,
-concurrence) est **préservée** — pas aplatie en cases vides.
+Three excerpts of real reports to calibrate **tone, language and level of detail**. To imitate
+for the final rendering, not to copy word for word. They are quoted **verbatim, in the language
+their author wrote them in** (two in French, one in English) — that is what a real Snetor report
+looks like. Observe: the language follows the sales rep (FR or EN), status and sector lead each
+client, volumes are precise when known, the **action plan (PA / plan of action)** is concrete,
+and the narrative richness (market intel, relationship, competition) is **preserved** — not
+flattened into empty boxes.
 
 ---
 
-## Extrait 1 — Chemicals, FR, narratif (Thibaut Gautier — Côte d'Ivoire)
+## Excerpt 1 — Chemicals, FR, narrative (Thibaut Gautier — Côte d'Ivoire)
 
 > **Commentaire général :** La Côte d'Ivoire est un marché mature en chemicals pour SNETOR,
 > nous travaillons déjà avec la quasi-totalité des acteurs. Malgré cela, de belles opportunités
@@ -28,12 +30,12 @@ concurrence) est **préservée** — pas aplatie en cases vides.
 > **PA :** Envoyer échantillons de solvants et animer la relation avec offres spot dès que bons
 > prix. Rechercher des fournisseurs de résines pour étoffer notre gamme (priorité).
 
-Noter : volumes par produit avec unités variées (T/mois, KL/mois, TC/mois), fournisseur actuel
-mentionné quand connu, PA orienté action. Le narratif (groupe, interlocuteur, contexte) est gardé.
+Note: volumes per product with mixed units (T/month, KL/month, TC/month), current supplier
+mentioned when known, action-oriented PA. The narrative (group, contact, context) is kept.
 
 ---
 
-## Extrait 2 — Polymers, FR, semi-structuré (Morine Semi-Lou — Ghana)
+## Excerpt 2 — Polymers, FR, semi-structured (Morine Semi-Lou — Ghana)
 
 > **Infos en bref :**
 > - La relative stabilité récente de la monnaie est perçue comme un signe positif.
@@ -46,12 +48,12 @@ mentionné quand connu, PA orienté action. Le narratif (groupe, interlocuteur, 
 > - CAPS : Lotte non approuvés. SABIC, SCG, BOROUGE. Impossible de rivaliser avec les prix Borouge.
 > - Objectif 2026 : lui vendre plus de plastique en dehors du PET et PS.
 
-Noter : volume total en tête, détail par application/grade, grades approuvés vs non approuvés,
-concurrence nommée, objectif commercial. Très dense, très concret.
+Note: total volume up front, breakdown per application/grade, approved vs non-approved grades,
+competition named, commercial objective. Very dense, very concrete.
 
 ---
 
-## Extrait 3 — Mixte/Polymers, EN, structuré (William Junco — Jamaïque)
+## Excerpt 3 — Mixed/Polymers, EN, structured (William Junco — Jamaica)
 
 > **Client:** OMNI INDUSTRIES.
 > **Contact:** Patrick Kumst (Owner).
@@ -66,20 +68,20 @@ concurrence nommée, objectif commercial. Très dense, très concret.
 > **Plan of Action:** We got samples of the PVC compound; the goal is to get a supplier with
 > competitive offers as the quantity per month is attractive.
 
-Noter : EN car le sales écrit en anglais, fiche très régulière (Consumption / Relationship /
-Competition / Developments / Plan of Action), grades avec MI, historique relationnel et
-comportement de paiement conservés. Un même rapport mêle polymères et chemicals (LABSA, soude)
-selon les clients.
+Note: EN because the sales rep writes in English, very regular record (Consumption /
+Relationship / Competition / Developments / Plan of Action), grades with MI, relationship
+history and payment behaviour kept. A single report mixes polymers and chemicals (LABSA,
+caustic soda) depending on the clients.
 
 ---
 
-## Ce qu'il faut retenir pour la rédaction finale
+## What to retain for the final write-up
 
-- **Langue = celle du sales.** Ne traduis pas.
-- **Statut + secteur** en tête de chaque client.
-- **Volumes précis** quand connus, sinon « — ». Garder les unités telles que dictées.
-- **Plan d'action concret** : quoi faire, pour qui, quand.
-- **Préserver le narratif** : intel marché, relationnel, concurrence, projets d'usine, rumeurs.
-  C'est ce qui fait la valeur des rapports Snetor — ne pas l'aplatir.
-- Le rendu peut être **narratif** (extrait 1) ou **fiches régulières** (extrait 3) selon le
-  style du sales — épouse le sien.
+- **Language = the sales rep's.** Do not translate.
+- **Status + sector** at the top of each client.
+- **Precise volumes** when known, otherwise "—". Keep the units as dictated.
+- **Concrete action plan**: what to do, for whom, when.
+- **Preserve the narrative**: market intel, relationship, competition, plant projects, rumours.
+  That is what makes Snetor reports valuable — do not flatten it.
+- The rendering can be **narrative** (excerpt 1) or **regular records** (excerpt 3) depending on
+  the sales rep's style — match his own.

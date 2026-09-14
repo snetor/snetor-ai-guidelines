@@ -40,6 +40,6 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 ## READMEs techniques (hors docs/)
 
 - [snetor-skills](../plugins/snetor-skills/README.md)
-- [Polices Raleway — mode stand-alone](../plugins/snetor-skills/skills/snetor-html-slides/assets/fonts/README.md)
+- [Raleway fonts — stand-alone mode](../plugins/snetor-skills/skills/snetor-html-slides/assets/fonts/README.md)
 - [deploy-claude.ps1 — Déploiement Claude DSI Snetor](../scripts/README.md)
 - [Claude Code — Status Line](../statusline/README.md)
