@@ -81,6 +81,16 @@ cause des `lessons.md` de 3 000 lignes que plus personne ne lit.
 Conséquence pratique : ce qui doit survivre au poste s écrit **aussi** dans
 `tasks/lessons.md`. `memory/` est un cache de travail, pas une archive.
 
+**En worktree, la mémoire suit — depuis le 2026-09-14 seulement.** Le dossier de
+mémoire est nommé d après le **chemin** du répertoire de travail : un worktree
+est le même dépôt ailleurs, donc un autre dossier, vide. Git Hygiene imposant le
+worktree, la règle désarmait la mémoire à chaque chantier sérieux (mesuré sur
+`snetor-pim` : 52 fichiers côté checkout principal, **0** dans les trois projets
+worktree, qui totalisaient 8 sessions). Le hook `SessionStart`
+`hooks/worktree_memory.py` relie désormais les deux. Il ne s arme que sur un
+worktree lié, ne remplace jamais un `memory/` déjà rempli — il le signale — et se
+désarme tout seul si Claude Code change sa convention de nommage.
+
 ### Consolider `memory/` avec `/dream`
 
 `/dream` relit les fichiers de `memory/`, fusionne les doublons, remplace ce qui
