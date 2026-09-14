@@ -135,12 +135,12 @@ Use `a.metric` when the stat comes from a citable external source. Link to the s
 
 ## Loss / Problem Hero (left big panel + right problem list)
 
-> ⚠️ **Piège de mise en page, rencontré en séance et non hypothétique.** `loss-list` est un `display:grid`, et `.body` est un `display:flex; flex-direction:column`. Un `loss-item` posé là voit sa colonne `1fr` s'effondrer à `0px` : **le texte se coupe mot par mot, un mot par ligne.** La condition suffisante est donc simplement « `loss-list` dans un `.body` », c'est-à-dire l'usage normal — pas un cas tordu.
+> ⚠️ **Layout trap, hit live in a meeting — not hypothetical.** `loss-list` is a `display:grid`, and `.body` is a `display:flex; flex-direction:column`. A `loss-item` placed there sees its `1fr` column collapse to `0px`: **the text breaks word by word, one word per line.** The sufficient condition is therefore simply "`loss-list` inside a `.body`", i.e. normal usage — not some contrived edge case.
 >
-> **Alternatives sûres**, dans l'ordre de préférence :
-> - **trois constats** → trois `card accent-warn` en `grid cols-3` (liseré rouge, fond dégradé rouge très pâle). Une `card` porte son propre fond et ne s'effondre pas.
-> - **quatre constats** → le patron `market-facts` ci-dessous.
-> - `loss-hero` + `loss-list` seulement si le panneau dramatique est vraiment nécessaire, et alors en testant le rendu.
+> **Safe alternatives**, in order of preference:
+> - **three findings** → three `card accent-warn` in a `grid cols-3` (red top rule, very pale red gradient background). A `card` carries its own background and does not collapse.
+> - **four findings** → the `market-facts` pattern below.
+> - `loss-hero` + `loss-list` only if the dramatic panel is genuinely needed, and then only after testing the render.
 
 Use this pattern only when you have fewer than 4 items and the `loss-hero` drama panel is essential:
 
@@ -778,26 +778,26 @@ Marks appendix slides kept after the main deck (full data, detailed charts) — 
 
 ---
 
-## Scope Ribbon (bandeau de périmètre sous le titre)
+## Scope Ribbon (scope band under the title)
 
-Rappelle en une ligne le périmètre/scope d'une slide de coût ou de décision — utile quand le chiffrage couvre plusieurs livrables et que l'audience risque de l'oublier. À placer **juste après le `<h2>`**, avec la même classe `animate` que le titre.
+States in one line the scope of a cost or decision slide — useful when the costing covers several deliverables and the audience is likely to forget it. Place it **right after the `<h2>`**, with the same `animate` class as the title.
 
 ```html
 <h2 class="animate d1">Le titre de la slide.</h2>
 <div class="scope-ribbon animate d1">Périmètre : <strong>PIM produit + CRM interne (Twenty)</strong> <em>· une seule équipe recrutée, un seul budget</em></div>
 ```
 
-`strong` = ce que couvre le périmètre (vert) ; `em` = la nuance (gris, non italique). Fonctionne sur slide claire, `dark` et deck `theme-dark`. Répéter le même bandeau sur les slides coût / programme / décision pour marteler le scope.
+`strong` = what the scope covers (green); `em` = the caveat (grey, not italic). Works on a light slide, on `dark`, and in a `theme-dark` deck. Repeat the same band on the cost / program / decision slides to hammer the scope home.
 
 ---
 
-## Macro Cost-Code Bars (composition lisible de loin, sans Chart.js)
+## Macro Cost-Code Bars (composition readable from the back of the room, no Chart.js)
 
-**Composant de coût exécutif préféré** pour un COMEX / grande salle : chaque ligne est un scénario, la barre est segmentée par **macro-composant** (couleur = sens, pas décor), gros total à droite. Se lit en 2 secondes de loin — préférer aux charts empilés multi-séries quand l'audience est décisionnelle.
+**The preferred executive cost component** for a COMEX / large room: each row is a scenario, the bar is segmented by **macro-component** (color = meaning, not decoration), large total on the right. Readable in 2 seconds from a distance — prefer it over multi-series stacked charts when the audience is there to decide.
 
-- **Longueur de barre** = part du plus gros total : mettre `style="width:X%"` sur `.macro-bar` (100 % pour le scénario le plus cher, moins pour les autres) → la barre la moins chère est visiblement plus courte.
-- **Largeur des segments** = part du total de la ligne : `style="width:Y%"` sur chaque `.seg` (somme = 100 %). Laisser un segment sans texte s'il est trop étroit.
-- Palette sémantique fournie : `.intern` (vert, construit/internalisé), `.buy` (navy, acheté/éditeur), `.base` (gris, socle). Adapter les noms au sujet, garder **≤ 3-4 codes**.
+- **Bar length** = share of the largest total: set `style="width:X%"` on `.macro-bar` (100 % for the most expensive scenario, less for the others) → the cheapest bar is visibly shorter.
+- **Segment width** = share of that row's total: `style="width:Y%"` on each `.seg` (sum = 100 %). Leave a segment without text if it is too narrow.
+- Semantic palette provided: `.intern` (green, built/in-house), `.buy` (navy, bought/vendor), `.base` (grey, foundation). Adapt the names to the subject, keep to **≤ 3-4 codes**.
 
 ```html
 <div class="body">
@@ -837,9 +837,9 @@ Rappelle en une ligne le périmètre/scope d'une slide de coût ou de décision 
 
 ---
 
-## Card Semantic Accents (liseré coloré par sens)
+## Card Semantic Accents (top rule colored by meaning)
 
-Le liseré haut de `.card` est vert par défaut. Pour coder les deux volets d'une paire (ex. PIM vs CRM, construire vs acheter), utiliser `.card.accent-navy` (ou l'alias `.card.buy`) et `.card.accent-teal`.
+The top rule of `.card` is green by default. To code the two halves of a pair (e.g. PIM vs CRM, build vs buy), use `.card.accent-navy` (or its alias `.card.buy`) and `.card.accent-teal`.
 
 ```html
 <div class="grid cols-2">
@@ -850,9 +850,9 @@ Le liseré haut de `.card` est vert par défaut. Pour coder les deux volets d'un
 
 ---
 
-## Tradeoff Cards (deux voies comparées — ex. build vs buy)
+## Tradeoff Cards (two paths compared — e.g. build vs buy)
 
-Deux options en vis-à-vis, une mise en avant en vert (`.good`), l'autre en garde (`.watch`). Idéal pour un « acheter ou construire » sur une slide aérée.
+Two options side by side, one highlighted in green (`.good`), the other flagged as a watch item (`.watch`). Ideal for a "buy or build" on an airy slide.
 
 ```html
 <div class="tradeoff-grid animate d2">
@@ -869,7 +869,7 @@ Deux options en vis-à-vis, une mise en avant en vert (`.good`), l'autre en gard
 </div>
 ```
 
-`.tradeoff-card.wide` occupe toute la largeur (verdict / note transverse sous les deux cartes).
+`.tradeoff-card.wide` spans the full width (verdict / cross-cutting note under both cards).
 
 ---
 
@@ -957,9 +957,9 @@ Wrap items in `<a class="agenda-item" href="?slide=N">` to jump to a slide; use 
 
 ---
 
-## Constats — trois cartes à liseré rouge
+## Findings — three cards with a red top rule
 
-Le remplaçant sûr de `loss-list` quand les constats sont au nombre de trois. Voir l'avertissement de la section Loss / Problem Hero.
+The safe replacement for `loss-list` when there are exactly three findings. See the warning in the Loss / Problem Hero section.
 
 ```html
 <div class="grid cols-3 animate d2">
@@ -973,11 +973,11 @@ Le remplaçant sûr de `loss-list` quand les constats sont au nombre de trois. V
 
 ---
 
-## Chiffres nus — `stat-row` et `duo`
+## Bare figures — `stat-row` and `duo`
 
-**À préférer chaque fois que la grandeur du nombre n'est pas le message.** Une barre de composition dit « volume » : sur un montant faible, c'est le contresens exact — le rendu donne l'impression que ça coûte cher. Deux chiffres posés sur du blanc ne disent rien d'autre qu'eux-mêmes.
+**Prefer these whenever the magnitude of the number is not the message.** A composition bar says "volume": on a small amount that is exactly the wrong reading — the render makes it look expensive. Two figures set on white say nothing but themselves.
 
-`stat-row` porte trois repères, `duo` deux chiffres héros.
+`stat-row` carries three markers, `duo` two hero figures.
 
 ```html
 <div class="stat-row animate d2">
@@ -1013,9 +1013,9 @@ Le remplaçant sûr de `loss-list` quand les constats sont au nombre de trois. V
 
 ---
 
-## Ratio — une proportion dessinée
+## Ratio — a proportion drawn, not written
 
-Dix pastilles, une pleine, pour dire « un sur dix ». **Un pourcentage se lit, un dessin se voit** : de loin, personne n'a besoin de convertir `10 %` en une proportion. Garder un dénominateur qui se compte d'un coup d'œil — 5, 10, 20 au maximum.
+Ten dots, one filled, to say "one in ten". **A percentage is read, a drawing is seen**: from a distance, nobody needs to convert `10 %` into a proportion. Keep a denominator that can be counted at a glance — 5, 10, 20 at most.
 
 ```html
 <div class="ratio animate d2">
@@ -1024,13 +1024,13 @@ Dix pastilles, une pleine, pour dire « un sur dix ». **Un pourcentage se lit, 
 </div>
 ```
 
-Fonctionne sur slide claire comme sur slide d'accent. Pairer avec un `statement` qui donne la raison du ratio, jamais avec un second chiffre.
+Works on a light slide as well as on an accent slide. Pair it with a `statement` that gives the reason for the ratio, never with a second figure.
 
 ---
 
-## Échelle de calcul — `calc`
+## Calculation ladder — `calc`
 
-**Le composant de coût à préférer dès que l'audience doit pouvoir refaire le calcul elle-même.** Un badge d'opération à gauche, le libellé au milieu, le montant à droite. Les lignes `sum` sont les seules à retenir ; les précédentes expliquent comment on y arrive.
+**The cost component to prefer as soon as the audience must be able to redo the arithmetic themselves.** An operation badge on the left, the label in the middle, the amount on the right. The `sum` rows are the only ones to remember; the rows before them explain how you get there.
 
 ```html
 <div class="calc animate d2">
@@ -1057,18 +1057,18 @@ Fonctionne sur slide claire comme sur slide d'accent. Pairer avec un `statement`
 </div>
 ```
 
-**Deux règles dures, apprises en séance :**
+**Two hard rules, learned in the room:**
 
-1. **Afficher des montants, pas des grandeurs intermédiaires.** Un tableau de volumes — tokens, lignes, heures — ne répond pas à « combien coûte une unité », qui est la seule question posée. Le détail des volumes va en notes du présentateur.
-2. **Les montants affichés doivent tomber juste à l'écran.** `0,10 + 0,24 = 0,34`, puis `0,34 × 52 = 18`. Si les valeurs exactes ne s'additionnent pas proprement, choisir les arrondis qui tombent juste et mettre les valeurs exactes en notes. Un calcul dont les lignes ne s'additionnent pas fait douter de tout le reste, même quand l'écart n'est qu'un arrondi.
+1. **Show amounts, not intermediate quantities.** A table of volumes — tokens, rows, hours — does not answer "how much does one unit cost", which is the only question being asked. The volume detail belongs in the speaker notes.
+2. **The amounts on screen must add up exactly.** `0,10 + 0,24 = 0,34`, then `0,34 × 52 = 18`. If the exact values do not add up cleanly, pick the roundings that do and put the exact values in the notes. A calculation whose rows do not add up casts doubt on everything else, even when the gap is only a rounding.
 
-**Ne pas utiliser de glyphe texte dans le badge.** Les `+` et `×` de Raleway ont une hauteur d'œil bien moindre qu'une lettre : à taille égale ils paraissent minuscules dans leur pastille. Passer par `ph-plus`, `ph-equals`, `ph-x`, dont l'épaisseur de trait est constante.
+**Do not use a text glyph in the badge.** Raleway's `+` and `×` have a far smaller x-height than a letter: at the same size they look tiny inside their pill. Use `ph-plus`, `ph-equals`, `ph-x` instead — their stroke weight is constant.
 
 ---
 
-## Deux étages de tri — `sieves`
+## Two filtering stages — `sieves`
 
-Pour la slide qui explique **comment un dispositif filtre, et surtout où il est perfectible**. Chaque tamis porte son libellé, sa transition chiffrée, son principe, et une ligne de limite.
+For the slide that explains **how a system filters, and above all where it can be improved**. Each sieve carries its label, its numeric transition, its principle, and a limitation line.
 
 ```html
 <div class="sieves animate d2">
@@ -1089,13 +1089,13 @@ Pour la slide qui explique **comment un dispositif filtre, et surtout où il est
 </div>
 ```
 
-**La ligne `sv-limit` est le composant.** Une slide qui nomme sa propre faiblesse désarme le challenge au lieu de l'attendre — et sur un sujet IA, la question « comment savez-vous que le tri est bon » arrive toujours. Pairer avec un `big-message` qui porte l'exemple concret du défaut et le chantier d'amélioration qui le fermerait.
+**The `sv-limit` line is the component.** A slide that names its own weakness disarms the challenge instead of waiting for it — and on an AI topic, the question "how do you know the filtering is any good" always comes. Pair it with a `big-message` carrying the concrete example of the flaw and the workstream that would close it.
 
 ---
 
-## Extrait réel du produit — `edition-item`
+## Real product excerpt — `edition-item`
 
-**Montrer le produit vaut mieux que le décrire.** Une carte qui porte la source **cliquable**, le contenu non retouché, et un encart de mise en perspective.
+**Showing the product beats describing it.** A card carrying the **clickable** source, the untouched content, and a perspective callout.
 
 ```html
 <p class="edition-head animate d2">« Le titre du livrable, cité tel quel. »</p>
@@ -1110,15 +1110,15 @@ Pour la slide qui explique **comment un dispositif filtre, et surtout où il est
 </div>
 ```
 
-**La source cliquable est le composant** : c'est la démonstration la plus rapide que rien n'est inventé, et elle vaut mieux qu'une slide d'explication du mécanisme.
+**The clickable source is the component**: it is the fastest proof that nothing was invented, and it beats a slide explaining the mechanism.
 
-⚠️ **Le titre de la slide ne doit pas laisser croire à une adoption qui n'existe pas.** « L'édition de ce matin, telle qu'elle est partie » suggère un service installé ; « La bêta actuelle : à quoi ressemble une édition » décrit le design. Quand le dispositif est en test, le dire dans le titre — un sponsor qui découvre l'écart en séance ne croira plus le reste du deck.
+⚠️ **The slide title must not suggest an adoption that does not exist.** "This morning's edition, exactly as it went out" implies a service already in production; "The current beta: what an edition looks like" describes the design. When the system is still in test, say so in the title — a sponsor who discovers the gap during the meeting will stop believing the rest of the deck.
 
 ---
 
-## Liste d'annexe — `cols-list`
+## Appendix list — `cols-list`
 
-Une annexe reste une annexe : elle liste. Mais elle se lit de loin comme le reste du deck.
+An appendix is still an appendix: it lists. But it reads from a distance like the rest of the deck.
 
 ```html
 <div class="annex-block animate d2">
@@ -1136,15 +1136,15 @@ Une annexe reste une annexe : elle liste. Mais elle se lit de loin comme le rest
 </div>
 ```
 
-`cols-list` est en trois colonnes par défaut, `two` et `one` réduisent. **Puce pleine pour ce qui existe, puce creuse (`todo`) pour ce qui reste à faire** : un vert et un navy se distinguent mal à distance, un plein et un creux se voient toujours.
+`cols-list` is three columns by default; `two` and `one` reduce that. **Filled bullet for what exists, hollow bullet (`todo`) for what remains to be done**: green and navy are hard to tell apart at a distance, filled and hollow always show.
 
-Poser `annex` sur la slide (`class="slide annex"`) resserre le corps et réduit le `h2` — une annexe porte plus de blocs qu'une slide de séance.
+Putting `annex` on the slide (`class="slide annex"`) tightens the body and shrinks the `h2` — an appendix carries more blocks than a meeting slide.
 
 ---
 
-## État d'une étape, posé sur le schéma — `fn-tag`
+## Step status, placed on the diagram — `fn-tag`
 
-Une étiquette par nœud de `flow` pour dire ce qui tourne déjà et ce qui reste à construire.
+One label per `flow` node to say what already runs and what remains to be built.
 
 ```html
 <div class="flow five animate d2">
@@ -1165,9 +1165,9 @@ Une étiquette par nœud de `flow` pour dire ce qui tourne déjà et ce qui rest
 <div class="big-message animate d3">Trois étapes sur cinq tournent déjà.</div>
 ```
 
-**Cela remplace une slide d'inventaire entière.** Le schéma porte lui-même son état d'avancement, et le `big-message` en donne le compte. Sur un deck de proposition, c'est le composant qui dit « une bonne partie est déjà faite » sans y consacrer une slide.
+**This replaces a whole inventory slide.** The diagram carries its own progress status, and the `big-message` gives the count. On a proposal deck, this is the component that says "a good part is already done" without spending a slide on it.
 
-`flow five` porte cinq étapes ; la grille de base en porte quatre.
+`flow five` carries five steps; the base grid carries four.
 
 ---
 

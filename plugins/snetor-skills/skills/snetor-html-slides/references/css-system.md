@@ -29,27 +29,27 @@ to match the actual relative path from the output file to the assets folder.
 
 ---
 
-## Échelle typographique (charte Snetor — Brand Book p. 29-30)
+## Type Scale (Snetor brand guidelines — Brand Book p. 29-30)
 
-Police unique : **Raleway**. Quatre graisses seulement, celles qui sont réellement chargées :
+A single typeface: **Raleway**. Four weights only — the ones actually loaded:
 
-| Poids | Graisse Raleway | Rôle | Exemples |
+| Weight | Raleway face | Role | Examples |
 |---|---|---|---|
-| `400` | Regular | corps de texte | `p`, `li`, `.sources`, captions |
-| `500` | Medium | sous-titres | `.lead`, `.sd-sub` |
-| `600` | SemiBold | titres | `h1`, `h2`, `.statement`, `.closing-title`, `.sd-title`, `blockquote` |
-| `700` | Bold | accents, micro-labels, chiffres | `h3`, `.eyebrow`, `.metric`, `.pill`, `.g-head`, `.annex-tag`… |
+| `400` | Regular | body text | `p`, `li`, `.sources`, captions |
+| `500` | Medium | subheadings | `.lead`, `.sd-sub` |
+| `600` | SemiBold | headings | `h1`, `h2`, `.statement`, `.closing-title`, `.sd-title`, `blockquote` |
+| `700` | Bold | accents, micro-labels, figures | `h3`, `.eyebrow`, `.metric`, `.pill`, `.g-head`, `.annex-tag`… |
 
-**Règle dure : aucun `font-weight` en dehors de `400 / 500 / 600 / 700`.**
-Un `font-weight:800` (ExtraBold) ou `900` (Black) n'est pas chargé — ni par le `<link>` Google Fonts
-(`wght@400;500;600;700`), ni par les quatre `@font-face` du mode stand-alone. Le navigateur retombe
-alors sur le 700 et lui applique un **gras synthétique** : les glyphes sont épaissis par le moteur de
-rendu, pas dessinés par le typographe. Ce n'est plus du Raleway. Si un ExtraBold est un jour
-nécessaire, il faut d'abord ajouter `800` à l'URL Google Fonts **et** livrer `Raleway-ExtraBold.ttf`
-dans `assets/fonts/` — jamais déclarer le poids seul.
+**Hard rule: no `font-weight` outside `400 / 500 / 600 / 700`.**
+A `font-weight:800` (ExtraBold) or `900` (Black) is not loaded — neither by the Google Fonts `<link>`
+(`wght@400;500;600;700`), nor by the four `@font-face` rules of stand-alone mode. The browser then
+falls back to 700 and applies **synthetic bold** to it: the glyphs are thickened by the rendering
+engine, not drawn by the type designer. That is no longer Raleway. If an ExtraBold ever becomes
+necessary, you must first add `800` to the Google Fonts URL **and** ship `Raleway-ExtraBold.ttf`
+in `assets/fonts/` — never declare the weight on its own.
 
-Couleur du texte : **navy `#152B47`**, jamais du noir (règle de charte). Aucun `#000` dans le
-système ; `--muted` / `--subtle` sont des dérivés navy pour le texte secondaire.
+Text color: **navy `#152B47`**, never black (brand rule). No `#000` anywhere in the
+system; `--muted` / `--subtle` are navy derivatives for secondary text.
 
 ---
 
@@ -61,44 +61,44 @@ Set the theme on `<main class="deck ...">`:
 
 Per-slide accent (rhythm): add `dark` to a slide in a light deck, or `light` to a slide in a dark deck. `.light` opts the slide out of `theme-dark` back to the light styling.
 
-### Lisibilité sur fond foncé — l'invariant des deux chemins
+### Legibility on a dark background — the two-path invariant
 
-Trois surfaces sont foncées : `.cover`, une slide d'accent `.dark` dans un deck
-clair, et une slide de contenu d'un deck `theme-dark`. **Toute règle de couleur
-écrite pour l'une doit être écrite pour les autres**, dans la couche
-« COUCHE FONCÉE COMMUNE » du bloc CSS, avec les deux sélecteurs sur la même
-règle. La couche `theme-dark` a été créée par duplication de la cascade `.dark`,
-et les règles ajoutées ensuite ne sont parties que d'un côté : `.statement
-strong` restait en `--green` `#007D36` sur navy, soit **2,11:1**, sous le
-plancher WCAG AA de 3:1 en gros texte. Invisible en séance.
+Three surfaces are dark: `.cover`, a `.dark` accent slide inside a light deck,
+and a content slide of a `theme-dark` deck. **Any color rule written for one
+must be written for the others**, in the
+"COUCHE FONCÉE COMMUNE" layer of the CSS block, with both selectors on the same
+rule. The `theme-dark` layer was created by duplicating the `.dark` cascade,
+and rules added afterwards only landed on one side: `.statement
+strong` stayed `--green` `#007D36` on navy, i.e. **2.11:1**, below the
+WCAG AA floor of 3:1 for large text. Invisible in the room.
 
-Seuls les composants dont le texte se pose **à même le fond de slide** ont
-besoin d'une variante foncée. Un composant qui porte son propre fond clair
+Only components whose text sits **directly on the slide background** need a
+dark variant. A component that carries its own light background
 (`card`, `check-card`, `chart-card`, `agenda-item`, `brick`, `mini-table`,
-`market-cell`, `readiness-rail`, `pill`, `provider-tag`) n'en a pas besoin :
-son backdrop n'est pas le dégradé.
+`market-cell`, `readiness-rail`, `pill`, `provider-tag`) does not:
+its backdrop is not the gradient.
 
-⚠️ **`step` est l'exception qui prouve la règle.** Il porte bien une carte
-blanche, mais il ne redéclare pas la couleur de son texte, contrairement à
-`card` qui a sa variante `dark-card`. Sur une slide d'accent, son `h3` et son
-`p` héritaient donc du `color:white` de la cascade foncée : blanc sur blanc, la
-slide paraissait vide à l'écran. Sa variante est désormais dans la couche
-commune. Porter son propre fond ne suffit pas — **il faut aussi porter sa
-couleur de texte.**
+⚠️ **`step` is the exception that proves the rule.** It does carry a white
+card, but it does not redeclare its text color, unlike
+`card` which has its `dark-card` variant. On an accent slide, its `h3` and its
+`p` therefore inherited `color:white` from the dark cascade: white on white, and
+the slide looked empty on screen. Its variant now lives in the common
+layer. Carrying your own background is not enough — **you must also carry your
+text color.**
 
-Correspondances à respecter quand un nouveau composant arrive :
+Mappings to respect when a new component arrives:
 
-| Sur fond clair | Sur fond foncé |
+| On a light background | On a dark background |
 |---|---|
-| `var(--navy)` (titre, valeur) | `white` |
-| `var(--muted)` (corps, légende) | `rgba(255,255,255,.78)` |
-| `var(--subtle)` (caption, en-tête de colonne) | `rgba(255,255,255,.72)` à `.78` |
-| `var(--green)` (accent, lien, icône) | `var(--pastel)` |
-| `var(--border)` (filet) | `rgba(255,255,255,.24)` |
+| `var(--navy)` (heading, value) | `white` |
+| `var(--muted)` (body, caption) | `rgba(255,255,255,.78)` |
+| `var(--subtle)` (caption, column header) | `rgba(255,255,255,.72)` to `.78` |
+| `var(--green)` (accent, link, icon) | `var(--pastel)` |
+| `var(--border)` (rule) | `rgba(255,255,255,.24)` |
 
-Le blanc est le plafond : quand un texte blanc ne passe toujours pas, ce n'est
-plus un problème de palette mais de fond — c'est le cas de l'en-tête de cover,
-traité par un voile navy et documenté à sa règle.
+White is the ceiling: when white text still does not pass, it is no longer a
+palette problem but a background one — that is the case of the cover header,
+handled by a navy scrim and documented at its rule.
 
 ---
 

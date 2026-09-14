@@ -1,51 +1,52 @@
-# Snetor HTML Slides — Mode stand-alone (hors ligne)
+# Snetor HTML Slides — Stand-alone mode (offline)
 
-Un deck Snetor charge par défaut trois choses depuis Internet : la police **Raleway** (Google Fonts),
-les icônes **Phosphor**, et si besoin **Chart.js** / **jsvectormap**. Dans un contexte hors ligne,
-tout ça tombe : le deck s'affiche en police système, sans icônes, et les charts restent vides.
+By default a Snetor deck loads three things from the internet: the **Raleway** font (Google Fonts),
+the **Phosphor** icons, and if needed **Chart.js** / **jsvectormap**. Offline, all of that falls
+over: the deck renders in a system font, without icons, and the charts stay empty.
 
-Ce document décrit comment produire un deck qui **ne dépend d'aucun réseau**.
-
----
-
-## 1. Quand basculer en stand-alone
-
-Basculer dès que l'une de ces conditions est vraie :
-
-- le collaborateur emploie les mots **stand-alone**, **autonome**, **hors ligne**, **offline**,
-  **sans internet**, **package**, ou demande un deck **à envoyer par mail** ;
-- le deck sera présenté chez un **client / fournisseur** ou dans une salle dont le Wi-Fi n'est pas garanti ;
-- le deck doit être **archivé** et rester lisible dans plusieurs années (les CDN bougent, les URL meurent) ;
-- le deck sort du périmètre Snetor (partage externe, annexe d'un appel d'offres).
-
-En cas de doute, poser la question au Step 1 du wizard (voir `SKILL.md`, question 5).
-
-> **Un deck de séance en salle Snetor n'a pas besoin du mode stand-alone.** Ne pas l'activer par
-> défaut : il coûte un dossier d'assets plus lourd et il interdit les charts Chart.js.
+This document describes how to produce a deck that **depends on no network**.
 
 ---
 
-## 2. Deux niveaux
+## 1. When to switch to stand-alone
 
-| Niveau | Ce que c'est | Quand |
+Switch as soon as one of these is true:
+
+- the user says **stand-alone**, **autonome**, **hors ligne**, **offline**, **sans internet**,
+  **package**, or asks for a deck **to send by e-mail** / **à envoyer par mail** ;
+- the deck will be shown at a **customer / supplier** site, or in a room whose Wi-Fi is not
+  guaranteed;
+- the deck must be **archived** and stay readable years from now (CDNs move, URLs die);
+- the deck leaves the Snetor perimeter (external sharing, tender annex).
+
+When in doubt, ask the question in Step 1 of the wizard (see `SKILL.md`, question 5).
+
+> **A deck for a meeting on Snetor premises does not need stand-alone mode.** Do not turn it on by
+> default: it costs a heavier assets folder and it rules out Chart.js charts.
+
+---
+
+## 2. Two levels
+
+| Level | What it is | When |
 |---|---|---|
-| **N1 — package autonome** *(défaut)* | 1 fichier `.html` + un dossier `assets/` **adjacent**. Zéro appel réseau. Se copie/se zippe d'un bloc. | Cas courant. Présentation hors ligne, archivage. |
-| **N2 — fichier unique** | Tout est encodé en `base64` **dans** le HTML. Un seul fichier, rien autour. | Envoi par mail, dépôt dans un outil qui n'accepte qu'un fichier. |
+| **L1 — self-contained package** *(default)* | 1 `.html` file + an **adjacent** `assets/` folder. Zero network calls. Copies and zips as one block. | Common case. Offline presentation, archiving. |
+| **L2 — single file** | Everything is `base64`-encoded **inside** the HTML. One file, nothing around it. | Sending by e-mail, uploading to a tool that accepts a single file only. |
 
-**N1 est le défaut.** Ne passer en N2 que si le collaborateur demande explicitement *un seul fichier*.
-N2 gonfle le HTML d'environ +33 % du poids des assets (les 4 polices seules pèsent ~740 ko en base64) :
-au-delà de ~5 Mo, le fichier devient pénible à ouvrir et à envoyer.
+**L1 is the default.** Only go to L2 if the user explicitly asks for *one single file*.
+L2 inflates the HTML by roughly +33 % of the asset weight (the 4 fonts alone weigh ~740 kB in
+base64): past ~5 MB the file becomes painful to open and to send.
 
 ---
 
-## 3. Chemins d'assets
+## 3. Asset paths
 
-En stand-alone, le dossier d'assets est **adjacent au HTML**, pas dans le `03-Outputs/assets/` partagé.
-Le deck et ses assets forment un couple qui se déplace ensemble.
+In stand-alone mode the assets folder sits **next to the HTML**, not in the shared
+`03-Outputs/assets/`. The deck and its assets form a pair that travels together.
 
 ```
-03-Outputs/<dossier>/
-├── 2026-07-23 - Mon deck - Audience.html
+03-Outputs/<folder>/
+├── 2026-07-23 - My deck - Audience.html
 └── assets/
     └── <deck-slug>/
         ├── snetor_full_logo.png
@@ -54,7 +55,7 @@ Le deck et ses assets forment un couple qui se déplace ensemble.
         └── Raleway-*.ttf
 ```
 
-Dans le CSS, les chemins deviennent donc `assets/<deck-slug>/…` (et non `../assets/<deck-slug>/…`) :
+In the CSS, paths therefore become `assets/<deck-slug>/…` (and not `../assets/<deck-slug>/…`):
 
 ```css
 --logo: url("assets/<deck-slug>/snetor_full_logo.png");
@@ -64,11 +65,11 @@ Dans le CSS, les chemins deviennent donc `assets/<deck-slug>/…` (et non `../as
 
 ---
 
-## 4. Polices — remplacer Google Fonts
+## 4. Fonts — replacing Google Fonts
 
-**Supprimer** les trois `<link>` Google Fonts du `<head>`. **Copier** les quatre fichiers depuis
-`assets/fonts/` du skill vers le dossier d'assets du deck, et **déclarer** les `@font-face` en tête du
-bloc `<style>`, avant les `:root` :
+**Delete** the three Google Fonts `<link>` tags from the `<head>`. **Copy** the four files from the
+skill's `assets/fonts/` into the deck's assets folder, and **declare** the `@font-face` rules at the
+top of the `<style>` block, before the `:root`:
 
 ```css
 @font-face { font-family:"Raleway"; src:url("assets/<deck-slug>/Raleway-Regular.ttf")  format("truetype"); font-weight:400; font-display:swap; }
@@ -77,23 +78,24 @@ bloc `<style>`, avant les `:root` :
 @font-face { font-family:"Raleway"; src:url("assets/<deck-slug>/Raleway-Bold.ttf")     format("truetype"); font-weight:700; font-display:swap; }
 ```
 
-Le reste du CSS est inchangé : `font-family: "Raleway", system-ui, …` continue de fonctionner.
+The rest of the CSS is unchanged: `font-family: "Raleway", system-ui, …` keeps working.
 
-> **Piège vérifié** : ne jamais retirer le `<link>` Google Fonts sans avoir posé les `@font-face`.
-> Le deck bascule silencieusement en police système et personne ne le voit avant la séance.
+> **Verified trap**: never remove the Google Fonts `<link>` without having declared the
+> `@font-face` rules first. The deck silently falls back to a system font and nobody notices it
+> before the meeting.
 
 ---
 
-## 5. Icônes — remplacer Phosphor
+## 5. Icons — replacing Phosphor
 
-Le CDN Phosphor est interdit en stand-alone. Deux stratégies, dans l'ordre de préférence :
+The Phosphor CDN is forbidden in stand-alone mode. Two strategies, in order of preference:
 
-**A. Se passer d'icônes** *(recommandé)*. Les composants du design system (`fact-card`, `card`,
-`brick`, `phase`…) sont conçus pour fonctionner sans icône : un chiffre, un titre, une phrase suffisent.
-Un deck aéré perd peu à ne pas avoir d'icônes.
+**A. Do without icons** *(recommended)*. The design system components (`fact-card`, `card`,
+`brick`, `phase`…) are built to work without icons: a figure, a title and a sentence are enough.
+An airy deck loses little by having no icons.
 
-**B. SVG inline.** Si une iconographie est indispensable, embarquer les SVG directement dans le markup.
-Garder la classe `ph-icon` pour hériter du cadre et des tons (`.navy`, `.teal`, dark-safe) :
+**B. Inline SVG.** If iconography is indispensable, embed the SVGs directly in the markup.
+Keep the `ph-icon` class to inherit the frame and the tones (`.navy`, `.teal`, dark-safe):
 
 ```html
 <span class="ph-icon" aria-hidden="true">
@@ -103,107 +105,106 @@ Garder la classe `ph-icon` pour hériter du cadre et des tons (`.navy`, `.teal`,
 </span>
 ```
 
-Récupérer les tracés sur <https://phosphoricons.com> (MIT) au moment de la génération, un par icône
-réellement utilisée. Ne pas embarquer une police d'icônes entière pour trois pictos.
+Fetch the paths from <https://phosphoricons.com> (MIT) at generation time, one per icon actually
+used. Do not embed a whole icon font for three pictograms.
 
 ---
 
-## 6. Charts — sans CDN
+## 6. Charts — without a CDN
 
-**Par défaut : ne pas utiliser Chart.js en stand-alone.** Le design system fournit des visuels
-purement CSS qui couvrent l'essentiel des besoins, et qui sont de toute façon la forme préférée
-pour un deck aéré (cf. règle 28 « densité par défaut ») :
+**By default: do not use Chart.js in stand-alone mode.** The design system ships purely CSS visuals
+that cover most of the needs, and that are the preferred form for an airy deck anyway (see rule 28,
+"default density"):
 
-| Besoin | Composant CSS |
+| Need | CSS component |
 |---|---|
-| Répartition en une barre | `.stacked` + `.legend` |
-| Comparaison de quelques valeurs | `.impact-bars` |
-| Coût / TCO exécutif | `macro cost-code` |
-| Un chiffre fort | `big-number` |
-| 4 métriques | `market-facts` / `fact-card` |
-| Séquence, jalons | `path`, `timeline`, `gantt`, `journey` |
+| Breakdown in a single bar | `.stacked` + `.legend` |
+| Comparing a few values | `.impact-bars` |
+| Executive cost / TCO | `macro cost-code` |
+| One strong figure | `big-number` |
+| 4 metrics | `market-facts` / `fact-card` |
+| Sequence, milestones | `path`, `timeline`, `gantt`, `journey` |
 
-**Si un chart Chart.js est réellement indispensable** (deep-dive, radar, matrice bulles) :
-télécharger `chart.umd.min.js` dans le dossier d'assets du deck et le référencer en local.
+**If a Chart.js chart really is indispensable** (deep-dive, radar, bubble matrix): download
+`chart.umd.min.js` into the deck's assets folder and reference it locally.
 
 ```html
 <script src="assets/<deck-slug>/chart.umd.min.js"></script>
 ```
 
-Le bootstrap et le lazy-init de `references/charts.md` restent identiques — y compris la règle 22
-(construire dans `requestAnimationFrame` à l'activation de la slide). **jsvectormap / world-map n'est
-pas supporté en stand-alone** : le fond de carte se charge depuis le réseau. Remplacer par une liste
-de pays ou une `market-strip`.
+The bootstrap and the lazy-init of `references/charts.md` are unchanged — including rule 22
+(build inside `requestAnimationFrame` on slide activation). **jsvectormap / world-map is not
+supported in stand-alone mode**: the base map loads from the network. Replace it with a country
+list or a `market-strip`.
 
 ---
 
-## 7. Niveau 2 — fichier unique (base64)
+## 7. Level 2 — single file (base64)
 
-Uniquement sur demande explicite. Encoder chaque asset et l'inliner :
+On explicit request only. Encode each asset and inline it:
 
 ```css
 @font-face { font-family:"Raleway"; src:url("data:font/ttf;base64,AAEAAA…") format("truetype"); font-weight:400; }
 :root { --logo: url("data:image/png;base64,iVBORw0…"); }
 ```
 
-Encodage (PowerShell) :
+Encoding (PowerShell):
 
 ```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("chemin\vers\asset.png")) | Set-Clipboard
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("path\to\asset.png")) | Set-Clipboard
 ```
 
-Contraintes à respecter :
-- images en `data:image/png;base64,` / `data:image/jpeg;base64,` ;
-- polices en `data:font/ttf;base64,` ;
-- **compresser le hero** avant encodage (une bannière en 1920px suffit) ;
-- annoncer le poids final au collaborateur — au-delà de ~5 Mo, proposer de revenir en N1.
+Constraints to respect:
+- images as `data:image/png;base64,` / `data:image/jpeg;base64,` ;
+- fonts as `data:font/ttf;base64,` ;
+- **compress the hero** before encoding (a 1920px banner is enough);
+- announce the final weight to the user — past ~5 MB, offer to go back to L1.
 
 ---
 
-## 8. Vérification obligatoire
+## 8. Mandatory verification
 
-Un deck stand-alone se vérifie, il ne se suppose pas. Trois contrôles, dans l'ordre :
+A stand-alone deck is verified, never assumed. Three checks, in order:
 
-**1. Aucune référence réseau restante.**
+**1. No network reference left.**
 
 ```powershell
 Select-String -Path "<deck>.html" -Pattern "https?://" |
   Where-Object { $_.Line -notmatch 'rel="noreferrer"' }
 ```
 
-Seuls les liens `href` cliquables vers des applications internes sont acceptables — ils sont
-volontaires et ne bloquent pas le rendu. Toute occurrence dans `<link>`, `<script src>`,
-`@import` ou `url()` est un défaut.
+Only clickable `href` links to internal applications are acceptable — they are deliberate and do
+not block rendering. Any occurrence in `<link>`, `<script src>`, `@import` or `url()` is a defect.
 
-**2. Chaque asset référencé existe sur le disque.**
+**2. Every referenced asset exists on disk.**
 
 ```powershell
 $html = "<deck>.html"; $dir = Split-Path $html
 Select-String -Path $html -Pattern 'assets/[A-Za-z0-9._/-]+' -AllMatches |
   ForEach-Object { $_.Matches.Value } | Sort-Object -Unique |
-  ForEach-Object { if (Test-Path (Join-Path $dir $_)) { "OK   $_" } else { "MANQUANT $_" } }
+  ForEach-Object { if (Test-Path (Join-Path $dir $_)) { "OK   $_" } else { "MISSING $_" } }
 ```
 
-**3. Rendu réel, réseau coupé.** Ouvrir le deck sous Edge et contrôler visuellement : la police doit
-être Raleway (et non une police système), le logo et le hero doivent s'afficher. En headless :
+**3. Real rendering, network off.** Open the deck in Edge and check it visually: the font must be
+Raleway (not a system font), and the logo and the hero must display. Headless:
 
 ```powershell
 & $edge --headless=new --disable-gpu --window-size=1600,1000 --virtual-time-budget=4000 `
         --screenshot="out.png" "file:///…/<deck>.html?slide=1"
 ```
 
-> Le contrôle 3 n'est pas optionnel : les contrôles 1 et 2 ne détectent pas une police mal déclarée.
+> Check 3 is not optional: checks 1 and 2 do not detect a badly declared font.
 
 ---
 
-## 9. Récapitulatif des écarts au mode normal
+## 9. Summary of the deviations from normal mode
 
-| Règle `SKILL.md` | Mode normal | Mode stand-alone |
+| `SKILL.md` rule | Normal mode | Stand-alone mode |
 |---|---|---|
-| Google Fonts | 3 `<link>` dans le `<head>` | supprimés, remplacés par 4 `@font-face` |
-| 13 — CDN libs | Chart.js / jsvectormap via CDN | interdit ; Chart.js vendoré si indispensable, jsvectormap non supporté |
-| 19 — Phosphor | `<i class="ph ph-…">` via CDN | pas d'icônes, ou SVG inline |
-| Step 3 — chemins | `../assets/<deck-slug>/` | `assets/<deck-slug>/` adjacent au HTML |
-| 22 — lazy-init charts | inchangée | inchangée (si Chart.js vendoré) |
+| Google Fonts | 3 `<link>` in the `<head>` | removed, replaced by 4 `@font-face` |
+| 13 — CDN libs | Chart.js / jsvectormap via CDN | forbidden; Chart.js vendored if indispensable, jsvectormap unsupported |
+| 19 — Phosphor | `<i class="ph ph-…">` via CDN | no icons, or inline SVG |
+| Step 3 — paths | `../assets/<deck-slug>/` | `assets/<deck-slug>/` next to the HTML |
+| 22 — chart lazy-init | unchanged | unchanged (if Chart.js is vendored) |
 
-Toutes les autres règles s'appliquent sans changement.
+All the other rules apply unchanged.

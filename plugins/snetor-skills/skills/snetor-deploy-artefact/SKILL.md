@@ -1,55 +1,54 @@
 ---
 name: snetor-deploy-artefact
 description: >
-  Déploie un artefact métier autonome (page HTML de power user, classeur devenu
-  application) vers la voie pavée Snetor - audite ce que l artefact ré-embarque,
-  sort les données personnelles vers l état partagé, branche identité et droits
-  sur Easy Auth, monte un contexte de build explicite, puis ouvre la PR qui ne
-  change que la balise d image. USE THIS SKILL dès qu un utilisateur veut mettre
-  en ligne ou mettre à jour une application métier venue d un fichier ("déployer
-  cet artefact", "nouvelle version du HTML", "le power user a livré une v2",
-  "mettre son outil sur la voie pavée", "deploy this artifact", "paved road"), et
-  AVANT de toucher au Dockerfile ou de lancer un build. Ne pas utiliser pour
-  onboarder une application qui a déjà son dépôt et sa CI - celle-ci patche sa
-  propre clé d image.
+  Deploys a self-contained business artifact (a power user HTML page, a spreadsheet
+  turned application) onto the Snetor paved road - audits what the artifact brings back
+  in, moves personal data out to the shared state, wires identity and permissions onto
+  Easy Auth, builds an explicit build context, then opens the PR that changes nothing but
+  the image tag. USE THIS SKILL as soon as a user wants to put online or update a business
+  application that came from a file ("deployer cet artefact", "nouvelle version du HTML",
+  "le power user a livre une v2", "mettre son outil sur la voie pavee", "deploy this
+  artifact", "ship this artifact", "the power user shipped a v2", "new version of the
+  HTML", "put their tool on the paved road", "paved road"), and BEFORE touching the
+  Dockerfile or launching a build. Do not use to onboard an application that already has
+  its own repo and CI - this one patches its own image key.
 ---
 
-# Déployer un artefact métier sur la voie pavée
+# Deploying a business artifact onto the paved road
 
-Un artefact métier est une page autonome, écrite par quelqu un du métier, qui
-marche déjà sur son poste. Le déployer n est pas un portage technique : c est
-faire tenir dans une architecture partagée un objet conçu pour circuler en pièce
-jointe.
+A business artifact is a self-contained page, written by someone from the
+business, that already works on their machine. Deploying it is not a technical
+port: it is making an object designed to travel as an attachment fit inside a
+shared architecture.
 
-**Le principe qui gouverne tout le reste : une image de conteneur est une copie
-durable.** Retirer une donnée du fichier après coup ne la retire pas des balises
-déjà poussées. Tout ce qui suit en découle.
+**The principle that governs everything else: a container image is a lasting
+copy.** Removing a piece of data from the file afterwards does not remove it from
+the tags already pushed. Everything below follows from that.
 
-## Ce qui rend ce déploiement différent d un autre
+## What makes this deployment different from any other
 
-Une v2 d artefact **ne descend pas de la version déployée.** Elle descend de la
-version locale de son auteur, qui n a jamais vu vos adaptations et n avait aucune
-raison de les connaître. Elle ré-embarque donc exactement ce que le déploiement
-précédent avait fait sortir.
+An artifact v2 **does not descend from the deployed version.** It descends from
+the local version of its author, who never saw your adaptations and had no reason
+to know about them. So it brings back in exactly what the previous deployment had
+taken out.
 
-C est le piège central, et il ne se voit pas : l artefact s ouvre, il est plus
-riche qu avant, tout va bien. Constaté en vrai — un artefact livré en v2
-ré-embarquait les trois noms sortis un mois plus tôt, plus cent adresses de plus.
+That is the central trap, and it does not show: the artifact opens, it is richer
+than before, all is well. Seen for real — an artifact delivered as a v2 brought
+back the three names taken out a month earlier, plus a hundred more addresses.
 
-## Étape 1 — Auditer, avant tout plan
+## Step 1 — Audit, before any plan
 
-Ne rien planifier avant d avoir comparé le nouvel artefact à celui qui tourne, sur
-**quatre axes**. Ils régressent ensemble, parce qu ils viennent tous du même
-fichier local.
+Plan nothing before comparing the new artifact to the one running, on **four
+axes**. They regress together, because they all come from the same local file.
 
-| Axe | Ce qu on compte | Ce que ça veut dire |
+| Axis | What to count | What it means |
 |---|---|---|
-| Données personnelles | noms, adresses e-mail, téléphones, identifiants | doit valoir 0, hors exception nommée |
-| Persistance | `localStorage`, `sessionStorage`, `indexedDB` | doit valoir 0 : l état est partagé ou il n existe pas |
-| Authentification | mots de passe, empreintes, `crypto.subtle`, écrans de connexion | doit valoir 0 : c est Easy Auth |
-| Diffusion | régénération du fichier, « télécharger et remplacer » | l image remplace le fichier, pas l inverse |
+| Personal data | names, email addresses, phone numbers, identifiers | must be 0, apart from a named exception |
+| Persistence | `localStorage`, `sessionStorage`, `indexedDB` | must be 0: the state is shared or it does not exist |
+| Authentication | passwords, hashes, `crypto.subtle`, login screens | must be 0: that is Easy Auth |
+| Distribution | regenerating the file, "download and replace" | the image replaces the file, not the other way round |
 
-Compter, pas parcourir. Sur les deux fichiers, côte à côte :
+Count, do not skim. On both files, side by side:
 
 ```bash
 for f in "ancien.html" "nouveau.html"; do
@@ -60,122 +59,121 @@ for f in "ancien.html" "nouveau.html"; do
 done
 ```
 
-Un `localStorage` à 18 et un `fetch(` à 0 disent tout : l artefact ignore qu il
-existe un serveur.
+A `localStorage` at 18 and a `fetch(` at 0 say everything: the artifact does not
+know a server exists.
 
-**Chercher ensuite le point de greffe.** Un artefact de power user mûr a presque
-toujours une frontière interne — un noyau, un registre de modules, une fonction de
-sérialisation. Les modules y lisent leur état au démarrage et le réécrivent au
-même endroit. Un seul motif, répété : on le remplace une fois. Chercher cette
-frontière **avant** de proposer une réécriture, elle existe plus souvent qu on ne
-croit.
+**Then look for the graft point.** A mature power user artifact almost always has
+an internal boundary — a core, a module registry, a serialization function.
+Modules read their state there at startup and write it back to the same place. A
+single pattern, repeated: it gets replaced once. Look for that boundary
+**before** proposing a rewrite, it exists more often than expected.
 
-## Étape 2 — Le contrôle de sortie, écrit avant la chirurgie
+## Step 2 — The exit check, written before the surgery
 
-Un script, versionné, pas une relecture. Une relecture ne rattrape pas la même
-chose deux fois de suite ; c est précisément pourquoi la v2 arrive chargée.
+A script, versioned, not a read-through. A read-through does not catch the same
+thing twice in a row; that is precisely why the v2 arrives loaded.
 
-Il affirme, sur le fichier, ce que l image n a pas le droit d emporter :
-identités attendues à zéro, `localStorage` et compagnie à zéro hors commentaire,
-et **le compte exact** de chaque exception.
+It asserts, on the file, what the image is not allowed to carry away: identities
+expected at zero, `localStorage` and friends at zero outside comments, and **the
+exact count** of every exception.
 
-**Le lancer d abord sur l artefact reçu, et vérifier qu il ÉCHOUE.** Un contrôle
-qui passe du premier coup ne contrôle rien : un motif mal échappé donne un `OK`
-rassurant sur un artefact plein d adresses. Lui donner aussi son propre auto-test
-— la fonction de contrôle doit détecter ce qu on lui injecte exprès.
+**Run it on the artifact as received first, and check that it FAILS.** A check
+that passes on the first try checks nothing: a badly escaped pattern gives a
+reassuring `OK` on an artifact full of addresses. Give it its own self-test too —
+the checking function must detect what gets injected into it on purpose.
 
-### Les exceptions se comptent
+### Exceptions are counted
 
-Quand le métier obtient de garder une donnée personnelle — l adresse de contact du
-propriétaire, typiquement —, la règle ne devient pas « aucune donnée, sauf… », ce
-qui ne veut plus rien dire. Elle devient un **compte exact**, avec sa date et son
-décideur :
+When the business wins the right to keep a piece of personal data — the contact
+address of the owner, typically —, the rule does not become "no data, except…",
+which no longer means anything. It becomes an **exact count**, with its date and
+its decision maker:
 
-> exactement 1 occurrence de ce nom et 3 de cette adresse, aucune autre.
+> exactly 1 occurrence of this name and 3 of this address, no others.
 
-Le compte fait plus que documenter : un dérapage signale que la donnée est
-**ressortie ailleurs**, typiquement dans une liste de destinataires.
+The count does more than document: a drift signals that the data has **come back
+out somewhere else**, typically in a recipient list.
 
-## Étape 3 — Sortir les données, sans écrire de code d amorçage
+## Step 3 — Take the data out, without writing seeding code
 
-Les données personnelles quittent l artefact et vont dans l état partagé. Le
-partage à tenir : **le code porte l organisation, la base porte qui occupe la
-place.** Des règles indexées sur `0/1/2` fonctionnent avant même que les noms
-soient saisis — l écran affiche « Collaborateur 1/2/3 » et rien ne casse.
+Personal data leaves the artifact and goes into the shared state. The split to
+hold: **the code carries the organisation, the database carries who holds the
+seat.** Rules indexed on `0/1/2` work before the names are even entered — the
+screen shows "Collaborateur 1/2/3" and nothing breaks.
 
-Pour les remettre : **utiliser les écrans de saisie qui existent déjà.** Un
-artefact qui portait 60 adresses de destinataires a forcément un écran pour les
-éditer, et son collage accepte probablement déjà le format Outlook. Écrire un
-mécanisme d amorçage serait du code neuf pour un geste unique.
+To put them back: **use the input screens that already exist.** An artifact that
+carried 60 recipient addresses necessarily has a screen to edit them, and its
+paste handler probably already accepts the Outlook format. Writing a seeding
+mechanism would be new code for a one-time gesture.
 
-Garder les données sorties dans un dossier de graines, **hors de l image**, avec un
-fichier qui dit pourquoi elles n y sont pas — sinon quelqu un ajoutera un
-`COPY . /app` un jour de fatigue. La graine doit avoir la forme que l écran
-d import attend : si l import *remplace* une liste, une graine réduite aux seules
-adresses effacerait tout le reste.
+Keep the extracted data in a seed folder, **outside the image**, with a file that
+says why it is not in there — otherwise someone will add a `COPY . /app` on a
+tired day. The seed must have the shape the import screen expects: if the import
+*replaces* a list, a seed reduced to the addresses alone would wipe out
+everything else.
 
-## Étape 4 — ⚠️ Le contexte de build est explicite, jamais implicite
+## Step 4 — ⚠️ The build context is explicit, never implicit
 
-**`az acr build` n honore pas `.dockerignore`.** Vérifié : un marqueur de 40 Mo
-posé dans un dossier ignoré fait passer le contexte annoncé de 6,58 à 46,6 Mio.
-Le dossier de graines part donc avec le contexte, vers le service de build.
+**`az acr build` does not honour `.dockerignore`.** Verified: a 40 MB marker
+dropped in an ignored folder moves the announced context from 6.58 to 46.6 MiB.
+So the seed folder leaves with the context, towards the build service.
 
-Le `Dockerfile` nomme ses `COPY`, donc rien n entre dans l image — mais **« pas
-dans l image » n est pas « pas transmis »**.
+The `Dockerfile` names its `COPY` lines, so nothing enters the image — but **"not
+in the image" is not "not transmitted"**.
 
-Ne pas construire depuis le dossier de travail. Copier les fichiers **nommés** dans
-un dossier temporaire, **afficher le contexte**, puis construire depuis là. Un
-contexte qu on voit vaut mieux qu un contexte qu on espère. Faire du contrôle de
-sortie un barrage : rien ne part au registre s il échoue, c est le dernier moment
-où la donnée n est pas encore devenue une couche d image.
+Do not build from the working folder. Copy the **named** files into a temporary
+folder, **print the context**, then build from there. A context you can see beats
+a context you hope for. Make the exit check a gate: nothing goes to the registry
+if it fails, that is the last moment where the data has not yet become an image
+layer.
 
-## Étape 5 — Un contrôle qui EXÉCUTE
+## Step 5 — A check that EXECUTES
 
-« Ça demande un navigateur connecté, donc c est invérifiable » est presque toujours
-faux, et ça coûte un déploiement non vérifié. Easy Auth et la base ne sont pas
-nécessaires pour éprouver la logique du client : ce sont deux réponses HTTP.
+"It needs an authenticated browser, so it cannot be verified" is almost always
+false, and it costs one unverified deployment. Easy Auth and the database are not
+needed to exercise the client logic: they are two HTTP responses.
 
-Servir la page depuis le disque et **stubber les routes** — l identité et l état
-partagé — puis jouer chaque grade. Un faux serveur d état en mémoire respectant le
-même contrat que le vrai, numéro de version compris, tient en trente lignes.
+Serve the page from disk and **stub the routes** — identity and shared state —
+then play every role level. An in-memory fake state server honouring the same
+contract as the real one, version number included, fits in thirty lines.
 
-**Le contrôle qui compte le plus : deux écritures concurrentes.** C est le seul
-défaut grave d un état partagé naïf, et le seul qui ne se voit pas quand il se
-produit — la dernière sauvegarde écrase le travail de l autre en silence. Vérifier
-que la seconde échoue, que l écran nomme l auteur, et que rien n est écrasé.
+**The check that matters most: two concurrent writes.** That is the only serious
+flaw of a naive shared state, and the only one that does not show when it happens
+— the last save silently overwrites the work of the other. Check that the second
+one fails, that the screen names the author, and that nothing is overwritten.
 
-Vérifier aussi ce qu on n aurait pas pensé à vérifier :
+Also check what you would not have thought to check:
 
-- **la fréquence d écriture.** Une fonction d enregistrement appelée à la frappe
-  fait un appel réseau par caractère, donc un conflit par caractère. Compter les
-  écritures pour une saisie.
-- **le grade le plus faible.** Il doit voir les chiffres et se faire refuser
-  l écriture avec un message qui nomme ce qu il faut demander.
-- **l artefact seul**, sans amorçage : le manque doit être annoncé, pas silencieux.
+- **the write frequency.** A save function called on every keystroke makes one
+  network call per character, so one conflict per character. Count the writes for
+  one input.
+- **the lowest role level.** It must see the figures and be refused the write
+  with a message naming what to ask for.
+- **the artifact on its own**, with no seeding: the gap must be announced, not
+  silent.
 
-Aucun contrôle statique ne remplace ça. Constaté : `node --check` vert, contrôle de
-sortie vert, et la page **morte au démarrage** — une suppression avait retiré une
-définition en laissant son appel. Seul le contrôle qui ouvre la page l a vue.
+No static check replaces that. Seen for real: `node --check` green, exit check
+green, and the page **dead at startup** — a deletion had removed a definition and
+left its call behind. Only the check that opens the page saw it.
 
-## Étape 6 — La PR ne change qu une chose
+## Step 6 — The PR changes one thing only
 
-Une balise d image. Le manifeste garde son nom, ses rôles, sa base, son
-`cost_center`. **Toute ressource ajoutée ou détruite dans le plan est un signal
-d arrêt.**
+One image tag. The manifest keeps its name, its roles, its database, its
+`cost_center`. **Any resource added or destroyed in the plan is a stop signal.**
 
-Ne pas renommer l application parce que le produit a changé de nom : renommer, c
-est un nouvel onboardage — application, groupes, URI de redirection, base — et l
-état déjà écrit ne suit pas. Un nom de clé n est pas un nom de produit ; la
-description du manifeste, elle, se met à jour.
+Do not rename the application because the product changed name: renaming is a new
+onboarding — application, groups, redirect URIs, database — and the state already
+written does not follow. A key name is not a product name; the manifest
+description, on the other hand, does get updated.
 
-Écrire dans le commentaire de la clé **ce que la balise apporte**, pas seulement
-son numéro. La personne qui lira ce fichier dans six mois cherche à savoir
-laquelle rétablir.
+Write in the comment of the key **what the tag brings**, not just its number.
+Whoever reads that file in six months is trying to find out which one to roll
+back to.
 
-## Découvrir les valeurs, ne pas les supposer
+## Discover the values, do not assume them
 
-Ne coder en dur ni registre, ni groupe de ressources, ni serveur. Les relever à l
-exécution :
+Hard-code neither a registry, nor a resource group, nor a server. Read them at
+run time:
 
 ```bash
 az acr list --query "[].name" -o tsv
@@ -183,34 +181,34 @@ az containerapp list --query "[].{nom:name, rg:resourceGroup, fqdn:properties.co
 az containerapp auth show -n <app> -g <rg> --query "identityProviders.azureActiveDirectory.validation.jwtClaimChecks.allowedGroups"
 ```
 
-Le manifeste de l application et la table des balises d image vivent dans le dépôt
-de la landing zone, sous `environments/<env>/`. Ce sont eux qui font foi.
+The application manifest and the image tag table live in the landing zone repo,
+under `environments/<env>/`. Those are the authority.
 
-## Tableau des justifications
+## Table of rationalisations
 
-| Ce qu on se dit | Ce qui est vrai |
+| What you tell yourself | What is true |
 |---|---|
-| « C est la même app avec des modules en plus » | Non : c est une autre lignée. Compter les quatre axes avant de le croire. |
-| « Je change la ligne `COPY` et je reconstruis » | C est ainsi qu on republie les données sorties au déploiement précédent. |
-| « J ai mis un `.dockerignore` » | Il ne protège que `docker build`. `az acr build` l ignore. |
-| « Les contrôles statiques sont verts » | Ils ne prouvent pas que la page s ouvre. Faire un contrôle qui exécute. |
-| « Le comportement authentifié demande un navigateur » | Deux routes stubbées suffisent. Nommer ce qui reste vraiment invérifiable. |
-| « Une seule adresse, c est le demandeur lui-même » | Alors elle s écrit comme exception datée et **comptée**, pas comme oubli. |
-| « Je saisirai les données plus tard » | Décrire le geste dans un fichier, sinon la donnée revient dans l artefact. |
-| « J écris un petit script d amorçage » | L écran de saisie existe déjà. Le code neuf, c est la dette. |
+| "It is the same app with extra modules" | No: it is another lineage. Count the four axes before believing it. |
+| "I change the `COPY` line and rebuild" | That is how the data taken out at the previous deployment gets republished. |
+| "I added a `.dockerignore`" | It only protects `docker build`. `az acr build` ignores it. |
+| "The static checks are green" | They do not prove the page opens. Run a check that executes. |
+| "Authenticated behaviour needs a browser" | Two stubbed routes are enough. Name what really cannot be verified. |
+| "A single address, it is the requester himself" | Then it is written as a dated and **counted** exception, not as an oversight. |
+| "I will enter the data later" | Describe the gesture in a file, otherwise the data comes back into the artifact. |
+| "I will write a small seeding script" | The input screen already exists. New code is the debt. |
 
-## Signaux d arrêt
+## Stop signals
 
-- On s apprête à lancer `az acr build .` depuis le dossier de travail.
-- Le contrôle de sortie passe du premier coup, avant toute modification.
-- Le plan Terraform annonce autre chose qu un changement de balise.
-- Le mot « invérifiable » est sur le point d être écrit.
-- On a modifié l artefact **après** avoir construit l image.
-- On s apprête à renommer l application pour suivre le nom du produit.
+- You are about to run `az acr build .` from the working folder.
+- The exit check passes on the first try, before any change.
+- The Terraform plan announces something other than a tag change.
+- The word "unverifiable" is about to be written.
+- The artifact was modified **after** the image was built.
+- You are about to rename the application to follow the name of the product.
 
-## Ce qui reste au métier, et se dit explicitement
+## What stays with the business, and is said explicitly
 
-Trois choses ne peuvent pas être faites depuis un poste d agent, et doivent être
-rendues comme telles, avec le geste exact : l amorçage des données par les écrans
-de saisie, l ouverture depuis un compte de chaque groupe, et le merge de la PR
-quand `merge = apply`. Les lister nommément vaut mieux qu un « à vérifier ».
+Three things cannot be done from an agent machine, and must be handed back as
+such, with the exact gesture: seeding the data through the input screens, opening
+it from an account in each group, and merging the PR when `merge = apply`. Naming
+them one by one beats a "to be checked".
