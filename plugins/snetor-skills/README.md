@@ -27,9 +27,9 @@ the point: a routine you have to remember is a routine you run once.
 | Skill | Checks | Triggers on |
 |---|---|---|
 | **`snetor-docs-close`** | Documentation standard on branch close: plan purged, specs arbitrated, lessons recorded, todo cleaned, router rewritten under 150 lines, index regenerated | before opening/merging a PR, "on clôture", "c'est fini", "close the branch" |
-| **`snetor-doc-vs-infra`** | Every infrastructure claim in the docs against a dated Azure execution — proven / unproven / contradicted | "d'après le HANDOFF", "le runbook dit que", "l'app est en ligne", before citing any infra state |
-| **`snetor-lessons-outillage`** | Turns repeated lessons into executable guardrails (hook, test) instead of more prose | "on s'est déjà fait avoir", "c'est la deuxième fois", récidive, `lessons.md` near its 300-line cap |
-| **`snetor-tests-degraissage`** | Dead modules, sleeping tests, constant assertions, duplicate coverage — with the before/after count | "la CI prend des plombes", "on a trop de tests", after a large refactor |
+| **`snetor-doc-vs-infra`** | Every infrastructure claim in the docs against a dated Azure execution — proven / unproven / contradicted | "according to the HANDOFF", "the runbook says", "d'après le HANDOFF", before citing any infra state |
+| **`snetor-lessons-to-guardrails`** | Turns repeated lessons into executable guardrails (hook, test) instead of more prose | "we have been burned by this before", "that is the second time", "on s'est déjà fait avoir", `lessons.md` near its 300-line cap |
+| **`snetor-test-pruning`** | Dead modules, sleeping tests, constant assertions, duplicate coverage — with the before/after count | "the CI takes forever", "we have too many tests", "la CI prend des plombes", after a large refactor |
 
 ## Installation
 
@@ -99,9 +99,9 @@ snetor-skills/
 │   │   └── SKILL.md
 │   ├── snetor-doc-vs-infra/         ← doc claims vs. real Azure executions
 │   │   └── SKILL.md
-│   ├── snetor-lessons-outillage/    ← lessons → executable guardrails
+│   ├── snetor-lessons-to-guardrails/ ← lessons → executable guardrails
 │   │   └── SKILL.md
-│   └── snetor-tests-degraissage/    ← dead-test removal
+│   └── snetor-test-pruning/          ← dead-test removal
 │       └── SKILL.md
 └── README.md
 ```

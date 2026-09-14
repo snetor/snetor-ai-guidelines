@@ -1,58 +1,58 @@
 ---
 name: snetor-doc-vs-infra
 description: >
-  Confronte ce que la documentation d un depot Snetor AFFIRME sur son infrastructure a ce
-  qu Azure a REELLEMENT execute - collecte chaque affirmation (un job tourne, une image est a
-  jour, une ressource est joignable, un circuit s applique), cherche l execution datee qui la
-  prouve, et classe en prouve / non prouve / contredit. USE THIS SKILL des qu il faut
-  s appuyer sur une affirmation d infrastructure ecrite quelque part - "d apres le HANDOFF",
-  "le runbook dit que", "ce job applique les migrations", "l app est en ligne", "la CI deploie" -
-  et des qu un utilisateur demande si la doc est a jour, si un runbook marche encore, ou lance
-  un chantier sur un depot avec de l infrastructure Azure. A utiliser AVANT de citer un etat
-  d infra, jamais apres. Ne pas utiliser pour verifier la coherence de la documentation avec
-  elle-meme - c est check_docs.py.
+  Confronts what the documentation of a Snetor repo CLAIMS about its infrastructure with what
+  Azure ACTUALLY ran - collects every claim (a job runs, an image is current, a resource is
+  reachable, a circuit applies), looks for the dated execution that proves it, and sorts it into
+  proven / unproven / contradicted. USE THIS SKILL whenever you are about to rely on an
+  infrastructure claim written somewhere - "according to the HANDOFF", "d apres le HANDOFF",
+  "the runbook says", "le runbook dit que", "this job applies the migrations", "ce job applique
+  les migrations", "the app is live", "l app est en ligne", "the CI deploys", "la CI deploie" -
+  and whenever a user asks if the docs are up to date, if a runbook still works, or starts work
+  on a repo that has Azure infrastructure. Use it BEFORE quoting any infra state, never after.
+  Do not use it to check the documentation against itself - that is check_docs.py.
 ---
 
-# La doc affirme, l'infra exécute
+# The docs claim, the infrastructure runs
 
-## Pourquoi cette routine existe
+## Why this routine exists
 
-C'est la récidive la plus coûteuse mesurée sur les dépôts Snetor — **cinq occurrences en huit
-jours** sur `snetor-pim`, toutes de la même forme : **une phrase écrite dans un document a été
-prise pour une exécution**.
+This is the most expensive repeat failure measured across the Snetor repos — **five occurrences in
+eight days** on `snetor-pim`, all of the same shape: **a sentence written in a document was taken
+for an execution**.
 
-- Un job Container App était décrit comme le circuit d'application des migrations. Il **n'avait
-  jamais été exécuté**, et son image figeait un schéma vieux de trois mois.
-- « `merge = apply` » était écrit dans une note de contexte. C'était **faux** : le `Terraform
-  Apply` partait en `workflow_dispatch` manuel.
-- Un compte de stockage était décrit comme « joignable ». Il rendait `blocked by network rules`.
-- **La plus chère** : « la source lue est la production S/4HANA ». L'hypothèse a tenu **deux mois**,
-  porté 6 941 fiches produit, les vocabulaires, l'axe de sécurité au niveau ligne et un audit livré
-  au MDM. Elle a été repérée par une utilisatrice métier, pas par l'équipe.
+- A Container App job was described as the circuit that applies the migrations. It had **never been
+  executed**, and its image froze a schema three months old.
+- "`merge = apply`" was written in a context note. It was **false**: `Terraform Apply` ran on a
+  manual `workflow_dispatch`.
+- A storage account was described as "reachable". It returned `blocked by network rules`.
+- **The most expensive one**: "the source being read is S/4HANA production". The assumption held for
+  **two months**, carried 6,941 product records, the vocabularies, the row-level security axis and
+  an audit delivered to the MDM team. It was caught by a business user, not by the team.
 
-Un runbook qui n'a jamais été exécuté n'est pas un runbook. Une ligne de `HANDOFF.md` n'est pas
-une mesure.
+A runbook that has never been executed is not a runbook. A line in `HANDOFF.md` is not a
+measurement.
 
-## Ce qu'il faut savoir avant de commencer
+## What you need to know before starting
 
-- ⚠️ **Cette routine ne se planifie pas dans le cloud.** Le token Entra expire à ~2 h, et les
-  opérations de suppression exigent une MFA fraîche. Elle se lance depuis le poste, connecté.
-- **Le premier `az` qui échoue après deux heures de session, c'est le token.** Ne pas chercher
-  ailleurs : `az login` d'abord.
-- ⛔ **Ne jamais tronquer une sortie `az` par un pipe** (`| tail`, `| head`, `| Select-Object`) :
-  le code de sortie est avalé avec. Le garde-fou `PreToolUse` le refuse — lire le motif, pas
-  contourner.
-- Sur un poste tunnelisé par Cato, le SQL sortant (1433) est bloqué : une vérification data-plane
-  passe par un job dans le VNet, pas depuis le poste.
+- ⚠️ **This routine cannot be scheduled in the cloud.** The Entra token expires after ~2 h, and
+  delete operations require fresh MFA. Run it from the workstation, signed in.
+- **The first `az` call that fails after two hours of session is the token.** Do not look anywhere
+  else: `az login` first.
+- ⛔ **Never truncate an `az` output through a pipe** (`| tail`, `| head`, `| Select-Object`): the
+  exit code gets swallowed with it. The `PreToolUse` guardrail refuses it — read the reason, do not
+  work around it.
+- On a workstation tunnelled through Cato, outbound SQL (1433) is blocked: a data-plane check goes
+  through a job inside the VNet, not from the workstation.
 
-## Séquence
+## Sequence
 
-1. **Collecter les affirmations d'infrastructure.** Balayer `CLAUDE.md`, `HANDOFF.md`,
-   `docs/live/runbooks/` et tout `README.md` de module : relever chaque énoncé qui prétend qu'un
-   job tourne, qu'une image est à jour, qu'une ressource est joignable, qu'un circuit s'applique,
-   qu'un environnement est peuplé. Les lister avec leur fichier et leur ligne.
+1. **Collect the infrastructure claims.** Sweep `CLAUDE.md`, `HANDOFF.md`, `docs/live/runbooks/`
+   and every module `README.md`: note every statement claiming that a job runs, that an image is
+   current, that a resource is reachable, that a circuit applies, that an environment is populated.
+   List them with their file and line.
 
-2. **Confronter chacune à une exécution datée.** Les commandes utiles :
+2. **Confront each one with a dated execution.** The useful commands:
 
    ```bash
    az containerapp job execution list -n <job> -g <rg> -o json
@@ -62,28 +62,28 @@ une mesure.
    gh run list --workflow <fichier.yml> --limit 5 --json conclusion,createdAt,event
    ```
 
-   Une affirmation est **prouvée** si une exécution réussie la porte, **avec sa date**. Sinon elle
-   est **non prouvée** — ce qui ne veut pas dire fausse.
+   A claim is **proven** if a successful execution carries it, **with its date**. Otherwise it is
+   **unproven** — which does not mean false.
 
-3. **Vérifier ce que les manifestes déclarent contre ce qui existe.** Un manifeste versionné
-   n'est **pas** l'état déployé : un job créé à la main n'est dans aucun manifeste, et un manifeste
-   modifié sans redéploiement ne change rien. Comparer le fichier au groupe de ressources.
+3. **Check what the manifests declare against what exists.** A versioned manifest is **not** the
+   deployed state: a job created by hand appears in no manifest, and a manifest edited without a
+   redeployment changes nothing. Compare the file with the resource group.
 
-4. **Ne rien corriger dans la doc sans mesure.** Une affirmation non prouvée se marque comme telle,
-   avec la date de la tentative de preuve. Elle ne se supprime pas et ne se réécrit pas au jugé.
+4. **Correct nothing in the docs without a measurement.** An unproven claim is marked as such, with
+   the date of the attempt to prove it. It is not deleted and not rewritten on a hunch.
 
-## Barrière de vérification
+## Verification barrier
 
-Chaque ligne du rapport porte **la commande qui l'établit et sa date**. Une ligne sans preuve
-d'exécution n'entre pas dans le rapport : elle entre dans la liste « non prouvé ».
+Every line of the report carries **the command that establishes it and its date**. A line with no
+proof of execution does not enter the report: it enters the "unproven" list.
 
-## Ce qu'il faut dire en fin de passe
+## What to report at the end of the pass
 
-Trois listes, dans cet ordre :
+Three lists, in this order:
 
-1. **Ce qui est prouvé** — l'affirmation, l'exécution qui la porte, sa date.
-2. **Ce qui est non prouvé** — l'affirmation, ce qui a été tenté, pourquoi ça n'a rien donné.
-3. **Ce qui est contredit** — l'affirmation, la mesure qui l'infirme. C'est la seule catégorie qui
-   appelle une correction immédiate de la doc, dans un commit dédié.
+1. **What is proven** — the claim, the execution that carries it, its date.
+2. **What is unproven** — the claim, what was attempted, why it came back empty.
+3. **What is contradicted** — the claim, the measurement that disproves it. This is the only
+   category that calls for an immediate correction of the docs, in a dedicated commit.
 
-⚠️ Ne jamais publier un chiffre sans son dénominateur et sa date.
+⚠️ Never publish a figure without its denominator and its date.

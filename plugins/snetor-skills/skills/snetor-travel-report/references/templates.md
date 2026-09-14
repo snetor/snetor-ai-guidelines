@@ -1,18 +1,17 @@
-# Templates de rapport de voyage Snetor
+# Snetor travel report templates
 
-Deux trames officielles : **Polymers** et **Chemicals**. Un voyage peut mélanger les deux
-(BU décidée **par client**, pas par voyage). Le template ordonne l'information à la fin —
-il ne limite pas ce que le sales peut dire. Tout ce qui est dit en plus est conservé
-(dans *Notes* ou en texte libre).
+Two official frames: **Polymers** and **Chemicals**. A trip can mix both (BU decided **per
+client**, not per trip). The template orders the information at the end — it does not limit
+what the sales rep can say. Everything said on top is kept (in *Notes* or in free text).
 
-> **Note de rendu.** Les colonnes et le « — » ci-dessous décrivent **quels champs existent** —
-> c'est une vue de référence, pas la mise en forme du rapport envoyé. Le **rapport final**
-> (celui que le sales colle dans Outlook) suit les règles de la section « Format du rapport
-> final » de `SKILL.md` : texte brut, **un bloc par produit** (pas de tableau). Les **attributs
-> produit** manquants y sont rendus **explicitement** (`not mentioned` si jamais évoqué,
-> `to confirm (…)` si le sales l'a oublié) pour faciliter l'extraction — jamais un « — » de
-> remplissage. Les **sections entièrement vides** (plan d'action, notes…) sont en revanche
-> **omises**. Ne reproduis donc pas les tableaux dans l'email.
+> **Rendering note.** The columns and the "—" below describe **which fields exist** — it is a
+> reference view, not the layout of the report that gets sent. The **final report** (the one the
+> sales rep pastes into Outlook) follows the rules of the "Final report format" section of
+> `SKILL.md`: plain text, **one block per product** (no table). Missing **product attributes**
+> are rendered there **explicitly** (`not mentioned` if never raised, `to confirm (…)` if the
+> sales rep forgot it) to ease extraction — never a filler "—". **Entirely empty sections**
+> (action plan, notes...), on the other hand, are **omitted**. So do not reproduce the tables in
+> the email.
 
 ---
 
@@ -81,13 +80,13 @@ Prospects to see next time:
 
 ---
 
-## Différence clé entre les deux blocs client
+## Key difference between the two client blocks
 
 | | Polymers | Chemicals |
 |---|---|---|
-| Cœur produit | **Consommation par grade** : Family / Sub-family / Grade / Application / Volume·mois | **Besoins par produit** : Product / Grade-spec / Volume·mois / Current supplier / Conditions |
-| Section spécifique | (recyclé dans Opportunities) | **Sourcing requests** (produits qu'ils veulent qu'on source) |
-| Notes | fournisseurs & concurrence, paiement, alertes | paiement & crédit, market intel, alertes |
+| Product core | **Consumption per grade**: Family / Sub-family / Grade / Application / Volume·month | **Needs per product**: Product / Grade-spec / Volume·month / Current supplier / Conditions |
+| Specific section | (recycled goes into Opportunities) | **Sourcing requests** (products they want us to source) |
+| Notes | suppliers & competition, payment, alerts | payment & credit, market intel, alerts |
 
-Le reste (en-tête, statut Client/Prospect, contact, opportunités, plan d'action, section
-marché) est commun.
+The rest (header, Client/Prospect status, contact, opportunities, action plan, market section)
+is common.

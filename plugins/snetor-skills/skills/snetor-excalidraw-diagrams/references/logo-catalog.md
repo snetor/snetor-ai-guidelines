@@ -9,8 +9,8 @@ up-to-date list. If something is missing, add a transparent-background PNG to th
 
 ## Snetor brand (`branding/`)
 `snetor_full_logo.png` (header), `snetor_full_logo_reversed.png` (on dark), `snetor_colors.png`,
-`snetor_shapes.png`, `Hero-banner-abstrait.jpg`. Le globe seul est proscrit par la charte : il ne
-s'utilise jamais sans le logotype, donc il n'est pas distribué.
+`snetor_shapes.png`, `Hero-banner-abstrait.jpg`. The globe on its own is banned by the brand
+guidelines: it is never used without the wordmark, so it is not shipped here.
 
 ## Azure — services (use for resource-group / service boxes)
 | File | Use for |

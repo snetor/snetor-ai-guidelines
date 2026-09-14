@@ -57,24 +57,24 @@ For "what we do" / "value proposition synthesis" slides. **Max 1 per deck.**
 <div class="bento animate d1">
   <article class="bento-cell big">
     <div class="eyebrow">Mission</div>
-    <h3>Accélérer l'IA dans la chaîne de valeur Snetor</h3>
-    <p>Un texte de synthèse plus long ici, occupant la plus grande cellule.</p>
+    <h3>Accelerate AI across the Snetor value chain</h3>
+    <p>A longer summary paragraph here, filling the largest cell.</p>
   </article>
   <article class="bento-cell">
     <span class="metric">12</span>
-    <p>Projets pilotes 2026</p>
+    <p>Pilot projects 2026</p>
   </article>
   <article class="bento-cell green">
-    <h3>Sécurité by design</h3>
-    <p>Données EU only.</p>
+    <h3>Security by design</h3>
+    <p>EU-only data.</p>
   </article>
   <article class="bento-cell tall">
     <h3>Roadmap</h3>
-    <p>POC → Pilote → Run → Scale</p>
+    <p>POC → Pilot → Run → Scale</p>
   </article>
   <article class="bento-cell dark">
     <span class="metric pastel">42%</span>
-    <p>Gain de productivité moyen.</p>
+    <p>Average productivity gain.</p>
   </article>
 </div>
 ```
@@ -134,18 +134,17 @@ Add to `<head>` once if the deck uses any `<i class="ph ...">` icon:
 
 The script auto-loads all six weight stylesheets. Single line, no bootstrap needed.
 
-⚠️ **En pratique, seule la graisse `regular` rend.** Mesuré en rendu réel : un
-`<i class="ph-fill ph-paperclip">` affiche un **carré vide** — la feuille de la
-graisse `fill` n'est pas servie, malgré ce que la doc amont annonce. Utiliser
-`ph` (regular) partout, y compris là où la règle 19 suggérait `ph-fill` pour
-donner du poids à une carte de KPI. Si un poids visuel est nécessaire, jouer sur
-la taille de l'icône et le fond de la pastille, pas sur la graisse.
+⚠️ **In practice, only the `regular` weight renders.** Measured on a real render: an
+`<i class="ph-fill ph-paperclip">` shows an **empty square** — the stylesheet for the
+`fill` weight is not served, whatever the upstream documentation claims. Use `ph`
+(regular) everywhere, including where rule 19 suggested `ph-fill` to give a KPI card
+more weight. If visual weight is needed, play with the icon size and the badge
+background, not with the weight.
 
-⚠️ **Ne jamais poser un glyphe texte d'opération dans une pastille ronde.** Les
-`+`, `×` et `=` de Raleway ont une hauteur d'œil bien moindre qu'une lettre : à
-`38px` dans un cercle de `52px`, ils paraissent minuscules. Passer par
-`ph-plus`, `ph-x`, `ph-equals`, dont l'épaisseur de trait est constante. C'est
-le défaut qui a fait reprendre le composant `calc` deux fois.
+⚠️ **Never put a text operator glyph inside a round badge.** Raleway's `+`, `×` and
+`=` have a much smaller x-height than a letter: at `38px` inside a `52px` circle they
+look tiny. Use `ph-plus`, `ph-x`, `ph-equals` instead, whose stroke width is constant.
+That is the defect that forced two reworks of the `calc` component.
 
 ### Component on fact-card
 
@@ -153,8 +152,8 @@ le défaut qui a fait reprendre le composant `calc` deux fois.
 <article class="fact-card animate d1">
   <i class="ph ph-trophy ph-icon"></i>
   <span class="metric counter" data-target="42" data-suffix="%">0%</span>
-  <h3>Croissance</h3>
-  <p>Sur 12 mois.</p>
+  <h3>Growth</h3>
+  <p>Over 12 months.</p>
 </article>
 ```
 

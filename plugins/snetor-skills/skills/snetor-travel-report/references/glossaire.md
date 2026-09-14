@@ -1,76 +1,84 @@
-# Glossaire Snetor — jargon rapport de voyage
+# Snetor glossary — travel report jargon
 
-Sert à **comprendre et normaliser** ce que dit le sales, pas à le réciter. Si un sales dit
-« du blow PE général », tu sais le rattacher à Family=PE / Application=blow. En cas de doute
-sur un grade précis, **signale-le** plutôt que de deviner.
+Used to **understand and normalise** what the sales rep says, not to recite it back. If a sales
+rep says "general blow PE" (in French: "du blow PE général"), you know how to map it to
+Family=PE / Application=blow. When in doubt about a precise grade, **flag it** rather than guess.
 
-Source : glossaire Snetor (extrait ciblé sur produits, commerce, conditions).
+Source: Snetor glossary (extract focused on products, trade, terms).
+
+Many entries below keep their **French form** next to the English one: the sales rep often
+dictates in French, and that is the word you will actually hear.
 
 ---
 
-## Hiérarchie produit (polymères)
+## Product hierarchy (polymers)
 
-**Famille → Sous-famille → Grade → Application.**
+**Family → Sub-family → Grade → Application.**
 
-- **Famille** : type de polymère. PE, PP, PS/EPS, PET, PA, POM, PVC, PU. Jamais un grade.
-- **Sous-famille** : LLDPE, HDPE, LDPE, mLLDPE, PP Homo, PP Copo (copolymère), PPH, PPC, PPR…
-- **Grade** : référence la plus précise (code qualité). Ex. `SABIC 218`, `Lotrene TR571`,
-  `HD5420GA`, `PVC K65`, `M8008UV`. Parfois distingué par un MFI.
-- **Application** : film, injection (inj), blow, roto (rotomoulage), raffia, thermoforming
-  (thermo), pipe, caps (bouchons), CSD (boissons gazeuses), drums (fûts), jericans…
-- **Vierge vs recyclé** : « virgin » = matière neuve ; intérêt recyclé = opportunité fréquente.
+- **Family**: polymer type. PE, PP, PS/EPS, PET, PA, POM, PVC, PU. Never a grade.
+- **Sub-family**: LLDPE, HDPE, LDPE, mLLDPE, PP Homo, PP Copo (copolymer), PPH, PPC, PPR...
+- **Grade**: the most precise reference (quality code). E.g. `SABIC 218`, `Lotrene TR571`,
+  `HD5420GA`, `PVC K65`, `M8008UV`. Sometimes told apart by an MFI.
+- **Application**: film, injection (inj), blow, roto (rotomoulding), raffia, thermoforming
+  (thermo), pipe, caps, CSD (carbonated soft drinks), drums, jerricans...
+- **Virgin vs recycled**: "virgin" = new material; interest in recycled = frequent opportunity.
 
-## Familles chemicals fréquentes
+## Frequent chemicals families
 
-TiO2 (dioxyde de titane), soude caustique (flakes/écaillée/perlée vs liquide), solvants
-(toluène, xylène, white spirit, IPA, IBA, MEK, acétone, acétate de butyle, hexane, MEG),
-résines (acrylique, alkyde, styrène acrylique), SLES, LABSA, CAB, CDEA, glycérine, MPG,
-vaseline / white mineral oil, C16/C18, soap noodles / bordillons, silicate de soude,
-soda ash, carbonate de calcium, terre décolorante / bleaching earth (Pure-Flo, Tonsil),
-hypochlorite de calcium/sodium, sulfate d'alumine, acide phosphorique/sulfurique/oxalique,
-perborate de soude, CMC, sel vacuum, éthanol.
+TiO2 (titanium dioxide / dioxyde de titane), caustic soda / soude caustique (flakes / écaillée /
+perlée vs liquid), solvents (toluene, xylene, white spirit, IPA, IBA, MEK, acetone, butyl
+acetate, hexane, MEG), resins (acrylic, alkyd, styrene acrylic), SLES, LABSA, CAB, CDEA,
+glycerine, MPG, petroleum jelly / white mineral oil (vaseline), C16/C18, soap noodles /
+bordillons, sodium silicate / silicate de soude, soda ash, calcium carbonate / carbonate de
+calcium, bleaching earth / terre décolorante (Pure-Flo, Tonsil), calcium/sodium hypochlorite,
+aluminium sulphate / sulfate d'alumine, phosphoric/sulphuric/oxalic acid, sodium perborate,
+CMC, vacuum salt, ethanol.
 
-## Attributs techniques
+## Technical attributes
 
-- **MFI (Melt Flow Index) / MI** : indice de fluidité d'un polymère. Différencie des grades
-  (ex. « MFI 8 », « MI 4 »). **MFR** est une variante de dénomination, à distinguer du MFI.
-- **COA (Certificate of Analysis)** / **TDS (Technical Data Sheet)** / **FDS / MSDS** (sécurité)
-  / **Stewardship** (conformité réglementaire) : documents produit échangés.
-- **REACH**, **ROHS**, **alimentarité (food conformity)** : exigences réglementaires.
+- **MFI (Melt Flow Index) / MI**: flow index of a polymer. Tells grades apart (e.g. "MFI 8",
+  "MI 4"). **MFR** is a naming variant, to be distinguished from MFI.
+- **COA (Certificate of Analysis)** / **TDS (Technical Data Sheet)** / **FDS / MSDS** (safety)
+  / **Stewardship** (regulatory compliance): product documents exchanged.
+- **REACH**, **ROHS**, **food conformity** (FR: alimentarité): regulatory requirements.
 
-## Unités & conditionnement
+## Units & packaging
 
-- **MT** = tonne métrique. Volumes souvent **par mois** sauf mention contraire.
-- **FCL (Full Container Loaded)** = container complet ; **LCL** = partiel.
-- **TC** = container (usage FR courant dans les rapports) ; **TC mix** = container de produits variés.
-- **KL** = kilolitre. **Bulk** = vrac. **Isotank** = conteneur citerne. **IBC**, **drum** (fût).
-- **TEU** = unité conteneur 20 pieds.
+- **MT** = metric ton. Volumes are usually **per month** unless stated otherwise.
+- **FCL (Full Container Loaded)** = full container; **LCL** = partial.
+- **TC** = container (common French usage in the reports); **TC mix** = container of mixed
+  products.
+- **KL** = kilolitre. **Bulk** = loose/in bulk. **Isotank** = tank container. **IBC**, **drum**.
+- **TEU** = 20-foot container unit.
 
 ## Incoterms
 
-- **CFR** (Cost and Freight) · **CIF** (+ assurance) · **FOB** (Free On Board) ·
+- **CFR** (Cost and Freight) · **CIF** (+ insurance) · **FOB** (Free On Board) ·
   **FCA** (Free Carrier) · **DDU** (Delivered Duty Unpaid) · **EXW**.
 
-## Conditions de paiement & crédit
+## Payment & credit terms
 
-- **LC (Letter of Credit / lettre de crédit)** ; **SBLC** (standby LC) ; **CAD** (cash against documents).
-- **« 90j date de BL »** / **« 60j date de facture »** : délai de paiement (BL = Bill of Lading,
-  date d'embarquement). **20/80** = acompte 20 % / solde 80 %.
-- **Assurance-crédit** (Allianz, etc.), **ligne de crédit**, **payment behavior** (good/bad).
-- **Traite avalisée / escomptable** : effet de commerce garanti par une banque.
+- **LC (Letter of Credit)**; **SBLC** (standby LC); **CAD** (cash against documents).
+- **"90 days from BL date"** / **"60 days from invoice date"** (FR: « 90j date de BL », « 60j
+  date de facture »): payment term (BL = Bill of Lading, shipment date). **20/80** = 20% down
+  payment / 80% balance.
+- **Credit insurance** (Allianz, etc.), **credit line**, **payment behavior** (good/bad).
+- **Avalised / discountable draft** (FR: traite avalisée / escomptable): bill of exchange
+  guaranteed by a bank.
 
-## Rôles & organisation
+## Roles & organisation
 
-- **GPM (Global Product Manager)** : responsable produit global (achats). Accompagne parfois le sales.
-- **GM / Country Manager** : responsable ventes régional / pays.
-- **Statut client** : **Client** (actif), **Prospect**, ou ancien client réactivé.
+- **GPM (Global Product Manager)**: global product owner (purchasing). Sometimes travels with
+  the sales rep.
+- **GM / Country Manager**: regional / country sales manager.
+- **Client status**: **Client** (active), **Prospect**, or reactivated former client.
 
-## Acteurs récurrents (fournisseurs / producteurs / concurrents cités)
+## Recurring players (suppliers / producers / competitors mentioned)
 
-Producteurs polymères : SABIC, Borealis/Borouge, Basell, ExxonMobil, SCG, Lotte, PTT,
+Polymer producers: SABIC, Borealis/Borouge, Basell, ExxonMobil, SCG, Lotte, PTT,
 Sinopec, Hanwha, Safripol, Marlex, Indorama, China Resources.
-Concurrents/traders : Muehlstein, M. Holland, Quantum, LEB, Tricon, Manuchar, Solevo.
-Chemicals : Dow (Dowanol), Sun Chemicals (DIC Group), Clariant (Tonsil), Oil Dril (Pure-Flo),
-Castel (éthanol), Eagle, MPC Prokym.
+Competitors/traders: Muehlstein, M. Holland, Quantum, LEB, Tricon, Manuchar, Solevo.
+Chemicals: Dow (Dowanol), Sun Chemicals (DIC Group), Clariant (Tonsil), Oil Dril (Pure-Flo),
+Castel (ethanol), Eagle, MPC Prokym.
 
-(Liste indicative — pas exhaustive. Capte tout nouvel acteur cité par le sales.)
+(Indicative list — not exhaustive. Capture any new player the sales rep mentions.)
