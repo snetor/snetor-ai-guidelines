@@ -42,17 +42,25 @@ def test_le_slug_reproduit_les_noms_reellement_observes(chemin, attendu):
 
 # --- refus n.1 : ne pas deviner -------------------------------------------------------------
 
+def _transcript(slug: str) -> str:
+    """Chemin de transcript monte avec le separateur de l'OS courant.
+
+    Le poste tourne sous Windows, la CI sous Linux : un chemin ecrit en dur avec des
+    antislashs se lit comme un seul nom de fichier sous POSIX, et le test passait a cote.
+    """
+    return str(pathlib.Path("racine") / ".claude" / "projects" / slug / "abc.jsonl")
+
+
 def test_la_convention_est_confirmee_par_le_transcript():
-    cwd = r"C:\Users\moi\depot"
-    transcript = r"C:\Users\moi\.claude\projects\C--Users-moi-depot\abc.jsonl"
+    cwd = str(pathlib.Path("Users") / "moi" / "depot")
+    transcript = _transcript(worktree_memory.slug_projet(cwd))
     assert worktree_memory.convention_verifiee(cwd, transcript) is True
 
 
 def test_une_convention_de_nommage_differente_est_refusee():
     """Si Claude Code changeait sa convention, le hook doit se desarmer, pas se tromper de cible."""
-    cwd = r"C:\Users\moi\depot"
-    transcript = r"C:\Users\moi\.claude\projects\un-hash-opaque-42\abc.jsonl"
-    assert worktree_memory.convention_verifiee(cwd, transcript) is False
+    cwd = str(pathlib.Path("Users") / "moi" / "depot")
+    assert worktree_memory.convention_verifiee(cwd, _transcript("un-hash-opaque-42")) is False
 
 
 def test_un_transcript_absent_refuse_la_verification():
