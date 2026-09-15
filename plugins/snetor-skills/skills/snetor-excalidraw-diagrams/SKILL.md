@@ -119,6 +119,89 @@ python <THIS-SKILL>/scripts/render_preview.py 01-mon-architecture.excalidraw 01-
 **Icons** — one clear icon per box; a row of 2–4 service icons under technical app boxes. Don't
 overcrowd. The toolkit auto-trims transparent margins and downscales, so icons size uniformly.
 
+## Composition rules — check these before you render
+
+These come from the Excalidraw community's own best-practice guides, and they are not decoration:
+a diagram of ours violated **seven of the eight** and that is exactly what made it look amateur.
+Go through the list before delivering. Every one of them is mechanical.
+
+| rule | what it means concretely |
+|---|---|
+| **Snap to a grid** | Every coordinate and every size is a multiple of 25 (ideally 50). Hand-tuned values like `44`, `46`, `34` are what makes a diagram look "composed by eye" — because it was. |
+| **Nothing below 14px** | Title 26–30, zone title 22, box label 20, description 15–17, annotation 14. A 12px caption is unreadable on a projector and reads as clutter even when it isn't. |
+| **Three accents, maximum** | One colour for the container, one per *opposing* idea. Everything else is grey (`#868E96`). A neutral is not an accent — and five accents means none of them signals anything. |
+| **60-30-10** | Roughly 60% white space. Tint only the zones that genuinely oppose each other; a container that holds other zones stays **white**, otherwise you stack three coloured fills and kill all contrast. |
+| **Boxes ≥ 120×80** | A 620×48 strip is not a box, it's a bar. Give content boxes real height or merge them. |
+| **Aspect ratio near 16∶9** | Target ~1800×1050. A 2400×780 canvas produces bands, not zones, and every slide that embeds it will letterbox it into illegibility. |
+| **Consistent gaps** | Same spacing between siblings, same padding inside every zone. Pick two values (e.g. 25 inside, 50 between) and never improvise a third. |
+| **No repeated element between siblings** | If all five boxes say "its own database", say it **once** in the zone subtitle. Fifteen identical chips is noise wearing the costume of information. |
+
+`roughness=0` is already the toolkit default, which is the right choice for documentation — the
+hand-drawn look belongs to brainstorming, not to a deck that goes to the DSI.
+
+**Check your logo files too.** `s4-hana.png` shipped with a transparency checkerboard *baked into
+the pixels* — someone had screenshotted an editor. It rendered as a grey grid behind the logo on
+every diagram that used it. If a logo looks dirty on a white background, open it and check: the fix
+is a flood-fill of light pixels from the edges (not a colour threshold, which would punch holes in
+white lettering inside the mark).
+
+## The house style: nested zones
+
+This is the default for an architecture diagram, and what makes ours look designed rather than
+drawn. Three rules, and they are worth more than any amount of extra content.
+
+**1. One frame per level of nesting, one colour per level.** The reader must see the nesting before
+reading a single label. Use `s.zone(...)` with `level=0,1,2…` (or an explicit `color`), which draws
+a coloured border, a very light tint, and a centred title in the border's colour. The level palette
+(`ZONE_LEVELS`) deliberately jumps hue — `NAVY → GREEN → AMBER → VIOLET → SKY` — because two
+neighbouring greens carry no information.
+
+**2. A logo sits ASTRIDE the frame's top edge.** `s.zone(..., logo="azure.png")` places it via
+`s.badge()`, which paints a white pill under the logo so it interrupts the border. This is the
+signature of the style: the logo belongs to the *boundary*, so it says what kind of place you are
+entering. A logo dropped inside the box would just be more content.
+
+**3. Beaucoup de vide.** What makes a diagram beautiful is what you leave out. Prefer one `s.chip()`
+per idea over a stack of labelled rows, and never repeat the same chip across sibling boxes — if
+all five applications have "its own database", say it *once* in the zone's subtitle.
+
+```python
+s.zone(90, 200, 1880, 560, "Notre compte Azure", color=NAVY, logo="azure.png",
+       subtitle="tout ce qui suit est facturé et gouverné ici")
+s.zone(134, 300, 470, 236, "L'ATELIER", color=GREEN, logo="azure-aca.png",
+       subtitle="aujourd'hui")
+s.chip(660, 424, 232, 68, "CRM")                      # the elementary brick
+s.logo_strip(1000, 900, [("sap.png", "SAP"), ("powerbi.png", "Power BI")])
+```
+
+**When NOT to nest.** Two things that are *not* inside each other must not be drawn inside each
+other. The Fabric diagram is the canonical case: the Microsoft 365 tenant and the Azure
+subscription are two separate frames side by side, joined by one arrow — drawing them nested would
+tell the reader that moving the bill moves the data, which is exactly the fear you are trying to
+kill.
+
+**Colour comes in pairs.** `ZONE_TINTS` maps every frame colour to its fill, and the pairs are
+lifted from Excalidraw's own palette rather than invented — a saturated border with a light fill of
+the same family. That pairing is what makes a render read as *Excalidraw* rather than as PowerPoint.
+An earlier version used near-white tints (`#F2F7F2`) and the zones stopped separating from the page
+at all: a frame is read by its border, but its fill still has to exist.
+
+**Vertical rhythm is a constant, not a judgement call.** `ZONE_TITLE_Y=28`, `ZONE_SUB_Y=64`,
+`ZONE_HEAD=110`, `ZONE_PAD=25`. Every zone starts its content at `y + ZONE_HEAD`, so sibling zones
+align horizontally without anyone computing it. Placing the first element by eye in each zone is the
+most visible — and least conscious — symptom of an improvised composition.
+
+**Zone sizing gotchas the toolkit handles for you** — all three were real defects caught by looking
+at a render, never by re-reading code:
+- A wide logotype (SAP S/4 HANA, Microsoft: 4–6∶1 ratios) produced a badge three times wider than a
+  square icon and covered the centred title. `badge(..., max_w=132)` caps the pill's *width* and
+  shrinks the height to match.
+- **Badge placement follows the zone's width.** Wide zone (≥600px): badge in the top-left corner,
+  title centred normally — the badge is far from the centre and does not collide. Narrow zone: there
+  is no room for both side by side, so the badge **centres itself** on the top edge and the title
+  stays centred underneath. An intermediate version pushed the title to the right of the badge
+  instead, and the resulting off-centre alignment was the first thing anyone noticed.
+
 ## Logos & icons
 
 Logos resolve from the shared Snetor asset set (the sibling `snetor-html-slides` skill), so there's a
