@@ -74,6 +74,43 @@ PALETTE = dict(green=GREEN, green_dark=GREEN_DARK, green20=GREEN20, green10=GREE
                emerald=EMERALD, pastel=PASTEL, white=WHITE, muted=MUTED, subtle=SUBTLE,
                border=BORDER)
 
+# ------------------------------------------------------------------ zone accents
+# Couleurs de CADRE pour les zones imbriquees. Le principe du style : une couleur
+# par niveau d'imbrication, pour qu'on lise l'emboitement sans lire les titres.
+#
+# Elles doivent se distinguer AU PREMIER COUP D'OEIL : deux verts voisins ne
+# donnent aucune information. Le vert et le navy Snetor ouvrent la serie, les
+# trois suivantes sont des accents choisis pour trancher en teinte tout en
+# restant sobres a cote de la charte.
+# Accents repris du nuancier Excalidraw, pas inventes : ces teintes sont concues
+# par paires (une bordure saturee, un fond tres clair de la meme famille) et
+# c'est ce qui donne au rendu son air d'Excalidraw plutot que de PowerPoint.
+AMBER="#E8590C"; VIOLET="#6741D9"; SKY="#1971C2"; CORAL="#E03131"
+GRAY="#868E96"
+ZONE_LEVELS = [NAVY, GREEN, AMBER, VIOLET, SKY]
+
+# Fonds associes. Ils sont CLAIRS mais pas delaves : une premiere version tirait
+# vers le blanc (#F2F7F2) et les zones ne se distinguaient plus du fond de page.
+# Un cadre se lit d'abord par sa bordure, mais son fond doit quand meme exister.
+ZONE_TINTS = {NAVY: "#F1F3F5", GREEN: "#EBFBEE", AMBER: "#FFF4E6",
+              VIOLET: "#F3F0FF", SKY: "#E7F5FF", EMERALD: "#E6FCF5",
+              BLUE_GREEN: "#E3FAFC", CORAL: "#FFF5F5", GRAY: "#F8F9FA"}
+
+# ------------------------------------------------------------- rythme vertical
+# Toutes les zones alignent leur contenu sur les MEMES offsets. Sans cette
+# constante, chaque zone place son premier element a l'oeil et le schema perd
+# son alignement horizontal — c'est le defaut le plus visible et le moins
+# conscient d'une composition improvisee.
+ZONE_TITLE_Y = 28      # ligne de base du titre, depuis le bord haut
+ZONE_SUB_Y = 64        # ligne de base du sous-titre
+ZONE_HEAD = 110        # ou commence le contenu d'une zone titree
+ZONE_PAD = 25          # marge interne laterale, partout
+
+
+def zone_color(level):
+    """Couleur de cadre pour un niveau d'imbrication (0 = le plus exterieur)."""
+    return ZONE_LEVELS[level % len(ZONE_LEVELS)]
+
 def _rid():
     return ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', k=20))
 def _nonce(): return random.randint(1, 2**31)
@@ -168,6 +205,109 @@ class Scene:
         self.rect(x, y, w, h, fill=fill, stroke=stroke)
         self.image(x+w/2, y+h*0.36, logo_h, logo)
         self.text(x+8, y+h-size*1.6, caption, size=size, color=color, align="center", w=w-16)
+
+    # ===================================================================== zones
+    # Le style "cadres imbriques" : un contenant par niveau, une couleur par
+    # niveau, un logo pose A CHEVAL sur le bord superieur pour dire de quelle
+    # technologie releve la zone. C'est ce chevauchement qui fait lire le
+    # schema comme une carte plutot que comme un tableau — le logo appartient
+    # a la frontiere, pas au contenu.
+
+    def zone(self, x, y, w, h, title=None, color=None, level=0, logo=None,
+             logo_h=38, size=17, tint=True, sw=2.5, subtitle=None, logo_x=56):
+        """Un cadre de zone : bordure coloree, fond tres clair, titre centre en haut,
+        logo optionnel a cheval sur le bord superieur gauche.
+
+        color prime sur level. Retourne (x, y, w, h) pour chainer les zones filles.
+        """
+        c = color or zone_color(level)
+        fill = ZONE_TINTS.get(c, "#F7F8F9") if tint else "transparent"
+        self.rect(x, y, w, h, fill=fill, stroke=c, sw=sw)
+        # Le badge occupe le coin superieur gauche : on centre le titre sur ce
+        # qui RESTE a sa droite, sinon il passe dessous des que la zone est
+        # etroite. Sur une zone large le decalage est imperceptible.
+        # Placement du badge selon la largeur, et c'est la seule facon propre :
+        #  - zone LARGE  : badge au coin haut-gauche, titre centre normalement.
+        #    Le badge est loin du centre, il ne gene pas.
+        #  - zone ETROITE : pas la place de mettre les deux cote a cote. Le badge
+        #    se CENTRE sur le bord haut et le titre reste centre dessous. Decaler
+        #    le titre a droite, comme dans une version precedente, donnait un
+        #    alignement de travers visible au premier coup d'oeil.
+        etroite = w < 600
+        if logo and etroite:
+            logo_x = w / 2
+        tx, tw = x + ZONE_PAD, w - 2 * ZONE_PAD
+        if title:
+            self.text(tx, y + ZONE_TITLE_Y, title, size=size, color=c,
+                      align="center", w=tw)
+        if subtitle:
+            self.text(tx, y + ZONE_SUB_Y, subtitle, size=max(14, int(size * 0.68)),
+                      color=SUBTLE, align="center", w=tw)
+        if logo:
+            # logo_x doit laisser la pastille blanche ENTIEREMENT a droite du coin :
+            # a 34 px elle debordait dans la marge et donnait un schema qui bave.
+            self.badge(x + logo_x, y, logo, logo_h)
+        return (x, y, w, h)
+
+    def badge(self, cx, cy, logo, logo_h=38, pad=9, max_w=132):
+        """Un logo pose a cheval sur une bordure, avec une pastille blanche dessous
+        qui interrompt le trait. A utiliser sur le bord superieur d'une zone.
+
+        max_w plafonne la LARGEUR de la pastille. Sans ce plafond, un logotype
+        allonge (SAP S/4 HANA, Microsoft : des ratios de 4 a 6 pour 1) produit a
+        hauteur egale une pastille trois fois plus large que celle d'une icone
+        carree, qui vient recouvrir le titre centre de la zone. On reduit alors la
+        hauteur pour tenir dans le plafond : mieux vaut un logo un peu plus petit
+        qu'un titre illisible."""
+        im = _prep(L(logo)); w0, h0 = im.size
+        w = logo_h * w0 / h0
+        if w > max_w:
+            logo_h = logo_h * max_w / w
+            w = max_w
+        self.rect(cx - w / 2 - pad, cy - logo_h / 2 - pad,
+                  w + 2 * pad, logo_h + 2 * pad,
+                  fill=WHITE, stroke="transparent", sw=1, rounded=True)
+        return self.image(cx, cy, logo_h, logo)
+
+    def chip(self, x, y, w, h, label, logo=None, color=NAVY, size=15, fill=WHITE,
+             logo_h=22, sw=2):
+        """La brique elementaire du style : boite arrondie, bordure fine coloree,
+        libelle centre, petit logo optionnel a gauche du texte."""
+        self.rect(x, y, w, h, fill=fill, stroke=color, sw=sw)
+        if logo:
+            im = _prep(L(logo)); lw = logo_h * im.size[0] / im.size[1]
+            tw = len(label) * size * 0.52
+            bloc = lw + 10 + tw
+            lx = x + (w - bloc) / 2
+            self.image(lx + lw / 2, y + h / 2, logo_h, logo)
+            self.text(lx + lw + 10, y + h / 2 - size * 0.62, label, size=size, color=color)
+        else:
+            self.text(x + 8, y + h / 2 - size * 0.62, label, size=size, color=color,
+                      align="center", w=w - 16)
+
+    def actor(self, cx, cy, label, logo=None, logo_h=42, size=14, color=MUTED):
+        """Un acteur externe : une icone et son nom dessous, sans cadre.
+        Sert a poser l'utilisateur ou un systeme tiers en marge du schema."""
+        if logo:
+            self.image(cx, cy, logo_h, logo)
+        self.text(cx - 70, cy + logo_h / 2 + 8, label, size=size, color=color,
+                  align="center", w=140)
+
+    def logo_strip(self, cx, y, entries, logo_h=40, gap=34, size=12, color=MUTED):
+        """Une rangee centree de logos legendes — les sources de donnees d'un schema.
+        `entries` est une liste de (nom_de_logo, legende)."""
+        dims = []
+        for name, _ in entries:
+            im = _prep(L(name)); dims.append(logo_h * im.size[0] / im.size[1])
+        cell = max(max(dims), 90) + gap
+        total = cell * len(entries)
+        x = cx - total / 2 + cell / 2
+        for (name, cap), _wd in zip(entries, dims):
+            self.image(x, y, logo_h, name)
+            if cap:
+                self.text(x - cell / 2 + 6, y + logo_h / 2 + 9, cap, size=size,
+                          color=color, align="center", w=cell - 12)
+            x += cell
 
     def arrow(self, x1, y1, x2, y2, color=BLUE_GREEN, label=None, sw=2, dashed=False):
         """A straight arrow from (x1,y1) to (x2,y2)."""
