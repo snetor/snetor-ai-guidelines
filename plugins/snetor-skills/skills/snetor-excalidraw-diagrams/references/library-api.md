@@ -45,6 +45,24 @@ Create one per diagram, add elements in back-to-front order (later = on top), th
 - `available_logos()` → sorted list of available file names.
 - Run `python scripts/excalidraw_snetor.py` to print the search dirs and the full list.
 
+## Nested-zone style
+
+The house style for architecture diagrams. See SKILL.md § "The house style: nested zones" for when
+to use it (and when not to nest).
+
+| call | what it draws |
+|---|---|
+| `zone(x, y, w, h, title, color=None, level=0, logo=None, subtitle=None, tint=True, sw=2.5, size=17, logo_h=38, logo_x=56)` | a coloured frame with a light tint, a centred title in the frame colour, an optional subtitle, and an optional logo astride the top edge. Returns `(x, y, w, h)`. `color` wins over `level`. |
+| `badge(cx, cy, logo, logo_h=38, pad=9, max_w=132)` | a logo on a white pill, meant to straddle a border. `max_w` caps the pill **width** and shrinks the height to fit — without it a wide logotype covers the zone title. |
+| `chip(x, y, w, h, label, logo=None, color=NAVY, size=15, sw=2, logo_h=22)` | the elementary brick: rounded box, thin coloured border, centred label, optional small logo to the left of the text. |
+| `actor(cx, cy, label, logo=None, logo_h=42)` | an external actor: an icon with its name underneath, no frame. |
+| `logo_strip(cx, y, entries, logo_h=40, gap=34)` | a centred row of captioned logos. `entries` is a list of `(logo_name, caption)`. |
+
+**Level palette** — `ZONE_LEVELS = [NAVY, GREEN, AMBER, VIOLET, SKY]`, plus `CORAL`. Hues jump on
+purpose: the nesting must be legible before any label is read. `zone_color(level)` wraps around.
+`ZONE_TINTS` maps each frame colour to its very light fill — a frame is read by its **border**, the
+fill must never compete with the content.
+
 ## Recipes
 
 **Container with two layered bands** (the standard architecture look):
