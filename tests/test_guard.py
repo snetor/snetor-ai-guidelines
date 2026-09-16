@@ -378,3 +378,64 @@ def test_le_corps_d_un_heredoc_est_bien_retire_de_la_commande():
     nettoye = guard._sans_corps_heredoc(commande)
     assert "--force" not in nettoye
     assert "echo fini" in nettoye
+
+
+# --- cas ajoutes apres la montee du fork Twenty (2026-09-14 au 2026-09-16) --------------------
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        'az postgres flexible-server parameter set -g rg-twenty-dev -s psql-twenty-dev '
+        '-n azure.extensions -v "uuid-ossp,unaccent,citext"',
+        "az mysql flexible-server parameter set -n sql_mode -v ANSI --resource-group rg-x "
+        "--server-name srv-x",
+    ],
+)
+def test_un_parametre_de_serveur_pose_en_cli_est_refuse(commande, hors_main):
+    """Terraform retablit la valeur declaree au prochain apply, et personne ne le voit passer.
+
+    Incident du 2026-09-15. `citext` a ete ajoutee a `azure.extensions` par
+    `az postgres flexible-server parameter set`. Le `terraform apply` suivant a retabli
+    `uuid-ossp,unaccent` — la valeur du module — QUELQUES MINUTES avant que le job de migration
+    Twenty ne tourne. La migration a echoue une seconde fois pour exactement la meme cause,
+    apres qu'elle eut ete « corrigee ». ~40 minutes et un cycle de migration.
+    """
+    v = verdict(commande)
+    assert v is not None, f"non attrape : {commande}"
+    assert v[0] == "deny"
+    assert "terraform" in v[1].lower(), "le motif doit nommer la cause, pas dire « interdit »"
+
+
+def test_une_virgule_dans_command_de_containerapp_job_est_refusee(hors_main):
+    """`az` ne prend qu'UNE valeur : la virgule n'est pas un separateur, et l'echec est muet.
+
+    Incident du 2026-09-15. `az containerapp job start --command "-c","script"` : le conteneur
+    demarre sans rien executer et rend `Failed` SANS UN SEUL LOG. Quatre tentatives, 1 h 30.
+    Le shape fautif est la virgule ENTRE DEUX VALEURS CITEES — une liste ecrite comme en Python.
+    """
+    v = verdict(
+        'az containerapp job start -n caj-twenty-migrate-dev -g rg-twenty-dev '
+        '--command "/bin/sh","-c","yarn command:prod upgrade"'
+    )
+    assert v is not None, "non attrape"
+    assert v[0] == "deny"
+    assert "virgule" in v[1].lower()
+
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        # Lire un parametre n'ecrit rien : seul `set` entre en conflit avec Terraform.
+        "az postgres flexible-server parameter show -n azure.extensions -g rg-x -s srv-x",
+        "az postgres flexible-server parameter list -g rg-x -s srv-x -o json",
+        # UNE valeur, meme si elle contient une virgule a l'interieur des memes guillemets.
+        'az containerapp job start -n caj-x -g rg-x --command "/bin/sh -c \'echo a,b\'"',
+        # Un `start` sans `--command` n'a aucun moyen de porter le defaut.
+        "az containerapp job start -n caj-twenty-migrate-dev -g rg-twenty-dev",
+        # Une autre commande `az` qui porte une liste separee par des virgules, legitimement.
+        'az containerapp job start -n caj-x -g rg-x --env-vars "A=1,B=2"',
+    ],
+)
+def test_les_commandes_az_legitimes_passent_toujours(commande, hors_main):
+    """Un faux positif coute plus cher que le piege qu'il couvre : il apprend a contourner."""
+    assert verdict(commande) is None, f"faux positif : {commande}"
