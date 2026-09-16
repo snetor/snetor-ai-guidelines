@@ -378,3 +378,55 @@ def test_le_corps_d_un_heredoc_est_bien_retire_de_la_commande():
     nettoye = guard._sans_corps_heredoc(commande)
     assert "--force" not in nettoye
     assert "echo fini" in nettoye
+
+
+# --- quatrieme faux positif du garde-fou (2026-09-16) ----------------------------------------
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        # L'incident : creer la PR du hook de session Azure. `az` est DANS LE TITRE.
+        'gh pr create --title "garder la session az vivante, y compris en cours de sequence" '
+        "--body-file corps.md | tail -2",
+        # Meme forme, sur un message de commit.
+        'git commit -m "documenter az login dans le runbook" | head -3',
+        # Et sur une simple recherche de texte.
+        "grep -rn 'az account show' docs/ | head -20",
+        # La regle soeur portait le meme defaut : elle est resserree du meme geste.
+        'git commit -m "toujours lire gh pr checks ligne par ligne" | head -3',
+    ],
+)
+def test_le_mot_az_dans_un_argument_n_est_pas_une_commande_az(commande, hors_main):
+    """Rencontre le 2026-09-16 : `\\baz\\b` matche « la session az vivante » dans un titre de PR.
+
+    Le garde-fou a refuse la creation de la pull request qui livrait precisement le hook de
+    session Azure. Quatrieme faux positif de la famille — les trois premiers (14/08, 17/08,
+    30/08) ont chacun leur test plus haut.
+
+    La cause est la meme a chaque fois : une regle qui lit ce que la commande TRANSPORTE au lieu
+    de ce qu'elle FAIT. `_sans_corps_heredoc` traite deja le cas du heredoc ; celui-ci est un
+    argument cite ordinaire. Le discriminant retenu est la POSITION : une commande commence une
+    ligne ou suit un separateur (`;`, `&&`, `||`, `|`, `(`), jamais une simple espace.
+
+    ⚠️ Volontairement etroit. `REQUESTS_CA_BUNDLE=... az account show` n'est plus vu — un
+    prefixe de variable d'environnement n'est pas un separateur. C'est le bon sens du compromis :
+    un refus manque coute un pipe tronquant de plus, un refus a tort apprend a contourner le
+    garde-fou.
+    """
+    assert verdict(commande) is None, f"faux positif : {commande}"
+
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        "az containerapp job execution list -n caj-pim-migrate-dev | tail -5",
+        "cd \"C:/Users/x/depot\" && az acr task list-runs --registry acrx | head -3",
+        "terraform plan ; az account show | tail -1",
+        "$(az account show) | head -2",
+    ],
+)
+def test_un_vrai_az_en_position_de_commande_reste_refuse(commande, hors_main):
+    """La moitie qui compte autant : resserrer ne doit pas desarmer."""
+    v = verdict(commande)
+    assert v is not None, f"non attrape : {commande}"
+    assert v[0] == "deny"
