@@ -68,3 +68,35 @@ def test_le_clone_lit_son_code_de_retour(source):
         "`git clone` ne verifie pas `$LASTEXITCODE` : un clone echoue passerait pour un succes "
         "jusqu'au `Test-Path` suivant, avec un message sans rapport."
     )
+
+
+def test_le_controle_de_jeton_azure_est_branche_aux_DEUX_evenements(source):
+    """Le branchement `PreToolUse` est celui qui traite l'incident, et il est facile a perdre.
+
+    Le 2026-09-15, la session `az` a expire deux fois EN PLEINE SEQUENCE de montee du fork Twenty
+    (`AADSTS70043`, duree de vie 7200 s). Au demarrage de session, le jeton etait vivant les deux
+    fois : un controle uniquement en `SessionStart` — ce que faisait l'ancien
+    `~/.azure-claude/az-ensure-login.ps1` — ne l'aurait pas vu.
+
+    Ce test echoue donc si quelqu'un retire le second branchement en pensant alleger, ce qui
+    ramenerait exactement le defaut d'avant.
+    """
+    bloc = re.search(
+        r"\$jetonDejaBranche\s*=\s*\$false(.*?)Write-Ok\s+\"Contr", source, re.DOTALL
+    )
+    assert bloc, "bloc de branchement du controle de jeton introuvable dans le deployeur"
+    corps = bloc.group(1)
+    assert re.search(r"\$cfg\.hooks\.SessionStart\s*=", corps), "branchement SessionStart absent"
+    assert re.search(r"\$cfg\.hooks\.PreToolUse\s*=", corps), (
+        "branchement PreToolUse absent : une expiration EN COURS de sequence ne serait pas vue, "
+        "ce qui est exactement l'incident du 2026-09-15."
+    )
+    assert "Bash|PowerShell" in corps, "le matcher PreToolUse doit viser les deux outils de shell"
+
+
+def test_le_controle_de_jeton_azure_est_idempotent(source):
+    """Le deployeur tourne plusieurs fois sur un meme poste : il ne doit pas empiler le hook."""
+    assert re.search(r"az_ensure_login\\?\.py.*\{\s*\$jetonDejaBranche\s*=\s*\$true", source), (
+        "la detection d'un branchement existant ne cherche pas `az_ensure_login.py` : une "
+        "deuxieme execution du deployeur ajouterait le hook une seconde fois."
+    )
