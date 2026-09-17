@@ -13,6 +13,14 @@ lit `~/.azure-claude/sp.env`, un fichier qui N'A JAMAIS EXISTE sur ce poste. Il 
 « `az login` manuel requis » et sortait en 0 — depuis le 2026-08-30. De plus il ne se declenchait
 qu'au demarrage de session, alors que l'incident est une expiration EN COURS de sequence.
 
+**Le 2026-09-17**, le repli lui-meme a ete instruit puis ABANDONNE. L identite `sp-claude-code-dev`
+n existait dans Entra sous aucune forme, et la creer aurait remplace une cle qui se perime toutes
+les deux heures par une cle valable jusqu en 2027, posee en clair sur le poste. C est exactement
+l ecart que le controle de frequence de connexion existe pour supprimer, et
+`azure-landing-zone/CLAUDE.md` avait deja tranche : « Pour un acces local, `az login` interactif. »
+Ce hook previent donc au bon moment, et ne repare rien — deux tests epinglent le fait que ni le
+message ni le code ne promettent le contraire.
+
 D'ou les trois proprietes que cette suite epingle :
 
 1. **Silencieux au vert, et GRATUIT.** Un hook qui lance `az` avant chaque commande double la
@@ -45,7 +53,6 @@ def sans_az(monkeypatch):
     def interdit(*_a, **_k):
         raise AssertionError("`az` a ete invoque alors que le cache devait suffire")
     monkeypatch.setattr(hook, "_interroger_az", interdit)
-    monkeypatch.setattr(hook, "_reconnecter", interdit)
 
 
 def _evenement(**champs) -> str:
@@ -128,41 +135,40 @@ def test_un_cache_qui_expire_bientot_relance_la_verification(monkeypatch):
 
 # --- ce qui doit etre dit, et comment --------------------------------------------------------
 
-def test_jeton_mort_et_sp_absent_nomme_le_fichier_qui_manque(monkeypatch, capsys):
-    """Le defaut trouve le 2026-09-16 : le repli ne pouvait pas fonctionner, et ne le disait pas.
+def test_jeton_mort_previent_sans_promettre_de_repli(monkeypatch, capsys):
+    """Le repli par service principal a ete instruit le 2026-09-17, puis ABANDONNE.
 
-    `sp.env` absent, le script PowerShell d'origine repondait « `az login` manuel requis » sans
-    jamais dire POURQUOI le repli automatique n'avait pas eu lieu.
+    L identite `sp-claude-code-dev` n existait pas dans Entra : ni service principal, ni
+    application, rien dans les `deletedItems`, et l empreinte du certificat ne figurait dans
+    AUCUNE des 141 app registrations du tenant. Le script PowerShell d origine promettait donc
+    depuis six semaines une reconnexion qui ne pouvait pas avoir lieu.
+
+    La creer aurait remplace une cle qui se perime toutes les deux heures par une cle valable
+    jusqu en 2027, posee en clair sur le poste — exactement l ecart que le controle de frequence
+    de connexion existe pour supprimer. `azure-landing-zone/CLAUDE.md` tranche deja :
+    « Pour un acces local, `az login` interactif. »
+
+    Ce test epingle la consequence : le message dit quoi faire, et ne promet rien d automatique.
     """
     monkeypatch.setattr(hook, "_expiration_en_cache", lambda: None)
     monkeypatch.setattr(hook, "_interroger_az", lambda: None)
-    monkeypatch.setattr(hook, "_config_sp", lambda: None)
     assert hook.traiter({"hook_event_name": "SessionStart"}) == 0
     sortie = capsys.readouterr().out
     assert "az login" in sortie
-    assert "sp.env" in sortie, "le motif doit nommer ce qui manque, pas dire « echec »"
+    assert "AADSTS70043" in sortie, "le motif doit nommer l erreur qu on verra vraiment"
+    for promesse in ("sp.env", "service principal sp-claude", "reconnecte"):
+        assert promesse not in sortie, (
+            f"le message promet encore un repli automatique ({promesse!r}) : il n existe pas, "
+            "et l avoir cru a coute six semaines de fausse securite"
+        )
 
 
-def test_jeton_mort_et_sp_present_tente_la_reconnexion(monkeypatch, capsys):
-    appels = []
-    reponses = iter([None, _dans(hours=2)])
-    monkeypatch.setattr(hook, "_expiration_en_cache", lambda: None)
-    monkeypatch.setattr(hook, "_ecrire_cache", lambda _d: None)
-    monkeypatch.setattr(hook, "_interroger_az", lambda: next(reponses))
-    monkeypatch.setattr(hook, "_config_sp", lambda: {"AZURE_CLIENT_ID": "id", "AZURE_TENANT_ID": "tid"})
-    monkeypatch.setattr(hook, "_reconnecter", lambda _c: appels.append("login") or True)
-    assert hook.traiter({"hook_event_name": "SessionStart"}) == 0
-    assert appels == ["login"]
-    assert "sp-claude-code-dev" in capsys.readouterr().out
-
-
-def test_une_reconnexion_qui_echoue_ne_bloque_pas(monkeypatch, capsys):
-    monkeypatch.setattr(hook, "_expiration_en_cache", lambda: None)
-    monkeypatch.setattr(hook, "_interroger_az", lambda: None)
-    monkeypatch.setattr(hook, "_config_sp", lambda: {"AZURE_CLIENT_ID": "id", "AZURE_TENANT_ID": "tid"})
-    monkeypatch.setattr(hook, "_reconnecter", lambda _c: False)
-    assert hook.traiter({"hook_event_name": "SessionStart"}) == 0
-    assert "az login" in capsys.readouterr().out
+def test_le_repli_par_service_principal_n_est_plus_dans_le_code(monkeypatch):
+    """Du code mort qui a l air d un filet de securite est pire que pas de filet."""
+    for disparu in ("_config_sp", "_reconnecter", "_manque", "CERTIFICAT", "CONFIG_SP"):
+        assert not hasattr(hook, disparu), (
+            f"`{disparu}` survit au retrait du repli : soit il sert, soit il ment."
+        )
 
 
 # --- ce qui ne doit jamais arriver -----------------------------------------------------------
