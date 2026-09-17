@@ -1,6 +1,6 @@
 # HANDOFF — snetor-ai-guidelines
 
-**Dernière révision :** 2026-09-07
+**Dernière révision :** 2026-09-17
 
 Routeur d état, pas un journal. L historique vit dans `git log`.
 
@@ -9,11 +9,18 @@ Routeur d état, pas un journal. L historique vit dans `git log`.
 Le repo distribue la configuration Claude Code de Snetor : les règles d équipe
 de `claude-config/`, importées dans chaque session depuis le `CLAUDE.md`
 personnel du poste, un style de sortie, un statusline, un script de déploiement
-poste, et le plugin `snetor-skills` (cinq skills) via le marketplace Claude
+poste, et le plugin `snetor-skills` (huit skills) via le marketplace Claude
 Code.
 
 Le standard de documentation est livré et appliqué à ce repo : `docs/live/`,
 `docs/dated/`, index généré, vérificateur en CI.
+
+`hooks/` porte trois hooks déployés sur tous les dépôts du poste : le garde-fou
+`guard.py`, la mémoire de worktree, et le contrôle de session Azure. Ils
+arrivent chacun avec leurs tests — c est la forme du dépôt, et elle ne se
+discute pas. Le principe qui les gouverne : **une règle qu un programme peut
+vérifier n a rien à faire en prose**, et chaque règle qui migre du texte vers le
+garde-fou est une règle qu on retire du texte.
 
 ## Prochaine action
 
@@ -39,6 +46,8 @@ de ce dépôt, qui est public.
 | Couleurs et lisibilité d un deck sur fond foncé | `plugins/snetor-skills/skills/snetor-html-slides/references/css-system.md` -> Lisibilité sur fond foncé |
 | Index complet de la documentation | `docs/README.md` |
 | Migrer un repo vers le standard | `docs/dated/decisions/2026-08-10-regles-de-migration-d-un-repo.md` |
+| Comprendre pourquoi une règle du garde-fou existe | `hooks/guard.py` — chaque motif cite son incident |
+| Savoir ce qu une montée de fork coûte vraiment | `docs/dated/decisions/2026-09-17-outillage-des-montees-twenty.md` |
 
 ## Décisions en attente
 
@@ -61,7 +70,7 @@ déploiement l écrase sans le dire. Éditer le repo, puis redéployer — et av
 de modifier un de ces fichiers, comparer les deux copies (`diff -q`), le poste
 pouvant être en avance sur le repo.
 
-## Sessions parallèlles
+## Sessions parallèles
 
 Un worktree par tâche. Ne jamais changer la branche du checkout principal, ne
 jamais pousser sur une branche dont la pull request est déjà mergée.
