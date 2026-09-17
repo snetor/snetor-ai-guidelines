@@ -70,6 +70,43 @@ def test_le_clone_lit_son_code_de_retour(source):
     )
 
 
+def test_le_deployeur_impose_nx_daemon_false(source):
+    """Le daemon Nx bloque le build sans ecrire un log : la variable qui le coupe est deployee.
+
+    Incident du 2026-09-14, montee du fork Twenty `twenty/v2.30.0` -> `twenty/v2.39.0` :
+    `nx build twenty-shared` est reste bloque 11 heures sur son etape `generateBarrels`, sans
+    ecrire une ligne de log ni consommer de CPU. Un blocage silencieux qui ressemble a une
+    lenteur, donc qu'on attend au lieu de le diagnostiquer. `NX_DAEMON=false` le debloque.
+
+    La variable est posee au niveau utilisateur, et non dans le fork : le
+    `.claude/settings.json` de `snetor/twenty` est un fichier AMONT — identique a
+    `upstream/main`, et reecrit 5 fois en 6 mois par Twenty. Y ecrire la variable fabriquerait
+    un point d'ancrage de plus a recoller a chaque montee.
+    """
+    bloc = re.search(r"\$snetorEnv\s*=\s*\[ordered\]@\{(.*?)^\s*\}", source, re.DOTALL | re.MULTILINE)
+    assert bloc, "bloc `$snetorEnv` introuvable dans le deployeur"
+    assert re.search(r"NX_DAEMON\s*=\s*'false'", bloc.group(1)), (
+        "`NX_DAEMON = 'false'` absent de `$snetorEnv` : sans lui, un `nx build` peut rester "
+        "bloque indefiniment sur son daemon, sans un log pour le dire."
+    )
+
+
+def test_les_variables_d_environnement_sont_fusionnees_une_a_une(source):
+    """Remplacer le bloc `env` entier effacerait les variables deja posees sur le poste.
+
+    Le settings utilisateur en porte d'autres (`MAX_THINKING_TOKENS` au 2026-09-16). Le
+    deployeur tourne en fusion, pas en reinitialisation : chaque cle s'ajoute avec `-Force`,
+    l'objet `env` ne se reassigne jamais en bloc.
+    """
+    assert re.search(
+        r"foreach\s*\(\$k\s+in\s+\$snetorEnv\.Keys\)[^\n]*\n\s*\$cfg\.env\s*\|\s*Add-Member[^\n]*-Force",
+        source,
+    ), (
+        "les cles de `$snetorEnv` ne sont pas ajoutees une a une avec `-Force` sur `$cfg.env` : "
+        "une reassignation en bloc effacerait les variables deja posees sur le poste."
+    )
+
+
 def test_le_controle_de_jeton_azure_est_branche_aux_DEUX_evenements(source):
     """Le branchement `PreToolUse` est celui qui traite l'incident, et il est facile a perdre.
 

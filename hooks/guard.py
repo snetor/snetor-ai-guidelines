@@ -75,6 +75,37 @@ COMMANDES = [
         "echoue — deux executions sont parties en mauvaise configuration.\n"
         "Faire : verifier le retour de l'update avant de demarrer.",
     ),
+    (
+        # Un parametre de serveur pose en CLI vit jusqu'au prochain `terraform apply`, qui
+        # retablit la valeur DECLAREE — et personne ne voit passer ce retablissement.
+        # `show` et `list` ne sont pas vises : lire n'entre en conflit avec rien.
+        re.compile(
+            r"\baz\s+(?:postgres|mysql)\s+flexible-server\s+parameter\s+set\b",
+            re.IGNORECASE,
+        ),
+        "Un parametre de serveur declare en Terraform est retabli a sa valeur declaree au "
+        "prochain apply, quel qu'en soit le motif. Le 15/09, `citext` posee ainsi dans "
+        "`azure.extensions` a ete effacee par un `terraform apply` QUELQUES MINUTES avant que le "
+        "job de migration ne tourne : la migration a echoue une seconde fois pour exactement la "
+        "meme cause, apres avoir ete « corrigee ».\n"
+        "Faire : ajouter le parametre DANS le module Terraform, puis un apply. "
+        "Lire reste libre (`parameter show`, `parameter list`).",
+    ),
+    (
+        # `az` ne prend qu'UNE valeur pour `--command` / `--args` : la virgule n'est pas un
+        # separateur. Le shape fautif est la virgule ENTRE DEUX VALEURS CITEES — une liste ecrite
+        # comme en Python. Une virgule A L'INTERIEUR d'une meme paire de guillemets est legitime.
+        re.compile(
+            r"\baz\s+containerapp\s+job\s+start\b[^\n]*--(?:command|args)\s+[^\n]*?[\"']\s*,\s*[\"']",
+            re.IGNORECASE,
+        ),
+        "Une virgule entre deux valeurs citees de `--command` / `--args` : `az` n'accepte qu'UNE "
+        "valeur, la virgule n'est pas un separateur. Le conteneur demarre sans rien executer et "
+        "rend `Failed` SANS UN SEUL LOG — quatre tentatives et 1 h 30 le 15/09, pour un echec qui "
+        "ne dit rien.\n"
+        "Faire : une seule chaine, le shell a l'interieur — "
+        "`--command \"/bin/sh -c 'yarn command:prod upgrade'\"`.",
+    ),
 ]
 
 # Ces trois-la ne sont pas des erreurs : ce sont des gestes difficilement reversibles, ou dont la

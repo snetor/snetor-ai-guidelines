@@ -703,6 +703,35 @@ function Invoke-Phase5-Snetor {
         $cfg.enabledPlugins | Add-Member -MemberType NoteProperty -Name $plugin -Value $true -Force
     }
 
+    # Variables d'environnement imposées aux sessions Claude Code.
+    #
+    # `NX_DAEMON = false` — le 2026-09-14, pendant la montée du fork Twenty de `twenty/v2.30.0`
+    # à `twenty/v2.39.0`, `nx build twenty-shared` est resté bloqué **11 heures** sur son étape
+    # `generateBarrels` : aucun log écrit, aucun CPU consommé. Un blocage silencieux ressemble à
+    # une lenteur, donc on l'attend au lieu de le diagnostiquer. Le daemon Nx en est la cause.
+    #
+    # Posée ici, au niveau utilisateur, et non dans le fork : le `.claude/settings.json` de
+    # `snetor/twenty` est un fichier **amont** — son contenu est identique à `upstream/main`, et
+    # Twenty l'a réécrit 5 fois en 6 mois. Y écrire la variable fabriquerait un point d'ancrage de
+    # plus à recoller à chaque montée, exactement ce que le fork cherche à éviter.
+    #
+    # Vérifié le 2026-09-16 : une clé `env` du settings utilisateur arrive bien dans une session
+    # ouverte dans le fork, alors même que le dépôt a son propre `settings.json` — un settings de
+    # projet ne masque que les clés qu'il déclare, et celui-là ne déclare pas `env`.
+    #
+    # Un dépôt qui voudrait le daemon le réactive dans son propre `.claude/settings.json`, qui
+    # prime sur celui-ci.
+    $snetorEnv = [ordered]@{
+        NX_DAEMON = 'false'
+    }
+
+    if (-not ($cfg.PSObject.Properties.Name -contains 'env')) {
+        $cfg | Add-Member -MemberType NoteProperty -Name 'env' -Value ([PSCustomObject]@{})
+    }
+    foreach ($k in $snetorEnv.Keys) {
+        $cfg.env | Add-Member -MemberType NoteProperty -Name $k -Value $snetorEnv[$k] -Force
+    }
+
     # Brancher le garde-fou en PreToolUse, sans toucher aux autres hooks du poste.
     #
     # ⚠️ Le détour par `runpy` n'est pas de la coquetterie : appeler le script directement
