@@ -813,6 +813,44 @@ python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/worktree_m
         Write-Ok "Mémoire de worktree branchée en SessionStart"
     }
 
+    # Brancher le contrôle de session Azure, en SessionStart ET en PreToolUse.
+    #
+    # Le 2026-09-15, pendant la montée du fork Twenty, la session `az` a expiré **deux fois en
+    # pleine séquence** (`AADSTS70043`, durée de vie 7200 s imposée par le contrôle de fréquence de
+    # connexion). Chaque expiration a interrompu l'owner au milieu d'un enchaînement. La règle
+    # « la session `az` expire après ~2 h » était écrite depuis L41 : c'est une récidive.
+    #
+    # ⚠️ Les DEUX branchements comptent, et le second est celui qui traite l'incident. Au démarrage
+    # de session, le jeton était vivant les deux fois — c'est en cours de séquence qu'il est tombé.
+    # Le hook ne coûte rien sur une commande qui ne parle pas à `az`, et lit une date d'expiration
+    # en cache le reste du temps : il n'invoque `az` que quand cette date approche.
+    #
+    # Même précaution `runpy` que pour les deux autres : un poste sans le fichier ne doit pas voir
+    # ses sessions échouer au démarrage, ni ses commandes bloquées.
+    $jetonCommande = @'
+python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/az_ensure_login.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
+'@.Trim()
+
+    $jetonDejaBranche = $false
+    foreach ($entree in @($cfg.hooks.SessionStart) + @($cfg.hooks.PreToolUse)) {
+        foreach ($h in @($entree.hooks)) {
+            if ($h.command -and $h.command -match 'az_ensure_login\.py') { $jetonDejaBranche = $true }
+        }
+    }
+
+    if ($jetonDejaBranche) {
+        Write-Info "Contrôle de session Azure déjà branché dans settings.json — inchangé"
+    } else {
+        $cfg.hooks.SessionStart = @($cfg.hooks.SessionStart) + ([PSCustomObject]@{
+            hooks = @([PSCustomObject]@{ type = 'command'; command = $jetonCommande; timeout = 90 })
+        })
+        $cfg.hooks.PreToolUse = @($cfg.hooks.PreToolUse) + ([PSCustomObject]@{
+            matcher = 'Bash|PowerShell'
+            hooks   = @([PSCustomObject]@{ type = 'command'; command = $jetonCommande; timeout = 90 })
+        })
+        Write-Ok "Contrôle de session Azure branché en SessionStart et PreToolUse"
+    }
+
     Set-JsonFile -Object $cfg -Path $settingsPath
     Write-Ok "settings.json configuré (plugins Snetor activés)"
 
