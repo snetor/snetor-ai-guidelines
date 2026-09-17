@@ -44,15 +44,31 @@ from pathlib import Path
 # a fait merger #95 sur du rouge, puis `az acr build | tail -20` a masque un token expire, puis la
 # meme erreur exactement sur #136. Trois fois en quatre jours.
 TRONQUE = r"(tail|head|Select-Object\s+-(First|Last))"
+
+# Une commande COMMENCE une ligne ou suit un separateur — jamais une simple espace.
+#
+# 🔴 Quatrieme faux positif de ce garde-fou, le 16/09. `\baz\b` matchait « la session az vivante »
+# dans le TITRE d'une pull request, et le garde-fou a refuse la creation de la PR qui livrait
+# precisement le hook de session Azure. Meme cause que les trois precedents : une regle qui lit ce
+# que la commande TRANSPORTE au lieu de ce qu'elle FAIT. `_sans_corps_heredoc` traite le heredoc ;
+# ceci traite l'argument cite ordinaire.
+#
+# ⚠️ Volontairement etroit : `REQUESTS_CA_BUNDLE=... az account show` n'est plus vu, un prefixe de
+# variable d'environnement n'etant pas un separateur. C'est le bon sens du compromis — un refus
+# manque coute un pipe tronquant de plus, un refus a tort apprend a contourner le garde-fou.
+DEBUT_DE_COMMANDE = r"(?:^|[\n;&|(]+\s*)"
+
 PIPE_QUI_AVALE = [
     (
-        re.compile(rf"\bgh\s+pr\s+checks\b[^|]*\|\s*{TRONQUE}", re.IGNORECASE),
+        re.compile(rf"{DEBUT_DE_COMMANDE}gh\s+pr\s+checks\b[^|]*\|\s*{TRONQUE}",
+                   re.IGNORECASE | re.MULTILINE),
         "Un pipe avale le code de sortie de `gh pr checks` : la commande rend vert meme quand un "
         "check est rouge. C'est ce qui a fait merger #95 et #136 sur du rouge.\n"
         "Faire : gh pr checks <n> --json name,state  puis LIRE chaque ligne.",
     ),
     (
-        re.compile(rf"\baz\s+[^|]*\|\s*{TRONQUE}", re.IGNORECASE),
+        re.compile(rf"{DEBUT_DE_COMMANDE}az(?:\.cmd)?\s+[^|]*\|\s*{TRONQUE}",
+                   re.IGNORECASE | re.MULTILINE),
         "Un pipe tronquant derriere `az` masque a la fois la fin de la sortie et le code de "
         "sortie. Incident : 20 minutes perdues sur un token expire invisible.\n"
         "Faire : rediriger vers un fichier, ou lire la sortie JSON en entier.",
@@ -74,6 +90,37 @@ COMMANDES = [
         "Un `;` entre `az ... update` et `az ... start` lance le job meme si la mise a jour a "
         "echoue — deux executions sont parties en mauvaise configuration.\n"
         "Faire : verifier le retour de l'update avant de demarrer.",
+    ),
+    (
+        # Un parametre de serveur pose en CLI vit jusqu'au prochain `terraform apply`, qui
+        # retablit la valeur DECLAREE — et personne ne voit passer ce retablissement.
+        # `show` et `list` ne sont pas vises : lire n'entre en conflit avec rien.
+        re.compile(
+            r"\baz\s+(?:postgres|mysql)\s+flexible-server\s+parameter\s+set\b",
+            re.IGNORECASE,
+        ),
+        "Un parametre de serveur declare en Terraform est retabli a sa valeur declaree au "
+        "prochain apply, quel qu'en soit le motif. Le 15/09, `citext` posee ainsi dans "
+        "`azure.extensions` a ete effacee par un `terraform apply` QUELQUES MINUTES avant que le "
+        "job de migration ne tourne : la migration a echoue une seconde fois pour exactement la "
+        "meme cause, apres avoir ete « corrigee ».\n"
+        "Faire : ajouter le parametre DANS le module Terraform, puis un apply. "
+        "Lire reste libre (`parameter show`, `parameter list`).",
+    ),
+    (
+        # `az` ne prend qu'UNE valeur pour `--command` / `--args` : la virgule n'est pas un
+        # separateur. Le shape fautif est la virgule ENTRE DEUX VALEURS CITEES — une liste ecrite
+        # comme en Python. Une virgule A L'INTERIEUR d'une meme paire de guillemets est legitime.
+        re.compile(
+            r"\baz\s+containerapp\s+job\s+start\b[^\n]*--(?:command|args)\s+[^\n]*?[\"']\s*,\s*[\"']",
+            re.IGNORECASE,
+        ),
+        "Une virgule entre deux valeurs citees de `--command` / `--args` : `az` n'accepte qu'UNE "
+        "valeur, la virgule n'est pas un separateur. Le conteneur demarre sans rien executer et "
+        "rend `Failed` SANS UN SEUL LOG — quatre tentatives et 1 h 30 le 15/09, pour un echec qui "
+        "ne dit rien.\n"
+        "Faire : une seule chaine, le shell a l'interieur — "
+        "`--command \"/bin/sh -c 'yarn command:prod upgrade'\"`.",
     ),
 ]
 
