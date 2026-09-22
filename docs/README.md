@@ -8,6 +8,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### À jour
 
+- [Convention de langue dans le code](live/code-conventions.md) — revu le 2026-09-22
 - [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-09
 
 ### Datés
@@ -19,6 +20,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### À jour
 
+- [Convention de langue dans le code](live/code-conventions.md) — revu le 2026-09-22
 - [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-09
 
 ### Datés
