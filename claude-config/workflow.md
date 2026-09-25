@@ -1,68 +1,67 @@
-# Workflow — méthode de travail générique
+# Workflow — general working method
 
-Règles valables sur tout projet. `deploy-claude.ps1` copie ce fichier vers
-`~/.claude/workflow.md` ; ne pas éditer cette copie, qui sera écrasée.
+These rules apply across projects. `deploy-claude.ps1` copies this file to
+`~/.claude/workflow.md`; do not edit that generated copy.
 
-## Planifier à la bonne échelle
+## Plan in proportion to the risk
 
-- Pour une tâche bornée, annoncer le résultat attendu et sa vérification en quelques lignes.
-- Utiliser le mode plan et une spec pour une décision d'architecture, un risque élevé,
-  une demande ambiguë ou plusieurs chantiers dépendants. Trois étapes mécaniques ne
-  justifient pas à elles seules une spec.
-- Si une hypothèse importante tombe, arrêter l'exécution et réviser le plan.
-- Choisir une seule source de suivi : issue pour un chantier multi-session ;
-  `tasks/todo.md` seulement pour un travail local sans issue. Ne pas dupliquer l'état.
+- For a bounded task, state the intended result and how you will verify it in a
+  few lines.
+- Use plan mode and a written spec for architectural decisions, high-risk or
+  ambiguous work, or several dependent workstreams. Three mechanical steps alone
+  do not justify a spec.
+- If a key assumption fails, stop execution and revise the plan.
+- Keep one source of progress: an issue for multi-session work; `tasks/todo.md`
+  only for local work without an issue. Do not duplicate status.
 
-## Paralléliser avec des frontières nettes
+## Parallelize with clear boundaries
 
-- Commencer avec une session. Par défaut, garder au plus 2 à 3 responsables de
-  lots actifs, avec des fichiers et livrables indépendants ; dépasser ce nombre
-  seulement si le gain attendu est explicite. Un relecteur intervient à la
-  demande. Ne pas créer de sous-équipes imbriquées par défaut.
-- Réserver les sous-agents aux recherches ou vérifications bornées : question précise,
-  périmètre de lecture, preuve attendue et condition d'arrêt. Arrêter les sessions
-  devenues inactives.
-- Pour chaque lot, consigner dans le suivi choisi : propriétaire, fichiers ou
-  ressources possédés, dépendances, critère de fin, portée des écritures et
-  preuve de recette. En dépôt Git, préciser aussi branche/worktree et, si le
-  projet en utilise, la PR du lot.
-  Un seul éditeur simultané par fichier partagé.
-- Si le suivi est public, ne pas y exposer de données sensibles : utiliser une
-  issue privée ou un contrat public expurgé, avec la preuve dans un espace autorisé.
-- Les messages directs servent aux décisions urgentes et demandent un accusé de
-  réception. Le suivi choisi porte les décisions durables et reste à jour,
-  au-delà des seuls commentaires.
-- Pour une ressource partagée ou de production, nommer un coordinateur unique des
-  écritures. Mesurer l'état, annoncer la cible exacte, puis attendre son feu vert.
-- Un rapport d'agent tient en quatre points : résultat, preuve, limites, prochaine
-  action. Une affirmation non vérifiée reste une hypothèse.
+- Start with one session. By default, keep at most two or three active workstream
+  owners with independent files and deliverables; exceed that only when the
+  expected benefit is explicit. Bring in a reviewer when needed. Do not create
+  nested teams by default.
+- Use subagents for bounded research or checks: a precise question, reading
+  scope, expected evidence, and stopping condition. Close idle sessions.
+- For each workstream, record in the chosen tracker: owner, owned files or
+  resources, dependencies, definition of done, write scope, and acceptance
+  evidence. In Git projects, also record the branch or worktree and, where the
+  project uses PRs, the PR. Have only one concurrent editor per shared file.
+- Keep sensitive details out of public trackers. Use a private issue or a
+  redacted public contract, with evidence stored in an authorized location.
+- Use direct messages for urgent decisions and require acknowledgment. Keep
+  durable decisions in the chosen tracker, not only in comments.
+- Name one write coordinator for shared or production resources. Measure the
+  current state, announce the exact target, then wait for the coordinator's go.
+- Report agent results in four parts: outcome, evidence, limitations, next
+  action. An unverified claim remains a hypothesis.
 
-## Gérer le coût de contexte
+## Manage context cost
 
-- Choisir le modèle par tâche : modèle fort pour architecture, sécurité ou diagnostic
-  difficile ; modèle intermédiaire pour implémentation et revue courantes ; modèle
-  léger pour une recherche bornée. Ajuster l'effort de réflexion de la même façon.
-- Chercher les fichiers pertinents avant de charger de longs journaux ou dossiers.
-  Transmettre aux autres sessions un résumé et un lien vers la preuve, pas le transcript.
-- Après un jalon terminé, repartir d'un contexte court si l'historique ne sert plus.
-  Comparer qualité et tokens avant/après sur des chantiers comparables ; les tokens
-  relus du cache ne sont ni du texte unique ni une facture.
+- Select model capability and reasoning effort by task: strongest available for
+  architecture, security, or difficult diagnosis; balanced for routine
+  implementation and review; fast for bounded searches. Avoid pinning model
+  versions in shared guidance.
+- Find relevant files before loading long logs or directories. Send other
+  sessions a summary and a pointer to evidence, not a full transcript.
+- After a completed milestone, start with a short context if the old history no
+  longer helps. Compare quality and tokens across comparable workstreams;
+  cache-read tokens are neither unique text nor a bill.
 
-## Apprendre sans grossir le préambule
+## Learn without bloating the preamble
 
-- Après une correction, inscrire une règle réutilisable avec l'incident qui
-  l'explique dans le registre prévu par le projet (`tasks/lessons.md` s'il existe) ;
-  éviter le journal de session. Chercher les leçons pertinentes à la demande.
-- Garder les leçons actives sous 300 lignes ; archiver les anciennes dans
-  `tasks/lessons/AAAA-MM.md` lorsque le dépôt utilise ce standard.
-- La mémoire personnelle hors Git ne garde que les faits non déductibles du code ou
-  de l'historique. Sauvegarder cette mémoire avant tout outil qui la réécrit.
+- After a correction, record a reusable rule and the incident behind it in the
+  project's lessons register (`tasks/lessons.md` if present), not a session
+  diary. Search for relevant lessons on demand.
+- Where the project uses this standard, keep active lessons below 300 lines and
+  archive older ones in `tasks/lessons/YYYY-MM.md`.
+- Keep personal memory outside Git for facts that cannot be derived from code
+  or history. Back it up before using a tool that rewrites it.
 
-## Vérifier avant de conclure
+## Verify before concluding
 
-- Prouver le comportement demandé avec les tests et, si pertinent, le parcours réel
-  d'un utilisateur. Un build ou une relecture du code ne prouvent pas l'usage final.
-- Distinguer les échecs préexistants des régressions ; documenter les limites de la
-  preuve. Ne pas marquer « terminé » si une condition d'acceptation reste non testée.
-- Corriger un bug à sa cause, sans élargir silencieusement la portée. Ne pas changer
-  des fichiers adjacents sans besoin ; préférer la solution la plus simple qui tient.
+- Prove the requested behavior with relevant tests and, when appropriate, a
+  real user's workflow. A build or code review alone does not prove usability.
+- Separate pre-existing failures from regressions and state the limits of the
+  evidence. Do not mark work done while an acceptance condition remains untested.
+- Fix a bug at its cause without silently expanding scope. Touch adjacent files
+  only when needed; prefer the simplest solution that holds.

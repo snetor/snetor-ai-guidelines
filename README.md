@@ -95,7 +95,7 @@ Then in Claude Code: `/plugin install` and select `plugins/snetor-skills`.
 Displays active model, git branch, context usage and token quota at the bottom of the terminal:
 
 ```
-Claude Sonnet 4.6 | ~/dev/my-project | git:main | ctx ████████░░ 67% (670k/1M tok) | 5h ████░░ 40%
+Claude <active model> | ~/dev/my-project | git:main | ctx ████████░░ 67% (670k/1M tok) | 5h ████░░ 40%
 ```
 
 **Automated install (Windows):**
@@ -239,15 +239,12 @@ Workflows are managed by the `superpowers` plugin. Each skill activates automati
 3. **Delegate selectively.** Give independent owners separate files and a shared contract; use subagents for bounded questions with a clear stopping point.
 4. **Lessons.** After a correction, record a reusable rule in the project's lessons register, not a session diary.
 
-### Claude models
+### Model selection
 
-| Model | ID | Recommended use |
-|---|---|---|
-| Claude Opus 4.7 | `claude-opus-4-7` | Complex tasks, architecture decisions |
-| Claude Sonnet 4.6 | `claude-sonnet-4-6` | Routine implementation and review |
-| Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | Simple tasks, high volume, latency-sensitive |
-
-Switch model in session: `/model`
+Use the strongest available model for architecture, security and difficult
+diagnosis; a balanced model for routine implementation and review; and a fast
+model for bounded searches. Do not pin model IDs in shared guidance: inspect
+the current options and switch models in session with `/model`.
 
 ---
 

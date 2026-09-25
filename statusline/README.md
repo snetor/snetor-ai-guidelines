@@ -3,7 +3,7 @@
 Displays at the bottom of the terminal: active model, current directory, git branch, context window usage and 5-hour token quota.
 
 ```
-Claude Sonnet 4.6 | ~/dev/my-project | git:main | ctx ████████░░░░ 67% (670k/1M tok) | 5h ████░░░░░░ 40%
+Claude <active model> | ~/dev/my-project | git:main | ctx ████████░░░░ 67% (670k/1M tok) | 5h ████░░░░░░ 40%
 ```
 
 ## Installation
@@ -50,7 +50,7 @@ chmod +x ~/.claude/statusline-command.sh
 
 | Indicator | Description |
 |---|---|
-| Model | Active Claude model name (e.g. `Claude Sonnet 4.6`) |
+| Model | Active Claude model name, as reported by Claude Code |
 | Directory | Abbreviated current path (`~` = home, `…/parent/project` if long) |
 | `git:branch` | Active git branch (hidden if not in a git repo) |
 | `ctx` | Context window usage — green < 60%, orange < 85%, red ≥ 85% |
