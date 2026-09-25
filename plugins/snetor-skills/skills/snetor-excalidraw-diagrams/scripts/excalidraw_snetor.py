@@ -23,7 +23,7 @@ Usage (from a build script you write in the output folder):
     s.arrow(250, 207, 330, 285, color=BLUE_GREEN, label="HTTPS")
     s.save("my-diagram.excalidraw")                          # writes next to the script
 
-Then render a PNG preview with render_preview.py and LOOK at it before delivering.
+Then render a PNG with render_excalidraw.py (real engine) and LOOK at it before delivering.
 
 Logos resolve from the shared Snetor asset folders (the sibling `snetor-html-slides` skill),
 or from $SNETOR_LOGO_DIR if set. See logo-catalog.md / available_logos().
@@ -130,19 +130,26 @@ def _prep(path):
 
 class Scene:
     """Accumulates Excalidraw elements + embedded image files, then writes a `.excalidraw`."""
-    def __init__(self):
+    def __init__(self, sketch=True):
+        # Direction artistique « brouillon propre » (2026-09-25) : police Excalifont et trait a
+        # main levee fin. Un schema qui a l'air d'un croquis se lit comme une idee a discuter,
+        # pas comme un plan fige — c'est ce qui le rend accessible a un dirigeant.
+        # sketch=False rend le style net d'origine (Helvetica, trait droit), pour une doc DSI.
         self.elements = []; self.files = {}
+        self.font = 5 if sketch else 2          # 5 = Excalifont, 2 = Helvetica
+        self.rough = 1 if sketch else 0
+        self.stroke = 1.5 if sketch else 2
 
     def _base(self, **kw):
         d = dict(angle=0, strokeColor=NAVY, backgroundColor="transparent", fillStyle="solid",
-                 strokeWidth=2, strokeStyle="solid", roughness=0, opacity=100, groupIds=[],
+                 strokeWidth=self.stroke, strokeStyle="solid", roughness=self.rough, opacity=100, groupIds=[],
                  frameId=None, roundness=None, seed=_nonce(), version=1, versionNonce=_nonce(),
                  isDeleted=False, boundElements=None, updated=_now(), link=None, locked=False)
         d.update(kw); return d
 
-    def rect(self, x, y, w, h, fill="transparent", stroke=NAVY, sw=2, rounded=True, opacity=100):
+    def rect(self, x, y, w, h, fill="transparent", stroke=NAVY, sw=None, rounded=True, opacity=100):
         e = self._base(type="rectangle", id=_rid(), x=x, y=y, width=w, height=h,
-                       backgroundColor=fill, strokeColor=stroke, strokeWidth=sw, opacity=opacity,
+                       backgroundColor=fill, strokeColor=stroke, strokeWidth=sw or self.stroke, opacity=opacity,
                        roundness={"type": 3} if rounded else None)
         self.elements.append(e); return e
 
@@ -152,16 +159,16 @@ class Scene:
         if w is None:
             w = int(max(len(line) for line in txt.split("\n"))*size*0.55)
         e = self._base(type="text", id=_rid(), x=x, y=y, width=w, height=h, strokeColor=color,
-                       text=txt, originalText=txt, fontSize=size, fontFamily=2, textAlign=align,
+                       text=txt, originalText=txt, fontSize=size, fontFamily=self.font, textAlign=align,
                        verticalAlign="top", lineHeight=1.25, autoResize=True, containerId=None)
         self.elements.append(e); return e
 
-    def boxlabel(self, x, y, w, h, txt, fill=WHITE, stroke=EMERALD, size=16, color=NAVY, sw=2):
+    def boxlabel(self, x, y, w, h, txt, fill=WHITE, stroke=EMERALD, size=16, color=NAVY, sw=None):
         """Rectangle with auto-centered bound text (the label re-centers if you move it in Excalidraw)."""
         r = self.rect(x, y, w, h, fill=fill, stroke=stroke, sw=sw)
         tid = _rid(); th = int(size*1.25*(txt.count("\n")+1))
         t = self._base(type="text", id=tid, x=x+8, y=y+h/2-th/2, width=w-16, height=th,
-                       strokeColor=color, text=txt, originalText=txt, fontSize=size, fontFamily=2,
+                       strokeColor=color, text=txt, originalText=txt, fontSize=size, fontFamily=self.font,
                        textAlign="center", verticalAlign="middle", lineHeight=1.25,
                        autoResize=False, containerId=r["id"])
         r["boundElements"] = [{"type": "text", "id": tid}]
@@ -270,7 +277,7 @@ class Scene:
         return self.image(cx, cy, logo_h, logo)
 
     def chip(self, x, y, w, h, label, logo=None, color=NAVY, size=15, fill=WHITE,
-             logo_h=22, sw=2):
+             logo_h=22, sw=None):
         """La brique elementaire du style : boite arrondie, bordure fine coloree,
         libelle centre, petit logo optionnel a gauche du texte."""
         self.rect(x, y, w, h, fill=fill, stroke=color, sw=sw)
@@ -309,26 +316,29 @@ class Scene:
                           color=color, align="center", w=cell - 12)
             x += cell
 
-    def arrow(self, x1, y1, x2, y2, color=BLUE_GREEN, label=None, sw=2, dashed=False):
+    def arrow(self, x1, y1, x2, y2, color=BLUE_GREEN, label=None, sw=None, dashed=False):
         """A straight arrow from (x1,y1) to (x2,y2)."""
         e = self._base(type="arrow", id=_rid(), x=x1, y=y1, width=x2-x1, height=y2-y1,
-                       strokeColor=color, strokeWidth=sw, strokeStyle="dashed" if dashed else "solid",
+                       strokeColor=color, strokeWidth=sw or self.stroke, strokeStyle="dashed" if dashed else "solid",
                        points=[[0, 0], [x2-x1, y2-y1]], lastCommittedPoint=None, startBinding=None,
                        endBinding=None, startArrowhead=None, endArrowhead="arrow", roundness={"type": 2})
         self.elements.append(e)
-        if label: self._arrow_label(e, label, (x1+x2)/2, (y1+y2)/2, color)
+        if label: self._arrow_label(e, label, (x1+x2)/2, (y1+y2)/2, color, vertical=x1 == x2)
         return e
 
-    def arrowp(self, points, color=BLUE_GREEN, label=None, sw=2, dashed=False):
+    def arrowp(self, points, color=BLUE_GREEN, label=None, sw=None, dashed=False):
         """A poly-line arrow through `points` (list of (x,y)). Use orthogonal points to route cleanly
         in the margins/gutters instead of cutting diagonally across boxes."""
         x0, y0 = points[0]; rel = [[px-x0, py-y0] for px, py in points]
         e = self._base(type="arrow", id=_rid(), x=x0, y=y0,
                        width=max(p[0] for p in rel)-min(p[0] for p in rel),
                        height=max(p[1] for p in rel)-min(p[1] for p in rel),
-                       strokeColor=color, strokeWidth=sw, strokeStyle="dashed" if dashed else "solid",
+                       strokeColor=color, strokeWidth=sw or self.stroke, strokeStyle="dashed" if dashed else "solid",
                        points=rel, lastCommittedPoint=None, startBinding=None, endBinding=None,
-                       startArrowhead=None, endArrowhead="arrow", roundness={"type": 2})
+                       startArrowhead=None, endArrowhead="arrow",
+                       # coudes nets : avec roundness type 2, le trait a main levee transforme
+                       # chaque angle droit en courbe en S
+                       roundness=None)
         self.elements.append(e)
         if label:  # place on the midpoint of the LONGEST segment (its clearest run)
             best = 0; bi = 0
@@ -336,14 +346,19 @@ class Scene:
                 dl = abs(points[k+1][0]-points[k][0])+abs(points[k+1][1]-points[k][1])
                 if dl > best: best = dl; bi = k
             self._arrow_label(e, label, (points[bi][0]+points[bi+1][0])/2,
-                              (points[bi][1]+points[bi+1][1])/2, color)
+                              (points[bi][1]+points[bi+1][1])/2, color,
+                              vertical=points[bi][0] == points[bi+1][0])
         return e
 
-    def _arrow_label(self, e, label, mx, my, color):
-        tid = _rid(); size = 14; tw = int(len(label)*size*0.55); th = int(size*1.25)
-        t = self._base(type="text", id=tid, x=mx-tw/2, y=my-th-4, width=tw, height=th,
-                       strokeColor=color, text=label, originalText=label, fontSize=size, fontFamily=2,
-                       textAlign="center", verticalAlign="middle", lineHeight=1.25,
+    def _arrow_label(self, e, label, mx, my, color, vertical=False):
+        # un libelle multi-ligne etait mesure comme une seule ligne : il debordait SUR la fleche
+        tid = _rid(); size = 14; lines = label.split("\n")
+        tw = int(max(len(l) for l in lines)*size*0.55); th = int(size*1.25*len(lines))
+        # segment vertical : le libelle se pose A DROITE du trait, pas centre dessus
+        x, y, align = (mx+8, my-th/2, "left") if vertical else (mx-tw/2, my-th-4, "center")
+        t = self._base(type="text", id=tid, x=x, y=y, width=tw, height=th,
+                       strokeColor=color, text=label, originalText=label, fontSize=size, fontFamily=self.font,
+                       textAlign=align, verticalAlign="middle", lineHeight=1.25,
                        autoResize=False, containerId=None)
         self.elements.append(t)
 

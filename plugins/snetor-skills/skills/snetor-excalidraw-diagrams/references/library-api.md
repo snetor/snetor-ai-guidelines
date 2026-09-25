@@ -24,6 +24,9 @@ Also `PALETTE` (a dict) for programmatic access.
 ## `Scene`
 
 Create one per diagram, add elements in back-to-front order (later = on top), then `save`.
+`Scene()` draws in the « brouillon propre » style (Excalifont, hand-drawn 1.5px stroke);
+`Scene(sketch=False)` draws the old clean style. Every `sw=` default below is the scene's stroke
+(1.5 sketch, 2 clean) unless you pass one.
 
 | Method | Purpose |
 |---|---|
