@@ -9,7 +9,7 @@
       "name": "snetor-skills",
       "source": "./plugins/snetor-skills",
       "description": "Snetor skills: branded visuals (HTML decks, Excalidraw diagrams), a travel-report assistant for sales reps, a deployment assistant for business artifacts, and four maintenance routines (branch closing, doc vs. infra, lessons into guardrails, dead tests)",
-      "version": "1.12.0"
+      "version": "1.12.1"
     }
   ]
 }

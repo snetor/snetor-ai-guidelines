@@ -1,136 +1,67 @@
-# Workflow — méthode de travail générique
+# Workflow — general working method
 
-Règles de méthode de travail, valables sur n'importe quel projet, distribuées
-par `deploy-claude.ps1` et **écrasées à chaque déploiement**.
+These rules apply across projects. `deploy-claude.ps1` copies this file to
+`~/.claude/workflow.md`; do not edit that generated copy.
 
-# Workflow Orchestration
+## Plan in proportion to the risk
 
-## 1. Plan Mode Default
+- For a bounded task, state the intended result and how you will verify it in a
+  few lines.
+- Use plan mode and a written spec for architectural decisions, high-risk or
+  ambiguous work, or several dependent workstreams. Three mechanical steps alone
+  do not justify a spec.
+- If a key assumption fails, stop execution and revise the plan.
+- Keep one source of progress: an issue for multi-session work; `tasks/todo.md`
+  only for local work without an issue. Do not duplicate status.
 
-- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+## Parallelize with clear boundaries
 
-- If something goes sideways, STOP and re-plan immediately – don't keep pushing
+- Start with one session. By default, keep at most two or three active workstream
+  owners with independent files and deliverables; exceed that only when the
+  expected benefit is explicit. Bring in a reviewer when needed. Do not create
+  nested teams by default.
+- Use subagents for bounded research or checks: a precise question, reading
+  scope, expected evidence, and stopping condition. Close idle sessions.
+- For each workstream, record in the chosen tracker: owner, owned files or
+  resources, dependencies, definition of done, write scope, and acceptance
+  evidence. In Git projects, also record the branch or worktree and, where the
+  project uses PRs, the PR. Have only one concurrent editor per shared file.
+- Keep sensitive details out of public trackers. Use a private issue or a
+  redacted public contract, with evidence stored in an authorized location.
+- Use direct messages for urgent decisions and require acknowledgment. Keep
+  durable decisions in the chosen tracker, not only in comments.
+- Name one write coordinator for shared or production resources. Measure the
+  current state, announce the exact target, then wait for the coordinator's go.
+- Report agent results in four parts: outcome, evidence, limitations, next
+  action. An unverified claim remains a hypothesis.
 
-- Use plan mode for verification steps, not just building
+## Manage context cost
 
-- Write detailed specs upfront to reduce ambiguity
+- Select model capability and reasoning effort by task: strongest available for
+  architecture, security, or difficult diagnosis; balanced for routine
+  implementation and review; fast for bounded searches. Avoid pinning model
+  versions in shared guidance.
+- Find relevant files before loading long logs or directories. Send other
+  sessions a summary and a pointer to evidence, not a full transcript.
+- After a completed milestone, start with a short context if the old history no
+  longer helps. Compare quality and tokens across comparable workstreams;
+  cache-read tokens are neither unique text nor a bill.
 
----
+## Learn without bloating the preamble
 
-## 2. Subagent Strategy
+- After a correction, record a reusable rule and the incident behind it in the
+  project's lessons register (`tasks/lessons.md` if present), not a session
+  diary. Search for relevant lessons on demand.
+- Where the project uses this standard, keep active lessons below 300 lines and
+  archive older ones in `tasks/lessons/YYYY-MM.md`.
+- Keep personal memory outside Git for facts that cannot be derived from code
+  or history. Back it up before using a tool that rewrites it.
 
-- Use subagents liberally to keep main context window clean
+## Verify before concluding
 
-- Offload research, exploration, and parallel analysis to subagents
-
-- For complex problems, throw more compute at it via subagents
-
-- One task per subagent for focused execution
-
----
-
-## 3. Self-Improvement Loop
-
-Two stores, two jobs. Do not confuse them.
-
-**`tasks/lessons.md` — the active rules, in Git, capped at 300 lines.**
-
-- After ANY correction from the user: write the anti-recurrence rule here, with the
-  incident that justifies it. The *why* is the payload — a rule without its incident
-  gets deleted by the next reader who doesn't understand it.
-
-- **Never read it wholesale at session start.** It is a reference you `grep` when
-  something breaks or when you touch an area you don't know, not a preamble you load.
-  Loading it whole costs more context than it returns.
-
-- When it passes 300 lines, `check_docs.py` blocks: move the closed sessions to
-  `tasks/lessons/AAAA-MM.md` (archive, never capped) and keep only what is still true.
-
-**The `memory/` directory — the loaded working set, outside Git.**
-
-- One file per fact, auto-injected at session start. This is what you actually carry.
-  Write here what is not derivable from the code, the git history, or a CLAUDE.md.
-
-- It lives under the user profile: not versioned, not shared, not backed up. Anything
-  that must survive a machine change belongs in `tasks/lessons.md` as well.
-
-- Consolidate it with `/dream` (merges duplicates, drops what has been disproved).
-  Back the directory up before the first run — `/dream` rewrites every file.
-  When it proposes the result, protect the entries that carry a correction
-  ("I had concluded the opposite"): the verdict alone is not the guardrail.
-
----
-
-## 4. Verification Before Done
-
-- Never mark a task complete without proving it works
-
-- Diff behavior between main and your changes when relevant
-
-- Ask yourself: "Would a staff engineer approve this?"
-
-- Run tests, check logs, demonstrate correctness
-
----
-
-## 5. Demand Elegance (Balanced)
-
-- For non-trivial changes: pause and ask "is there a more elegant way?"
-
-- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
-
-- Skip this for simple, obvious fixes – don't over-engineer
-
-- Challenge your own work before presenting it
-
----
-
-## 6. Think Before Coding
-
-- State your assumptions explicitly before implementing. If uncertain, ask.
-
-- If multiple interpretations exist, present them – don't pick one silently.
-
-- If a simpler approach exists, say so. Push back when warranted.
-
-- If something is unclear, stop and name what's confusing before continuing.
-
----
-
-# Autonomous Bug Fixing
-
-- When given a bug report: just fix it. Don't ask for hand-holding
-
-- Point at logs, errors, failing tests – then resolve them
-
-- Zero context switching required from the user
-
-- Go fix failing CI tests without being told how
-
----
-
-# Task Management
-
-- **Plan First:** Write plan to `tasks/todo.md` with checkable items
-
-- **Verify Plan:** Check in before starting implementation
-
-- **Track Progress:** Mark items complete as you go
-
-- **Explain Changes:** High-level summary at each step
-
-- **Document Results:** Add review section to `tasks/todo.md`
-
-- **Capture Lessons:** Update `tasks/lessons.md` after corrections
-
-- **Success Criteria First:** Transform each task into a verifiable goal — "fix the bug" → "write a test that reproduces it, then make it pass." For multi-step tasks, state a brief plan with a verify check per step.
-
----
-
-# Core Principles
-
-- **Simplicity First:** No features beyond what was asked. No abstractions for single-use code. No unasked configurability. If 50 lines could replace 200, rewrite.
-
-- **Surgical Changes:** Touch only what's necessary for the task. Don't improve adjacent code, comments, or formatting. Match existing style. If you notice unrelated dead code, mention it — clean it in a dedicated separate commit, never mixed silently into the current change.
-
-- **No Laziness:** Find root causes. No temporary fixes. Senior developer standards.
+- Prove the requested behavior with relevant tests and, when appropriate, a
+  real user's workflow. A build or code review alone does not prove usability.
+- Separate pre-existing failures from regressions and state the limits of the
+  evidence. Do not mark work done while an acceptance condition remains untested.
+- Fix a bug at its cause without silently expanding scope. Touch adjacent files
+  only when needed; prefer the simplest solution that holds.
