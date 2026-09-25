@@ -47,8 +47,9 @@ display at ~30–40px anyway).
 Every element needs: `type`, `id` (unique), `x`, `y`, `width`, `height`, plus the usual
 `angle, strokeColor, backgroundColor, fillStyle, strokeWidth, strokeStyle, roughness, opacity,
 groupIds, frameId, roundness, seed, version, versionNonce, isDeleted, boundElements, updated, link,
-locked`. The toolkit fills sensible defaults (`roughness=0` for clean lines, `fontFamily=2`
-Helvetica, rounded rectangles).
+locked`. The toolkit fills the « brouillon propre » defaults (`roughness=1` hand-drawn stroke,
+`strokeWidth=1.5`, `fontFamily=5` Excalifont, rounded rectangles); `Scene(sketch=False)` switches to
+`roughness=0`, `strokeWidth=2`, `fontFamily=2` Helvetica.
 
 - **Text**: `text`, `originalText`, `fontSize`, `fontFamily` (1=hand-drawn, 2=normal, 3=mono),
   `textAlign`, `verticalAlign`, `lineHeight`. `x` is the LEFT edge of the text box.

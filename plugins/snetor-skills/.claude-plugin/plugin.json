@@ -1,6 +1,6 @@
 {
   "name": "snetor-skills",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "Snetor skills for Claude Code: branded visuals using the official Snetor design system (animated HTML presentation decks AND Excalidraw architecture diagrams with embedded service icons), a travel-report assistant for sales reps, a deployment assistant that ships a business artifact onto an internal container platform, and four maintenance routines that trigger on situations rather than requests: branch closing against the documentation standard, doc-claims versus real Azure executions, turning repeated lessons into executable guardrails, and dead-test removal.",
   "author": {
     "name": "Snetor",
