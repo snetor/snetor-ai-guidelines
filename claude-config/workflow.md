@@ -1,136 +1,64 @@
 # Workflow — méthode de travail générique
 
-Règles de méthode de travail, valables sur n'importe quel projet, distribuées
-par `deploy-claude.ps1` et **écrasées à chaque déploiement**.
+Règles valables sur tout projet. `deploy-claude.ps1` copie ce fichier vers
+`~/.claude/workflow.md` ; ne pas éditer cette copie, qui sera écrasée.
 
-# Workflow Orchestration
+## Planifier à la bonne échelle
 
-## 1. Plan Mode Default
+- Pour une tâche bornée, annoncer le résultat attendu et sa vérification en quelques lignes.
+- Utiliser le mode plan et une spec pour une décision d'architecture, un risque élevé,
+  une demande ambiguë ou plusieurs chantiers dépendants. Trois étapes mécaniques ne
+  justifient pas à elles seules une spec.
+- Si une hypothèse importante tombe, arrêter l'exécution et réviser le plan.
+- Choisir une seule source de suivi : issue pour un chantier multi-session ;
+  `tasks/todo.md` seulement pour un travail local sans issue. Ne pas dupliquer l'état.
 
-- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+## Paralléliser avec des frontières nettes
 
-- If something goes sideways, STOP and re-plan immediately – don't keep pushing
+- Commencer avec une session. Par défaut, garder au plus 2 à 3 responsables de
+  lots actifs, avec des fichiers et livrables indépendants ; dépasser ce nombre
+  seulement si le gain attendu est explicite. Un relecteur intervient à la
+  demande. Ne pas créer de sous-équipes imbriquées par défaut.
+- Réserver les sous-agents aux recherches ou vérifications bornées : question précise,
+  périmètre de lecture, preuve attendue et condition d'arrêt. Arrêter les sessions
+  devenues inactives.
+- Pour chaque lot, consigner dans l'issue : propriétaire, branche/worktree, fichiers
+  possédés, dépendances, critère de fin, portée des écritures et preuve de recette.
+  Un seul éditeur simultané par fichier partagé et une PR par lot de code.
+- Les messages directs servent aux décisions urgentes et demandent un accusé de
+  réception. L'issue porte les décisions durables ; son corps est tenu à jour,
+  pas seulement ses commentaires.
+- Pour une ressource partagée ou de production, nommer un coordinateur unique des
+  écritures. Mesurer l'état, annoncer la cible exacte, puis attendre son feu vert.
+- Un rapport d'agent tient en quatre points : résultat, preuve, limites, prochaine
+  action. Une affirmation non vérifiée reste une hypothèse.
 
-- Use plan mode for verification steps, not just building
+## Gérer le coût de contexte
 
-- Write detailed specs upfront to reduce ambiguity
+- Choisir le modèle par tâche : modèle fort pour architecture, sécurité ou diagnostic
+  difficile ; modèle intermédiaire pour implémentation et revue courantes ; modèle
+  léger pour une recherche bornée. Ajuster l'effort de réflexion de la même façon.
+- Chercher les fichiers pertinents avant de charger de longs journaux ou dossiers.
+  Transmettre aux autres sessions un résumé et un lien vers la preuve, pas le transcript.
+- Après un jalon terminé, repartir d'un contexte court si l'historique ne sert plus.
+  Comparer qualité et tokens avant/après sur des chantiers comparables ; les tokens
+  relus du cache ne sont ni du texte unique ni une facture.
 
----
+## Apprendre sans grossir le préambule
 
-## 2. Subagent Strategy
+- Après une correction, inscrire dans `tasks/lessons.md` une règle réutilisable avec
+  l'incident qui l'explique ; éviter le journal de session. Chercher les leçons
+  pertinentes à la demande, sans lire le fichier entier au démarrage.
+- Garder les leçons actives sous 300 lignes ; archiver les anciennes dans
+  `tasks/lessons/AAAA-MM.md` lorsque le dépôt utilise ce standard.
+- La mémoire personnelle hors Git ne garde que les faits non déductibles du code ou
+  de l'historique. Sauvegarder cette mémoire avant tout outil qui la réécrit.
 
-- Use subagents liberally to keep main context window clean
+## Vérifier avant de conclure
 
-- Offload research, exploration, and parallel analysis to subagents
-
-- For complex problems, throw more compute at it via subagents
-
-- One task per subagent for focused execution
-
----
-
-## 3. Self-Improvement Loop
-
-Two stores, two jobs. Do not confuse them.
-
-**`tasks/lessons.md` — the active rules, in Git, capped at 300 lines.**
-
-- After ANY correction from the user: write the anti-recurrence rule here, with the
-  incident that justifies it. The *why* is the payload — a rule without its incident
-  gets deleted by the next reader who doesn't understand it.
-
-- **Never read it wholesale at session start.** It is a reference you `grep` when
-  something breaks or when you touch an area you don't know, not a preamble you load.
-  Loading it whole costs more context than it returns.
-
-- When it passes 300 lines, `check_docs.py` blocks: move the closed sessions to
-  `tasks/lessons/AAAA-MM.md` (archive, never capped) and keep only what is still true.
-
-**The `memory/` directory — the loaded working set, outside Git.**
-
-- One file per fact, auto-injected at session start. This is what you actually carry.
-  Write here what is not derivable from the code, the git history, or a CLAUDE.md.
-
-- It lives under the user profile: not versioned, not shared, not backed up. Anything
-  that must survive a machine change belongs in `tasks/lessons.md` as well.
-
-- Consolidate it with `/dream` (merges duplicates, drops what has been disproved).
-  Back the directory up before the first run — `/dream` rewrites every file.
-  When it proposes the result, protect the entries that carry a correction
-  ("I had concluded the opposite"): the verdict alone is not the guardrail.
-
----
-
-## 4. Verification Before Done
-
-- Never mark a task complete without proving it works
-
-- Diff behavior between main and your changes when relevant
-
-- Ask yourself: "Would a staff engineer approve this?"
-
-- Run tests, check logs, demonstrate correctness
-
----
-
-## 5. Demand Elegance (Balanced)
-
-- For non-trivial changes: pause and ask "is there a more elegant way?"
-
-- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
-
-- Skip this for simple, obvious fixes – don't over-engineer
-
-- Challenge your own work before presenting it
-
----
-
-## 6. Think Before Coding
-
-- State your assumptions explicitly before implementing. If uncertain, ask.
-
-- If multiple interpretations exist, present them – don't pick one silently.
-
-- If a simpler approach exists, say so. Push back when warranted.
-
-- If something is unclear, stop and name what's confusing before continuing.
-
----
-
-# Autonomous Bug Fixing
-
-- When given a bug report: just fix it. Don't ask for hand-holding
-
-- Point at logs, errors, failing tests – then resolve them
-
-- Zero context switching required from the user
-
-- Go fix failing CI tests without being told how
-
----
-
-# Task Management
-
-- **Plan First:** Write plan to `tasks/todo.md` with checkable items
-
-- **Verify Plan:** Check in before starting implementation
-
-- **Track Progress:** Mark items complete as you go
-
-- **Explain Changes:** High-level summary at each step
-
-- **Document Results:** Add review section to `tasks/todo.md`
-
-- **Capture Lessons:** Update `tasks/lessons.md` after corrections
-
-- **Success Criteria First:** Transform each task into a verifiable goal — "fix the bug" → "write a test that reproduces it, then make it pass." For multi-step tasks, state a brief plan with a verify check per step.
-
----
-
-# Core Principles
-
-- **Simplicity First:** No features beyond what was asked. No abstractions for single-use code. No unasked configurability. If 50 lines could replace 200, rewrite.
-
-- **Surgical Changes:** Touch only what's necessary for the task. Don't improve adjacent code, comments, or formatting. Match existing style. If you notice unrelated dead code, mention it — clean it in a dedicated separate commit, never mixed silently into the current change.
-
-- **No Laziness:** Find root causes. No temporary fixes. Senior developer standards.
+- Prouver le comportement demandé avec les tests et, si pertinent, le parcours réel
+  d'un utilisateur. Un build ou une relecture du code ne prouvent pas l'usage final.
+- Distinguer les échecs préexistants des régressions ; documenter les limites de la
+  preuve. Ne pas marquer « terminé » si une condition d'acceptation reste non testée.
+- Corriger un bug à sa cause, sans élargir silencieusement la portée. Ne pas changer
+  des fichiers adjacents sans besoin ; préférer la solution la plus simple qui tient.
