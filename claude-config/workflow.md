@@ -22,9 +22,12 @@ Règles valables sur tout projet. `deploy-claude.ps1` copie ce fichier vers
 - Réserver les sous-agents aux recherches ou vérifications bornées : question précise,
   périmètre de lecture, preuve attendue et condition d'arrêt. Arrêter les sessions
   devenues inactives.
-- Pour chaque lot, consigner dans l'issue : propriétaire, branche/worktree, fichiers
-  possédés, dépendances, critère de fin, portée des écritures et preuve de recette.
-  Un seul éditeur simultané par fichier partagé et une PR par lot de code.
+- Pour chaque lot, consigner dans le suivi choisi : propriétaire, fichiers ou
+  ressources possédés, dépendances, critère de fin, portée des écritures et
+  preuve de recette. En dépôt Git, préciser aussi branche/worktree et PR du lot.
+  Un seul éditeur simultané par fichier partagé.
+- Si le suivi est public, ne pas y exposer de données sensibles : utiliser une
+  issue privée ou un contrat public expurgé, avec la preuve dans un espace autorisé.
 - Les messages directs servent aux décisions urgentes et demandent un accusé de
   réception. L'issue porte les décisions durables ; son corps est tenu à jour,
   pas seulement ses commentaires.
@@ -46,9 +49,9 @@ Règles valables sur tout projet. `deploy-claude.ps1` copie ce fichier vers
 
 ## Apprendre sans grossir le préambule
 
-- Après une correction, inscrire dans `tasks/lessons.md` une règle réutilisable avec
-  l'incident qui l'explique ; éviter le journal de session. Chercher les leçons
-  pertinentes à la demande, sans lire le fichier entier au démarrage.
+- Après une correction, inscrire une règle réutilisable avec l'incident qui
+  l'explique dans le registre prévu par le projet (`tasks/lessons.md` s'il existe) ;
+  éviter le journal de session. Chercher les leçons pertinentes à la demande.
 - Garder les leçons actives sous 300 lignes ; archiver les anciennes dans
   `tasks/lessons/AAAA-MM.md` lorsque le dépôt utilise ce standard.
 - La mémoire personnelle hors Git ne garde que les faits non déductibles du code ou
