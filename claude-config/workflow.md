@@ -24,13 +24,14 @@ Règles valables sur tout projet. `deploy-claude.ps1` copie ce fichier vers
   devenues inactives.
 - Pour chaque lot, consigner dans le suivi choisi : propriétaire, fichiers ou
   ressources possédés, dépendances, critère de fin, portée des écritures et
-  preuve de recette. En dépôt Git, préciser aussi branche/worktree et PR du lot.
+  preuve de recette. En dépôt Git, préciser aussi branche/worktree et, si le
+  projet en utilise, la PR du lot.
   Un seul éditeur simultané par fichier partagé.
 - Si le suivi est public, ne pas y exposer de données sensibles : utiliser une
   issue privée ou un contrat public expurgé, avec la preuve dans un espace autorisé.
 - Les messages directs servent aux décisions urgentes et demandent un accusé de
-  réception. L'issue porte les décisions durables ; son corps est tenu à jour,
-  pas seulement ses commentaires.
+  réception. Le suivi choisi porte les décisions durables et reste à jour,
+  au-delà des seuls commentaires.
 - Pour une ressource partagée ou de production, nommer un coordinateur unique des
   écritures. Mesurer l'état, annoncer la cible exacte, puis attendre son feu vert.
 - Un rapport d'agent tient en quatre points : résultat, preuve, limites, prochaine
