@@ -78,10 +78,13 @@ image**, then fix overlaps, mis-routed arrows, text overflow, missing icons. Re-
 it's clean. This iteration is the difference between a sloppy diagram and a great one.
 
 ```bash
-python <THIS-SKILL>/scripts/render_preview.py 01-mon-architecture.excalidraw 01-mon-architecture.png
+python <THIS-SKILL>/scripts/render_excalidraw.py 01-mon-architecture.excalidraw 01-mon-architecture.png
 ```
 
-(The preview is a faithful *approximation* — clean flat render; the reference is Excalidraw itself.)
+`render_excalidraw.py` runs the **real** Excalidraw engine in headless Edge (Playwright), so the PNG
+shows the Excalifont and the hand-drawn stroke exactly as excalidraw.com will. It loads the engine
+from a CDN; offline, fall back to `render_preview.py` (same arguments) — a flat approximation in a
+system font, good for catching overlaps, useless for judging the style.
 
 ### 4. Deliver
 
@@ -96,8 +99,15 @@ python <THIS-SKILL>/scripts/render_preview.py 01-mon-architecture.excalidraw 01-
 **Palette** (imported as constants — use them, don't invent colors):
 `GREEN #007D36` (primary), `GREEN_DARK #006028`, `NAVY #152B47` (titles/text), `EMERALD #168C74`
 (box borders), `BLUE_GREEN #2A5458` (**all flow arrows** — this is the house arrow color),
-`GREEN05/10/20` (light fills/tints), `MUTED #4A5A6E` / `SUBTLE #7E8A9A` (secondary text). Clean lines
-(`roughness=0`), not the sketchy hand-drawn look — Snetor diagrams are corporate-clean.
+`GREEN05/10/20` (light fills/tints), `MUTED #4A5A6E` / `SUBTLE #7E8A9A` (secondary text).
+
+**Art direction — « brouillon propre » (clean sketch), the default since 2026-09-25.** Excalifont
+(`fontFamily=5`), hand-drawn stroke (`roughness=1`), thin lines (`strokeWidth=1.5`), rounded corners,
+solid light fills. A diagram that looks like a sketch reads as an idea to discuss rather than a
+frozen blueprint — which is what makes it land with an executive. It stays *propre*: the grid, the
+palette and the composition rules below still apply; only the stroke and the font loosen up.
+`Scene()` applies it; `Scene(sketch=False)` gives the old corporate-clean style (Helvetica, straight
+lines) for the rare technical doc that must look like a spec.
 
 **Layout** — group with translucent zones, stack in bands:
 - A big rounded container per boundary (a subscription, a VPC, a system). Light fill `GREEN05`,
@@ -136,8 +146,8 @@ Go through the list before delivering. Every one of them is mechanical.
 | **Consistent gaps** | Same spacing between siblings, same padding inside every zone. Pick two values (e.g. 25 inside, 50 between) and never improvise a third. |
 | **No repeated element between siblings** | If all five boxes say "its own database", say it **once** in the zone subtitle. Fifteen identical chips is noise wearing the costume of information. |
 
-`roughness=0` is already the toolkit default, which is the right choice for documentation — the
-hand-drawn look belongs to brainstorming, not to a deck that goes to the DSI.
+The sketch style is the toolkit default. It loosens the stroke, never the grid: a hand-drawn diagram
+with improvised coordinates looks careless, one on a 25px grid looks deliberate.
 
 **Check your logo files too.** `s4-hana.png` shipped with a transparency checkerboard *baked into
 the pixels* — someone had screenshotted an editor. It rendered as a grey grid behind the logo on

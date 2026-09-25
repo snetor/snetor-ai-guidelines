@@ -3,7 +3,7 @@
 
 Run it to (re)generate the canonical sample shipped with the skill:
     python example_diagram.py
-Writes example-architecture.excalidraw + (with render_preview) example-architecture.png
+Writes example-architecture.excalidraw ; render it with render_excalidraw.py -> example-architecture.png
 into the skill root. Use it as a reference for what "good" looks like.
 """
 import os, sys
@@ -54,8 +54,10 @@ def build():
     s.icon_row(x2+aw/2, ay+ah-26, ["azure-sql.png", "azure-blob-storage.png"], ih=26, gap=16)
 
     # Flows — short orthogonal arrow into the apps band; internal app->data link
-    s.arrowp([(220, 280), (245, 280), (245, 500), (285, 500)], color=BLUE_GREEN, label="HTTPS")
-    s.arrow(ax+aw, ay+ah/2, x2, ay+ah/2, color=BLUE_GREEN, label="lit / écrit")
+    # the lane hugs the container, so the caption goes under the actor rather than on the lane
+    s.arrowp([(220, 280), (245, 280), (245, 500), (285, 500)], color=BLUE_GREEN)
+    s.text(40, 318, "HTTPS", size=14, color=BLUE_GREEN, align="center", w=180)
+    s.arrow(ax+aw, ay+ah/2, x2, ay+ah/2, color=BLUE_GREEN)   # too short for a label: the arrow says it
 
     out = os.path.join(SKILL_ROOT, "example-architecture.excalidraw")
     s.save(out)
