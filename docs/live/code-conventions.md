@@ -1,46 +1,35 @@
 ---
 regime: live
 audience: [agent, dev]
-reviewed: 2026-09-22
+reviewed: 2026-09-28
 ---
 
-# Convention de langue dans le code
+# Language in a repo
 
-L'équipe s'agrandit et Snetor est une multinationale : un repo doit rester
-lisible par quelqu'un qui ne parle pas français. Cette règle sépare ce qui
-change de ce qui reste tel quel.
+The team is growing and Snetor is a multinational. A repo must be readable by someone who does not
+speak French. Decision: `docs/dated/decisions/2026-09-28-english-in-every-repo.md`.
 
-## La règle
+## The rule
 
-**En anglais** : identifiants de code — noms de fonctions, variables,
-classes, méthodes, paramètres — ainsi que les noms de fichiers et dossiers
-structurels, et les noms de skills Claude Code (`name:` du frontmatter d'un
-`SKILL.md`, nom du dossier qui le porte).
+**Everything written in a repo is in English**: identifiers, file and folder names, skill names,
+comments, commit messages, PR titles and bodies, `HANDOFF.md`, `docs/`, `tasks/`.
 
-**En français, sans changement** : documentation (`HANDOFF.md`,
-`tasks/lessons.md`, `docs/`), commentaires métier, messages de commit. C'est
-déjà la règle Snetor — voir `documentation-standard.md` — elle ne bouge pas.
-Un commentaire qui explique *pourquoi* une ligne de code existe reste en
-français ; le nom de la fonction qu'il commente passe en anglais.
-
-Exemple :
+A comment that explains *why* a line exists is written in English, like the rest:
 
 ```js
-// Reporté de 400 ms : une frappe utilisateur = un seul enregistrement en base.
+// Debounced by 400 ms: one keystroke = one database write.
 function loadData() { ... }
 ```
 
-## Ce que ça ne couvre pas
+## What it does not cover
 
-Les clés d'un contrat partagé (nom d'une colonne en base, clé d'un état
-persistant, route HTTP déjà en production) ne se renomment pas au passage :
-un renommage là casse un consommateur qui ne lit pas ce document. Le
-périmètre de cette règle est le code qu'un développeur lit et modifie, pas
-les contrats déjà publiés.
+- **Existing French text.** It is not translated. It changes language when someone rewrites it for
+  another reason, not through a dedicated pass.
+- **Shared contracts.** A database column, a persisted state key or an HTTP route in production is
+  not renamed in passing. Renaming it breaks a consumer that never reads this document.
+- **The conversation.** Agents answer the user in the user's language.
 
-## Repos existants
+## Enforcement
 
-Une passe de mise en conformité a été faite en septembre 2026 sur les repos
-qui en avaient le plus besoin. Au-delà, cette règle ne déclenche pas un audit
-récurrent : un identifiant français qui subsiste se renomme à l'occasion d'un
-chantier qui touche déjà ce fichier, pas par une passe dédiée systématique.
+`hooks/guard.py` refuses a French commit message or PR title. French inside backticks is ignored,
+so a verbatim quote stays possible. Nothing checks docs or comments automatically.

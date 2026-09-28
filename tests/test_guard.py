@@ -21,6 +21,7 @@ def hors_main(monkeypatch):
     """Neutralise les regles de branche pour tester les autres isolement."""
     monkeypatch.setattr(guard, "_branche", lambda _cwd: "feat/quelque-chose")
     monkeypatch.setattr(guard, "_branche_deja_mergee", lambda _cwd, _b=None: False)
+    monkeypatch.setattr(guard, "_gh", lambda _cwd, *_a: None)  # no network in tests
 
 
 def verdict(commande, powershell=False, cwd="."):
@@ -110,9 +111,9 @@ def test_un_message_de_commit_qui_cite_push_n_est_pas_un_push(monkeypatch, hors_
     monkeypatch.setattr(guard, "_branche_deja_mergee", lambda _cwd, _b=None: True)
     commande = (
         "cat > /tmp/msg.txt <<'EOF'\n"
-        "feat(pim): declarer le role\n"
+        "feat(pim): declare the role\n"
         "\n"
-        "Meme motif que `pim_acr_push` : le SP de CI ne peut pas ecrire de role assignment.\n"
+        "Same reason as `pim_acr_push`: the CI SP cannot write a role assignment.\n"
         "EOF\n"
         "git commit -F /tmp/msg.txt"
     )
@@ -453,7 +454,9 @@ def test_une_virgule_dans_command_de_containerapp_job_est_refusee(hors_main):
 )
 def test_les_commandes_az_legitimes_passent_toujours(commande, hors_main):
     """Un faux positif coute plus cher que le piege qu'il couvre : il apprend a contourner."""
-    assert verdict(commande) is None, f"faux positif : {commande}"
+    # Since 2026-09-28 an az write (`job start`) is handed back to the human: never refused here.
+    v = verdict(commande)
+    assert v is None or v[0] == "escalate", f"faux positif : {commande}"
 
 
 # --- quatrieme faux positif du garde-fou (2026-09-16) ----------------------------------------
@@ -462,14 +465,14 @@ def test_les_commandes_az_legitimes_passent_toujours(commande, hors_main):
     "commande",
     [
         # L'incident : creer la PR du hook de session Azure. `az` est DANS LE TITRE.
-        'gh pr create --title "garder la session az vivante, y compris en cours de sequence" '
+        'gh pr create --title "keep the az session alive, even mid-sequence" '
         "--body-file corps.md | tail -2",
         # Meme forme, sur un message de commit.
-        'git commit -m "documenter az login dans le runbook" | head -3',
+        'git commit -m "document az login in the runbook" | head -3',
         # Et sur une simple recherche de texte.
         "grep -rn 'az account show' docs/ | head -20",
         # La regle soeur portait le meme defaut : elle est resserree du meme geste.
-        'git commit -m "toujours lire gh pr checks ligne par ligne" | head -3',
+        'git commit -m "always read gh pr checks line by line" | head -3',
     ],
 )
 def test_le_mot_az_dans_un_argument_n_est_pas_une_commande_az(commande, hors_main):
@@ -506,3 +509,236 @@ def test_un_vrai_az_en_position_de_commande_reste_refuse(commande, hors_main):
     v = verdict(commande)
     assert v is not None, f"non attrape : {commande}"
     assert v[0] == "deny"
+
+
+# --- language: commit messages and PR titles in English (2026-09-28) -------------------------
+
+# Real subjects from this repo's history: the French ones were legitimate before 2026-09-28.
+FRENCH_SUBJECTS = [
+    "feat(guard): refuser les deux gestes qui ont coute la montee du fork Twenty",
+    "docs: convention de langue pour le code (identifiants en anglais)",
+    "fix(guard): le mot az dans un titre de PR n est pas une commande az",
+    "chore(deploy): imposer NX_DAEMON=false, le daemon bloquait le build sans un log",
+    "docs(cloture): la spec devient une decision, et le plan disparait",
+    "fix: typo dans le README",
+    "docs: mise à jour du runbook",
+]
+ENGLISH_SUBJECTS = [
+    "docs(workflow): streamline multi-session orchestration",
+    "docs: use English guidance and version-agnostic model advice",
+    "feat(guard): refuse French commit messages",
+    "fix: quote the `la session est expirée` error verbatim",  # French inside backticks
+    "fix(pim): de-duplicate the travel report import",
+]
+
+
+@pytest.mark.parametrize("subject", FRENCH_SUBJECTS)
+def test_a_french_commit_message_is_refused(subject, hors_main):
+    v = verdict(f'git commit -m "{subject}"')
+    assert v is not None and v[0] == "deny", f"not caught: {subject}"
+    assert "English" in v[1]
+
+
+@pytest.mark.parametrize("subject", FRENCH_SUBJECTS)
+def test_a_french_pr_title_is_refused(subject, hors_main):
+    v = verdict(f'gh pr create --title "{subject}" --body-file body.md')
+    assert v is not None and v[0] == "deny", f"not caught: {subject}"
+
+
+@pytest.mark.parametrize("subject", ENGLISH_SUBJECTS)
+def test_an_english_message_passes(subject, hors_main):
+    assert verdict(f'git commit -m "{subject}"') is None
+    assert verdict(f'gh pr create -t "{subject}" --body-file body.md') is None
+
+
+def test_the_claude_code_heredoc_form_is_read(hors_main):
+    commande = (
+        'git commit -m "$(cat <<\'EOF\'\n'
+        "feat: ajouter la regle de langue\n\n"
+        "Co-Authored-By: Claude <noreply@anthropic.com>\n"
+        "EOF\n"
+        ')"'
+    )
+    assert verdict(commande)[0] == "deny"
+
+
+def test_a_message_file_is_read(tmp_path, hors_main):
+    (tmp_path / "msg.txt").write_text("docs: réécrire la décision\n", encoding="utf-8")
+    assert verdict("git commit -F msg.txt", cwd=str(tmp_path))[0] == "deny"
+    (tmp_path / "msg.txt").write_text("docs: rewrite the decision\n", encoding="utf-8")
+    assert verdict("git commit -F msg.txt", cwd=str(tmp_path)) is None
+
+
+def test_a_french_doc_written_in_the_same_command_is_not_the_message(hors_main):
+    """The repo docs are still French: writing one next to an English commit is legitimate."""
+    commande = (
+        "cat > docs/live/note.md <<'EOF'\n"
+        "Une règle qui se déclenche à tort est une règle désactivée dans la semaine.\n"
+        "EOF\n"
+        'git add docs && git commit -m "docs: add the note"'
+    )
+    assert verdict(commande) is None
+
+
+def test_the_co_author_line_does_not_count(hors_main):
+    assert verdict('git commit -m "fix: guard\n\nCo-Authored-By: Clément <c@x.com>"') is None
+
+
+# --- az: read freely, a write goes back to the human (2026-09-28) -----------------------------
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        "az role assignment create --assignee x --role Reader --scope /subscriptions/s",
+        "az keyvault secret set --vault-name kv-x -n a --value b",
+        "az containerapp update -n ca-x -g rg-x --image acr/x:v2",
+        "az containerapp job delete -n caj-x -g rg-x --yes",
+        "az postgres flexible-server restore -g rg-x -n srv2 --source-server srv",
+        "az group create -n rg-x -l westeurope",
+        "az rest --method put --url https://management.azure.com/x --body @b.json",
+        "cd infra && az provider register --namespace Microsoft.App",
+    ],
+)
+def test_an_az_write_goes_back_to_the_human(commande, hors_main):
+    v = verdict(commande)
+    assert v is not None and v[0] == "escalate", f"not caught: {commande}"
+    assert "runbook" in v[1]
+
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        "az account show",
+        "az account set --subscription sub-dev",  # local CLI state, not Azure
+        "az login --tenant t",
+        "az extension add --name containerapp",
+        "az containerapp job execution list -n caj-x -g rg-x -o json",
+        "az keyvault secret show --vault-name kv-x -n a",
+        "az rest --method get --url https://management.azure.com/x",
+        "az acr build --registry r --image i:v1 . --no-logs",  # pushes an image, changes no resource
+        'gh pr create --title "document az role assignment create" --body-file b.md',
+    ],
+)
+def test_an_az_read_passes(commande, hors_main):
+    assert verdict(commande) is None, f"false positive: {commande}"
+
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        "gh workflow run tf-apply.yml --repo snetor/azure-landing-zone",
+        "gh workflow run tf-apply.yml -f confirm=yes",
+        "gh api -X POST repos/snetor/azure-landing-zone/actions/workflows/tf-apply.yml/dispatches -f ref=main",
+    ],
+)
+def test_triggering_tf_apply_goes_back_to_the_human_even_on_a_trusted_workstation(commande, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    v = verdict(commande)
+    assert v is not None and v[0] == "escalate"
+    assert "tf-apply" in v[1]
+
+
+def test_reading_tf_apply_runs_passes(hors_main):
+    assert verdict("gh run list --workflow tf-apply.yml --limit 5") is None
+    assert verdict("gh workflow run tf-plan.yml") is None
+
+
+# --- false positives reported by alz-security on 2026-09-28 -----------------------------------
+
+@pytest.fixture
+def shared_checkout_on_main(monkeypatch):
+    """The session cwd is the shared checkout, on `main`; any other directory is a worktree."""
+    monkeypatch.setattr(guard, "_branche", lambda cwd: "main" if cwd == "." else "feat/x")
+    monkeypatch.setattr(guard, "_branche_deja_mergee", lambda _cwd, _b=None: False)
+    monkeypatch.setattr(guard, "_gh", lambda _cwd, *_a: None)
+
+
+@pytest.mark.parametrize(
+    "commande, powershell",
+    [
+        ('git -C "$w" commit -m "fix: x"', False),
+        ("git -C $w commit -F msg.txt", True),
+        ("Set-Location $w; git commit -F msg.txt", True),
+        ('cd "$w" && git commit -m "fix: x"', False),
+        ('for w in a b; do cd "$w"; git commit -m "fix: x"; done', False),
+    ],
+)
+def test_a_commit_in_an_unresolvable_directory_is_not_a_commit_on_main(
+        commande, powershell, shared_checkout_on_main):
+    assert verdict(commande, powershell=powershell) is None
+
+
+def test_a_literal_git_c_directory_is_resolved(tmp_path, shared_checkout_on_main):
+    assert verdict(f'git -C "{tmp_path}" commit -m "fix: x"') is None
+    assert verdict('git commit -m "fix: x"')[0] == "deny"  # still refused in the shared checkout
+
+
+def test_az_in_a_commit_message_does_not_make_a_later_pipe_an_az_pipe(hors_main):
+    commande = 'git commit -m "fix: guard\n\naz containerapp update is escalated now" && git push | tail -3'
+    assert verdict(commande) is None
+
+
+# --- az rest: read-only POST APIs ---------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://management.azure.com/subscriptions/s/providers/Microsoft.CostManagement/query?api-version=2023-03-01",
+        "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2022-10-01",
+        "https://management.azure.com/subscriptions/s/resourceGroups/rg/validateMoveResources?api-version=2021-04-01",
+    ],
+)
+def test_read_only_post_apis_pass(url, hors_main):
+    assert verdict(f'az rest --method post --url "{url}" --body @q.json') is None
+
+
+def test_other_posts_still_escalate(hors_main):
+    v = verdict('az rest --method post --url "https://management.azure.com/subscriptions/s/resourceGroups/rg/moveResources?api-version=2021-04-01"')
+    assert v is not None and v[0] == "escalate"
+
+
+# --- gh pr merge: stacks and image-tag applies ------------------------------------------------
+
+@pytest.fixture
+def github(monkeypatch, hors_main):
+    """Canned `gh` answers: {args tuple prefix: json}."""
+    answers = {}
+
+    def fake(_cwd, *args):
+        for prefix, value in answers.items():
+            if args[: len(prefix)] == prefix:
+                return value
+        return None
+
+    monkeypatch.setattr(guard, "_gh", fake)
+    return answers
+
+
+def test_merge_with_delete_branch_under_a_stacked_pr_is_refused(github, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    github[("pr", "view", "504")] = {"headRefName": "feat/base", "files": [{"path": "a.tf"}]}
+    github[("pr", "list", "--base", "feat/base")] = [{"number": 508}]
+    v = verdict("gh pr merge 504 --squash --delete-branch")
+    assert v is not None and v[0] == "deny"
+    assert "#508" in v[1]
+
+
+def test_merge_with_delete_branch_and_no_stack_passes_on_a_trusted_workstation(github, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    github[("pr", "view", "504")] = {"headRefName": "feat/base", "files": [{"path": "a.tf"}]}
+    github[("pr", "list", "--base", "feat/base")] = []
+    assert verdict("gh pr merge 504 --squash --delete-branch") is None
+
+
+def test_merging_an_image_tag_file_escalates_even_on_a_trusted_workstation(github, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    github[("pr", "view", "511")] = {
+        "headRefName": "chore/bump", "files": [{"path": "environments/dev/pim-app-image.auto.tfvars"}]}
+    v = verdict("gh pr merge 511 --squash -R snetor/azure-landing-zone")
+    assert v is not None and v[0] == "escalate"
+    assert "whole of main" in v[1]
+
+
+def test_merge_checks_fail_open_when_gh_does_not_answer(github, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    assert verdict("gh pr merge 504 --squash --delete-branch") is None
