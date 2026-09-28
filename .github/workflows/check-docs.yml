@@ -8,6 +8,13 @@ on:
         required: false
         type: string
         default: "3.12"
+      runs-on:
+        # GitHub-hosted runners have been unavailable to the org's private repos since 2026-09-23
+        # (billing): a caller with a self-hosted runner passes its labels here.
+        description: 'Runner spec as JSON, e.g. ''["self-hosted","linux","snetor-aca"]'''
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
 
 # Un workflow appele herite du scope du token appelant. Le verificateur ne fait
 # que lire : on reduit explicitement, d autant qu un des repos consommateurs
@@ -17,7 +24,7 @@ permissions:
 
 jobs:
   check-docs:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(inputs.runs-on) }}
     # Les quatre depots appelants sont prives, et les minutes d un workflow reutilisable sont
     # facturees a l appelant : ce job pese donc sur le quota de 2000 min/mois de l organisation,
     # epuise le 18/08/2026. Sans cette ligne, le defaut GitHub est 360 minutes — 18 % du quota
