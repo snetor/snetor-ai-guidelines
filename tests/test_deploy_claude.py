@@ -137,3 +137,52 @@ def test_le_controle_de_jeton_azure_est_idempotent(source):
         "la detection d'un branchement existant ne cherche pas `az_ensure_login.py` : une "
         "deuxieme execution du deployeur ajouterait le hook une seconde fois."
     )
+
+
+# --- hook startup (2026-09-28) -----------------------------------------------------------------
+
+HOOKS = pathlib.Path(__file__).resolve().parent.parent / "hooks"
+
+
+def test_every_hook_starts_isolated_and_in_utf8(source):
+    """Without `-S`, `pip_system_certs.pth` imports pip at each call: 0.9 s idle, over 10 s under
+    load, and Claude Code then cancels the guard and runs the command unguarded (CRM run,
+    2026-09-24). Without `-X utf8`, French hook messages reach the model as mojibake."""
+    commands = re.findall(r"^python .*runpy.*$", source, re.MULTILINE)
+    assert len(commands) == 3, commands
+    for c in commands:
+        assert c.startswith("python -I -S -X utf8 -c "), c
+
+
+def test_an_existing_hook_entry_is_refreshed_not_just_detected(source):
+    for var in ("gardeCommande", "memoireCommande", "jetonCommande"):
+        assert re.search(rf"\$h\.command\s*=\s*\${var}\b", source), (
+            f"an existing entry keeps its old command: a fix to ${var} never reaches the workstation"
+        )
+
+
+def test_hooks_import_the_stdlib_only():
+    """`-S` drops site-packages: a hook that imports a third-party module would crash on start."""
+    import ast
+    import sys
+
+    for f in HOOKS.glob("*.py"):
+        for node in ast.walk(ast.parse(f.read_text(encoding="utf-8"))):
+            names = [a.name for a in node.names] if isinstance(node, ast.Import) else (
+                [node.module] if isinstance(node, ast.ImportFrom) and node.module else [])
+            for n in names:
+                top = n.split(".")[0]
+                assert top in sys.stdlib_module_names or top == "__future__", f"{f.name}: {n}"
+
+
+def test_the_guard_runs_with_the_deployed_flags():
+    import json
+    import subprocess
+    import sys
+
+    event = json.dumps({"tool_name": "Bash", "tool_input": {"command": "ls"}, "cwd": "."})
+    r = subprocess.run(
+        [sys.executable, "-I", "-S", "-X", "utf8", str(HOOKS / "guard.py")],
+        input=event, capture_output=True, text=True, timeout=30,
+    )
+    assert r.returncode == 0, r.stderr
