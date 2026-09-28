@@ -59,16 +59,19 @@ TRONQUE = r"(tail|head|Select-Object\s+-(First|Last))"
 # manque coute un pipe tronquant de plus, un refus a tort apprend a contourner le garde-fou.
 DEBUT_DE_COMMANDE = r"(?:^|[\n;&|(]+\s*)"
 
+# `[^|\n]*` and `QUOTED`: on 2026-09-28 an `az` line inside a multi-line `-m` message made the
+# `git push | tail` after it look like an az pipe (alz-security).
+QUOTED = re.compile(r"\"(?:[^\"\\]|\\.)*\"|'[^']*'")
 PIPE_QUI_AVALE = [
     (
-        re.compile(rf"{DEBUT_DE_COMMANDE}gh\s+pr\s+checks\b[^|]*\|\s*{TRONQUE}",
+        re.compile(rf"{DEBUT_DE_COMMANDE}gh\s+pr\s+checks\b[^|\n]*\|\s*{TRONQUE}",
                    re.IGNORECASE | re.MULTILINE),
         "Un pipe avale le code de sortie de `gh pr checks` : la commande rend vert meme quand un "
         "check est rouge. C'est ce qui a fait merger #95 et #136 sur du rouge.\n"
         "Faire : gh pr checks <n> --json name,state  puis LIRE chaque ligne.",
     ),
     (
-        re.compile(rf"{DEBUT_DE_COMMANDE}az(?:\.cmd)?\s+[^|]*\|\s*{TRONQUE}",
+        re.compile(rf"{DEBUT_DE_COMMANDE}az(?:\.cmd)?\s+[^|\n]*\|\s*{TRONQUE}",
                    re.IGNORECASE | re.MULTILINE),
         "Un pipe tronquant derriere `az` masque a la fois la fin de la sortie et le code de "
         "sortie. Incident : 20 minutes perdues sur un token expire invisible.\n"
@@ -155,7 +158,195 @@ ESCALADE = [
         re.compile(r"\bgit\s+push\b.*(--force(?!-with-lease)|(^|\s)-f(\s|$))"),
         "`git push --force` reecrit l'historique distant.",
     ),
+    (
+        # Standing rule since 2026-09-28: tf-apply runs only on Clement's explicit go for THAT run.
+        # Deliberately not covered by SNETOR_GUARD_TRUST_MERGE: trusting a merge is not trusting
+        # an apply. `gh run rerun <id>` is not caught: a run id does not say which workflow it is.
+        re.compile(r"\bgh\s+(?:workflow\s+run\b[^\n;&|]*\btf-apply|api\b[^\n;&|]*tf-apply[^\n;&|]*/dispatches)",
+                   re.IGNORECASE),
+        "Triggering `tf-apply` changes the Azure infrastructure. It needs Clement's explicit go "
+        "for this specific run, after he has read the plan.",
+    ),
 ]
+
+# --- az: read freely, change only with a human go -----------------------------------------
+
+# `az` is logged in as an admin account on this workstation: every write goes straight to Azure.
+# Standing rule (2026-09-28): read with az; write only for a documented runbook step; any other
+# infrastructure change goes through a Terraform PR in azure-landing-zone. A program cannot tell
+# a runbook step from an improvised fix (the runbooks use `role assignment create`, `secret set`,
+# `job delete`, `restore`...), so a write is handed back to the human, never refused outright.
+AZ_INVOCATION = re.compile(rf"{DEBUT_DE_COMMANDE}az(?:\.cmd)?\s+([^\n;&|]*)", re.IGNORECASE | re.MULTILINE)
+AZ_WRITE_VERBS = frozenset(
+    "create delete update set add remove start stop restart assign import restore register "
+    "unregister purge recover deploy up apply reset renew rotate grant revoke attach detach "
+    "scale swap invoke upgrade".split()
+)
+# Local CLI state, not Azure resources: `az account set` picks a subscription, `az config set`
+# a default, `az extension add` a plugin.
+AZ_LOCAL_GROUPS = frozenset({"login", "logout", "account", "config", "extension", "cloud", "version"})
+AZ_REST_WRITE = re.compile(r"(?:--method|-m)\s+[\"']?(?:put|post|patch|delete)\b", re.IGNORECASE)
+# POST, but read-only: cost and Resource Graph queries, and the dry run before a resource move.
+# Asked by alz-security on 2026-09-28: they run in almost every investigation.
+AZ_REST_POST = re.compile(r"(?:--method|-m)\s+[\"']?post\b", re.IGNORECASE)
+AZ_REST_READ_POST = re.compile(
+    r"(?:Microsoft\.CostManagement/query|Microsoft\.ResourceGraph/resources|/validateMoveResources)\b",
+    re.IGNORECASE,
+)
+
+
+def _az_write(commande: str) -> str | None:
+    """The first `az` invocation that changes Azure, or None."""
+    for m in AZ_INVOCATION.finditer(commande):
+        args = m.group(1)
+        positional = []
+        for token in args.split():
+            if token.startswith("-"):
+                break
+            positional.append(token.lower())
+        if not positional or positional[0] in AZ_LOCAL_GROUPS:
+            continue
+        if positional[0] == "rest":
+            if AZ_REST_WRITE.search(args) and not (AZ_REST_POST.search(args) and AZ_REST_READ_POST.search(args)):
+                return f"az {args.strip()}"
+            continue
+        if positional[-1] in AZ_WRITE_VERBS:
+            return f"az {' '.join(positional)}"
+    return None
+
+
+# --- gh pr merge: what the merge really does (2026-09-28, alz-security) ------------------------
+
+GH_PR_MERGE = re.compile(r"\bgh\s+pr\s+merge\b([^\n;&|]*)", re.IGNORECASE)
+GH_REPO = re.compile(r"(?:^|\s)(?:-R|--repo)(?:\s+|=)(\S+)")
+DELETE_BRANCH = re.compile(r"(?:^|\s)(?:--delete-branch|-d)(?:\s|$)")
+IMAGE_TAG_FILE = re.compile(r"-image\.auto\.tfvars$")
+
+
+def _gh(cwd: str, *args: str):
+    """`gh ... --json` parsed, or None. Network: only called on a `gh pr merge`."""
+    try:
+        sortie = subprocess.run(["gh", *args], cwd=cwd, capture_output=True, text=True, timeout=8)
+        return json.loads(sortie.stdout) if sortie.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
+def _merge_verdict(commande: str, cwd: str) -> tuple[str, str] | None:
+    """Two merges that are not what they look like. Fails open when `gh` does not answer.
+
+    · `--delete-branch` on a PR that another open PR is stacked on closes the stacked PR for
+      good. The escalation message warned about it; #504 was still merged that way on
+      2026-09-28 and #508 was lost. A warning read and ignored is a recidive: it becomes a deny.
+    · A merged `*-image.auto.tfvars` file auto-applies the WHOLE of main in azure-landing-zone,
+      not just the tag (#511, 2026-09-28). That merge is an apply: it goes back to the human even
+      on a SNETOR_GUARD_TRUST_MERGE workstation.
+    """
+    m = GH_PR_MERGE.search(commande)
+    if not m:
+        return None
+    args = m.group(1)
+    tokens = args.split()
+    selector = [tokens[0]] if tokens and not tokens[0].startswith("-") else []
+    repo = GH_REPO.search(args)
+    repo_args = ["-R", repo.group(1)] if repo else []
+    pr = _gh(cwd, "pr", "view", *selector, "--json", "headRefName,files", *repo_args)
+    if not isinstance(pr, dict):
+        return None
+    if DELETE_BRANCH.search(args) and pr.get("headRefName"):
+        stacked = _gh(cwd, "pr", "list", "--base", pr["headRefName"], "--state", "open",
+                      "--json", "number", *repo_args)
+        if stacked:
+            numbers = ", ".join(f"#{p['number']}" for p in stacked)
+            return "deny", (
+                f"{numbers} is stacked on `{pr['headRefName']}`. `--delete-branch` would close it for "
+                "good (#508 was lost that way on 2026-09-28).\n"
+                f"Do: retarget first (`gh pr edit <n> --base main`), then merge."
+            )
+    if any(IMAGE_TAG_FILE.search(f.get("path", "")) for f in pr.get("files") or []):
+        return "escalate", (
+            "This PR changes an `*-image.auto.tfvars` file: merging it auto-applies the whole of main "
+            "in azure-landing-zone, not just the tag. Treat the merge as an apply: it needs "
+            "Clement's go for this run."
+        )
+    return None
+
+
+# --- language: everything written in a repo is in English (2026-09-28) ----------------------
+
+# ponytail: word-count heuristic, not language detection. Two French signals (a function word, an
+# elision, one accented letter) are enough; a French quote can be kept inside backticks. Upgrade to
+# a real detector only if false positives show up.
+FRENCH_WORDS = frozenset(
+    "le la les des de une est et pour avec dans sur pas qui que au aux ce cette sans à où".split()
+)
+FRENCH_ELISION = re.compile(r"^(?:l|d|n|qu|c|s|j)['’]")
+FRENCH_ACCENT = re.compile(r"[àâçéèêëîïôùûüœ]", re.IGNORECASE)
+WORD = re.compile(r"[a-zà-ÿœ]+(?:['’-][a-zà-ÿœ]+)*")
+CODE_SPAN = re.compile(r"`[^`\n]*`")
+
+
+def _looks_french(text: str) -> bool:
+    lines = [l for l in text.splitlines() if not l.strip().lower().startswith("co-authored-by:")]
+    text = CODE_SPAN.sub(" ", "\n".join(lines))
+    words = WORD.findall(text.lower())
+    score = sum(w in FRENCH_WORDS or bool(FRENCH_ELISION.match(w)) for w in words)
+    return score + bool(FRENCH_ACCENT.search(text)) >= 2
+
+
+_QUOTED = r"(?:\s+|=)(?:\"((?:[^\"\\]|\\.)*)\"|'([^']*)'|(\S+))"
+COMMIT = re.compile(r"\bgit\s+commit\b", re.IGNORECASE)
+COMMIT_MESSAGE = re.compile(rf"(?:^|\s)(?:-m|--message){_QUOTED}")
+COMMIT_FILE = re.compile(rf"(?:^|\s)(?:-F|--file){_QUOTED}")
+PR_TITLE_CMD = re.compile(r"\bgh\s+pr\s+(?:create|edit|merge)\b", re.IGNORECASE)
+PR_TITLE = re.compile(rf"(?:^|\s)(?:-t|--title|--subject){_QUOTED}")
+
+
+def _heredocs(commande: str) -> list[tuple[str, str]]:
+    """`(opening line, body)` of each heredoc — the counterpart of `_sans_corps_heredoc`."""
+    found, opening, body, marker = [], "", [], None
+    for ligne in commande.split("\n"):
+        if marker is not None:
+            if ligne.strip() == marker:
+                found.append((opening, "\n".join(body)))
+                marker = None
+            else:
+                body.append(ligne)
+            continue
+        m = _OUVRE_UN_HEREDOC.search(ligne)
+        if m:
+            opening, body, marker = ligne, [], m.group(1)
+    return found
+
+
+def _values(pattern: re.Pattern, text: str) -> list[str]:
+    return [next((g for g in m.groups() if g is not None), "") for m in pattern.finditer(text)]
+
+
+def _written_texts(commande: str, cwd: str) -> list[str]:
+    """Commit messages and PR titles this command is about to write."""
+    sans = _sans_corps_heredoc(commande)
+    heredocs = _heredocs(commande)
+    texts: list[str] = []
+    commit = COMMIT.search(sans)
+    if commit:
+        after = sans[commit.end():]
+        texts += _values(COMMIT_MESSAGE, after)
+        texts += [body for opening, body in heredocs if COMMIT.search(opening)]
+        for path in _values(COMMIT_FILE, after):
+            written_here = [body for opening, body in heredocs if path in opening]
+            if written_here or path == "-":
+                texts += written_here
+                continue
+            fichier = Path(path) if Path(path).is_absolute() else Path(_cwd_effectif(commande, cwd) or cwd) / path
+            try:
+                texts.append(fichier.read_text(encoding="utf-8", errors="ignore")[:65536])
+            except OSError:
+                pass  # missing file: git will say so itself
+    pr = PR_TITLE_CMD.search(sans)
+    if pr:
+        texts += _values(PR_TITLE, sans[pr.end():])
+    return texts
 
 # --- regles specifiques a PowerShell ------------------------------------------------------
 
@@ -189,12 +380,26 @@ _CHANGEMENT_DE_REPERTOIRE = re.compile(
 )
 
 
-def _cwd_effectif(commande: str, cwd: str) -> str:
-    """Le repertoire ou la commande s'execute vraiment, `cd` de tete compris."""
+# Any directory change, wherever it sits: after a separator, or after `do` / `then` in a loop.
+_ANY_CD = re.compile(r"(?:^|[;&|(\n]|\bdo\b|\bthen\b)\s*(?:cd|Set-Location|pushd|Push-Location)\s", re.IGNORECASE)
+
+
+def _cwd_effectif(commande: str, cwd: str) -> str | None:
+    """Le repertoire ou la commande s'execute vraiment, `cd` de tete compris.
+
+    None when it cannot be known: a `cd` to a variable, or a `cd` further down the command (inside
+    a `for` loop...). Reported by alz-security on 2026-09-28: both fell back to the shared checkout
+    on `main` and refused a legitimate worktree commit. An unknown directory skips the branch
+    rules — a missed refusal costs less than a wrong one.
+    """
     m = _CHANGEMENT_DE_REPERTOIRE.match(commande)
+    if len(_ANY_CD.findall(commande)) > (1 if m else 0):
+        return None
     if not m:
         return cwd
     cible = next(g for g in m.groups() if g)
+    if "$" in cible or "%" in cible:
+        return None
     chemin = Path(cible)
     if not chemin.is_absolute():
         chemin = Path(cwd) / chemin
@@ -300,7 +505,13 @@ def verifier_commande(commande: str, powershell: bool, cwd: str) -> tuple[str, s
     # en documentant `az login --claims-challenge` dans le HANDOFF — le contournement etait alors
     # d'ecrire la commande autrement, c'est-a-dire d'obeir a un garde-fou qui se trompait.
     sans_heredoc = _sans_corps_heredoc(commande)
-    for motif, message in PIPE_QUI_AVALE + COMMANDES:
+    # A pipe rule reads the command with quoted text blanked: a commit message line starting with
+    # `az` is not an `az` call (2026-09-28). COMMANDES keep the quotes: the comma rule looks inside.
+    sans_citations = QUOTED.sub('""', sans_heredoc)
+    for motif, message in PIPE_QUI_AVALE:
+        if motif.search(sans_citations):
+            return "deny", message
+    for motif, message in COMMANDES:
         if motif.search(sans_heredoc):
             return "deny", message
 
@@ -330,26 +541,46 @@ def verifier_commande(commande: str, powershell: bool, cwd: str) -> tuple[str, s
     # commit qui cite `git push` n'est pas un `git push`. Cf. `_sans_corps_heredoc`.
     git_seul = _sans_corps_heredoc(commande)
     if re.search(r"\bgit\s+(push|commit)\b", git_seul) and not _que_des_suppressions(git_seul):
-        cwd = _cwd_effectif(commande, cwd)
-        branche = _branche(cwd)
+        git_cwd = _cwd_effectif(commande, cwd)
+        branche = _branche(git_cwd) if git_cwd is not None else None
         if branche == "main":
             return "deny", (
                 "Commit ou push direct sur `main`. Recidive explicite des 10 et 11/08 — un merge "
                 "laisse le checkout sur `main`, et le geste suivant y atterrit.\n"
                 "Faire : `git checkout -b <type>/<sujet>` d'abord."
             )
-        if re.search(r"\bgit\s+push\b", git_seul) and branche and _branche_deja_mergee(cwd, branche):
+        if re.search(r"\bgit\s+push\b", git_seul) and branche and _branche_deja_mergee(git_cwd, branche):
             return "deny", (
                 f"La branche `{branche}` n'apporte plus rien a `origin/main` : sa PR est mergee. "
                 "Un commit pousse ici pend hors de `main` — c'est arrive le 06/08.\n"
                 "Faire : repartir d'une branche neuve depuis `origin/main`."
             )
 
+    if any(_looks_french(t) for t in _written_texts(commande, cwd)):
+        return "deny", (
+            "Commit message or PR title in French. Since 2026-09-28 everything written in a repo is "
+            "in English (snetor-ai-guidelines: docs/dated/decisions/2026-09-28-english-in-every-repo.md). "
+            "Existing French text is not translated.\n"
+            "Do: rewrite the message in English. A French quote can stay inside backticks."
+        )
+
+    merge = _merge_verdict(sans_heredoc, cwd)
+    if merge:
+        return merge
+
     for motif, message in ESCALADE:
         if motif.search(commande):
             if motif is ESCALADE[0][0] and os.environ.get(CONFIANCE_MERGE) == "1":
                 continue
             return "escalate", message
+
+    az = _az_write(sans_heredoc)
+    if az:
+        return "escalate", (
+            f"`{az}` changes Azure with an admin account. Allowed only as a step of a documented "
+            "runbook; any other infrastructure change goes through a Terraform PR in "
+            "azure-landing-zone. Confirm which runbook step this is."
+        )
     return None
 
 

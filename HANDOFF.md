@@ -1,6 +1,6 @@
 # HANDOFF — snetor-ai-guidelines
 
-**Dernière révision :** 2026-09-17
+**Dernière révision :** 2026-09-28
 
 Routeur d état, pas un journal. L historique vit dans `git log`.
 
@@ -48,6 +48,7 @@ de ce dépôt, qui est public.
 | Migrer un repo vers le standard | `docs/dated/decisions/2026-08-10-regles-de-migration-d-un-repo.md` |
 | Comprendre pourquoi une règle du garde-fou existe | `hooks/guard.py` — chaque motif cite son incident |
 | Savoir ce qu une montée de fork coûte vraiment | `docs/dated/decisions/2026-09-17-outillage-des-montees-twenty.md` |
+| Language rule: everything in a repo is in English (2026-09-28) | `docs/live/code-conventions.md` |
 
 ## Décisions en attente
 
