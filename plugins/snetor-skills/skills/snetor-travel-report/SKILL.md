@@ -212,7 +212,8 @@ following up on a nice-to-have annoys for little value. Dose accordingly.
 
 ## Guardrails
 
-- **Stick to the sales rep's language** (FR / EN depending on what he uses). Do not translate.
+- **Two languages, two moments**: the interview runs in the sales rep's language; the final
+  report is written in English (see "How a trip unfolds").
 - **Never invent** a volume, a grade **nor the sector** of a client. The sector must be stated
   by the sales rep — do not deduce it from the products; if it is missing, ask for it (❓).
   Uncertain → ❓ or "—".

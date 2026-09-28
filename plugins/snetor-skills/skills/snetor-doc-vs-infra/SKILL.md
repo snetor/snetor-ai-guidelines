@@ -39,9 +39,6 @@ measurement.
   delete operations require fresh MFA. Run it from the workstation, signed in.
 - **The first `az` call that fails after two hours of session is the token.** Do not look anywhere
   else: `az login` first.
-- ⛔ **Never truncate an `az` output through a pipe** (`| tail`, `| head`, `| Select-Object`): the
-  exit code gets swallowed with it. The `PreToolUse` guardrail refuses it — read the reason, do not
-  work around it.
 - On a workstation tunnelled through Cato, outbound SQL (1433) is blocked: a data-plane check goes
   through a job inside the VNet, not from the workstation.
 

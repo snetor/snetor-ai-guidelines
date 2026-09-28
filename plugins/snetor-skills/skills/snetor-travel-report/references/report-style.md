@@ -3,7 +3,8 @@
 Three excerpts of real reports to calibrate **tone, language and level of detail**. To imitate
 for the final rendering, not to copy word for word. They are quoted **verbatim, in the language
 their author wrote them in** (two in French, one in English) — that is what a real Snetor report
-looks like. Observe: the language follows the sales rep (FR or EN), status and sector lead each
+looks like. Imitate their tone and structure, not their language: the final report is always in
+English. Observe: status and sector lead each
 client, volumes are precise when known, the **action plan (PA / plan of action)** is concrete,
 and the narrative richness (market intel, relationship, competition) is **preserved** — not
 flattened into empty boxes.
@@ -77,7 +78,7 @@ caustic soda) depending on the clients.
 
 ## What to retain for the final write-up
 
-- **Language = the sales rep's.** Do not translate.
+- **Language**: the excerpts keep their author's language; the final report is in English.
 - **Status + sector** at the top of each client.
 - **Precise volumes** when known, otherwise "—". Keep the units as dictated.
 - **Concrete action plan**: what to do, for whom, when.

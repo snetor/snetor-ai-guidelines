@@ -57,13 +57,13 @@ from excalidraw_snetor import (Scene, L, GREEN, GREEN_DARK, GREEN05, GREEN10, GR
                                NAVY, EMERALD, BLUE_GREEN, MUTED, SUBTLE, WHITE)
 
 s = Scene()
-s.image(120, 52, 46, "snetor_full_logo.png")                       # header brand logo
-s.text(300, 30, "Mon architecture — DEV", size=27, color=NAVY)
-s.rect(300, 120, 920, 660, fill=GREEN05, stroke=GREEN, sw=3)       # a container / zone
-s.card(352, 240, 156, 180, "Twenty\n(CRM)", icon="twenty.png",
-       fill=GREEN10, stroke=EMERALD)                                # a box with an icon + title
-s.icon_row(430, 400, ["azure-aca.png","postgresql.png","redis.png"])   # a row of service icons
-s.arrow(250, 207, 330, 285, color=BLUE_GREEN, label="HTTPS")        # a flow
+s.image(125, 50, 50, "snetor_full_logo.png")                       # header brand logo
+s.text(300, 25, "Mon architecture — DEV", size=28, color=NAVY)
+s.rect(300, 125, 925, 650, fill=GREEN05, stroke=GREEN, sw=3)       # a container / zone
+s.card(350, 250, 150, 175, "Twenty\n(CRM)", icon="twenty.png",
+       fill=GREEN10, stroke=EMERALD, size=20)                       # a box with an icon + title
+s.icon_row(425, 400, ["azure-aca.png","postgresql.png","redis.png"])   # a row of service icons
+s.arrow(250, 200, 325, 275, color=BLUE_GREEN, label="HTTPS")        # a flow
 s.save("01-mon-architecture.excalidraw")
 ```
 
@@ -101,12 +101,12 @@ system font, good for catching overlaps, useless for judging the style.
 (box borders), `BLUE_GREEN #2A5458` (**all flow arrows** — this is the house arrow color),
 `GREEN05/10/20` (light fills/tints), `MUTED #4A5A6E` / `SUBTLE #7E8A9A` (secondary text).
 
-**Art direction — « brouillon propre » (clean sketch), the default since 2026-09-25.** Excalifont
+**Art direction — « brouillon propre » (clean sketch), the default.** Excalifont
 (`fontFamily=5`), hand-drawn stroke (`roughness=1`), thin lines (`strokeWidth=1.5`), rounded corners,
 solid light fills. A diagram that looks like a sketch reads as an idea to discuss rather than a
 frozen blueprint — which is what makes it land with an executive. It stays *propre*: the grid, the
 palette and the composition rules below still apply; only the stroke and the font loosen up.
-`Scene()` applies it; `Scene(sketch=False)` gives the old corporate-clean style (Helvetica, straight
+`Scene()` applies it; `Scene(sketch=False)` gives a corporate-clean style (Helvetica, straight
 lines) for the rare technical doc that must look like a spec.
 
 **Layout** — group with translucent zones, stack in bands:
@@ -178,9 +178,9 @@ all five applications have "its own database", say it *once* in the zone's subti
 ```python
 s.zone(90, 200, 1880, 560, "Notre compte Azure", color=NAVY, logo="azure.png",
        subtitle="tout ce qui suit est facturé et gouverné ici")
-s.zone(134, 300, 470, 236, "L'ATELIER", color=GREEN, logo="azure-aca.png",
+s.zone(125, 300, 475, 250, "L'ATELIER", color=GREEN, logo="azure-aca.png",
        subtitle="aujourd'hui")
-s.chip(660, 424, 232, 68, "CRM")                      # the elementary brick
+s.chip(650, 425, 225, 75, "CRM")                      # the elementary brick
 s.logo_strip(1000, 900, [("sap.png", "SAP"), ("powerbi.png", "Power BI")])
 ```
 
@@ -193,8 +193,8 @@ kill.
 **Colour comes in pairs.** `ZONE_TINTS` maps every frame colour to its fill, and the pairs are
 lifted from Excalidraw's own palette rather than invented — a saturated border with a light fill of
 the same family. That pairing is what makes a render read as *Excalidraw* rather than as PowerPoint.
-An earlier version used near-white tints (`#F2F7F2`) and the zones stopped separating from the page
-at all: a frame is read by its border, but its fill still has to exist.
+A frame is read by its border, but its fill still has to exist: near-white tints make the zones
+vanish into the page.
 
 **Vertical rhythm is a constant, not a judgement call.** `ZONE_TITLE_Y=28`, `ZONE_SUB_Y=64`,
 `ZONE_HEAD=110`, `ZONE_PAD=25`. Every zone starts its content at `y + ZONE_HEAD`, so sibling zones
@@ -209,8 +209,7 @@ at a render, never by re-reading code:
 - **Badge placement follows the zone's width.** Wide zone (≥600px): badge in the top-left corner,
   title centred normally — the badge is far from the centre and does not collide. Narrow zone: there
   is no room for both side by side, so the badge **centres itself** on the top edge and the title
-  stays centred underneath. An intermediate version pushed the title to the right of the badge
-  instead, and the resulting off-centre alignment was the first thing anyone noticed.
+  stays centred underneath.
 
 ## Logos & icons
 
@@ -227,7 +226,6 @@ background) — both skills then pick it up.
 
 ## Gotchas
 
-- **Build files small/legible**: design for ~700–1400px wide; `fontSize` ≥ 12 for body, ≥ 14 titles.
 - **A WebP saved as `.png`** is handled (the toolkit normalizes to real PNG on embed) — but fix the
   source file name when you can.
 - **Bound labels** (`boxlabel`) re-center automatically in Excalidraw; standalone `text` does not —

@@ -54,7 +54,7 @@ wrongly, and a guardrail that fires wrongly is disabled within the week.**
 
 4. **Write the mechanism** for the gesture or invariant lessons that have none. **One mechanism at a
    time, with its test, in a dedicated commit.** A gesture guardrail goes into
-   `snetor-ai-guidelines/hooks/guard.py` — it then covers all fourteen repos, not just one.
+   `snetor-ai-guidelines/hooks/guard.py` — it then covers every Snetor repo, not just one.
 
 5. **Mark it** in `lessons.md` without rewriting the text of the lesson: add a `tooled: <path>` line
    underneath it.
