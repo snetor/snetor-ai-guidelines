@@ -16,7 +16,7 @@ another reason. Talk to the user in the user's language. Detail:
 - **Squash merge + suppression auto de la branche** (réglés sur les repos). Ne pas laisser traîner de branches mergées ; `git fetch --prune` régulier.
 - **⚠️ Ne JAMAIS pousser sur une branche après le merge de sa PR** — le commit pend hors de `main`. Repartir d'une nouvelle branche depuis `origin/main`.
 - **Worktrees** : un par tâche ; `git worktree remove` après merge. Ne jamais changer la branche du checkout principal partagé ni toucher aux branches ou worktrees d'un autre agent (sessions parallèles).
-- **Un repo dont la CI applique de l'infrastructure : `merge = apply`** — ne merger qu'avec plan CI vert et PR relue ; pas d'`apply` local.
+- **Infrastructure is applied only by a `tf-apply` dispatch with Clément's go for that run.** Exception: merging an image-tag `*-image.auto.tfvars` file auto-applies the **whole of main**, not just the tag — treat that merge as an apply. Merge only with a green CI plan and a reviewed PR; no local `apply`.
 - Détail : le `docs/git-workflow.md` du repo concerné, s'il existe.
 
 # Documentation
@@ -131,7 +131,10 @@ Since 2026-09-28 it also refuses a French commit message or PR title, and hands 
 every `az` command that changes Azure (`create`, `delete`, `set`, `start`, a non-GET `az rest`...)
 and every `tf-apply` trigger, even on a trusted workstation. `az` is logged in as an admin: read
 freely, write only as a documented runbook step, change infrastructure through a Terraform PR in
-`azure-landing-zone`.
+`azure-landing-zone`. Read-only POSTs pass (Cost Management and Resource Graph queries,
+`validateMoveResources`). On `gh pr merge` it asks GitHub what the merge does: it refuses
+`--delete-branch` when an open PR is stacked on that branch, and hands back to the human a merge
+that touches `*-image.auto.tfvars`, even on a trusted workstation.
 
 Il est déployé par `scripts/deploy-claude.ps1`, donc **actif sur tous les dépôts** ouverts avec
 Claude Code. Un dépôt qui a besoin d'une règle en propre pose son propre hook dans son

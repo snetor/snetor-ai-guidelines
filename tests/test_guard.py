@@ -21,6 +21,7 @@ def hors_main(monkeypatch):
     """Neutralise les regles de branche pour tester les autres isolement."""
     monkeypatch.setattr(guard, "_branche", lambda _cwd: "feat/quelque-chose")
     monkeypatch.setattr(guard, "_branche_deja_mergee", lambda _cwd, _b=None: False)
+    monkeypatch.setattr(guard, "_gh", lambda _cwd, *_a: None)  # no network in tests
 
 
 def verdict(commande, powershell=False, cwd="."):
@@ -640,3 +641,104 @@ def test_triggering_tf_apply_goes_back_to_the_human_even_on_a_trusted_workstatio
 def test_reading_tf_apply_runs_passes(hors_main):
     assert verdict("gh run list --workflow tf-apply.yml --limit 5") is None
     assert verdict("gh workflow run tf-plan.yml") is None
+
+
+# --- false positives reported by alz-security on 2026-09-28 -----------------------------------
+
+@pytest.fixture
+def shared_checkout_on_main(monkeypatch):
+    """The session cwd is the shared checkout, on `main`; any other directory is a worktree."""
+    monkeypatch.setattr(guard, "_branche", lambda cwd: "main" if cwd == "." else "feat/x")
+    monkeypatch.setattr(guard, "_branche_deja_mergee", lambda _cwd, _b=None: False)
+    monkeypatch.setattr(guard, "_gh", lambda _cwd, *_a: None)
+
+
+@pytest.mark.parametrize(
+    "commande, powershell",
+    [
+        ('git -C "$w" commit -m "fix: x"', False),
+        ("git -C $w commit -F msg.txt", True),
+        ("Set-Location $w; git commit -F msg.txt", True),
+        ('cd "$w" && git commit -m "fix: x"', False),
+        ('for w in a b; do cd "$w"; git commit -m "fix: x"; done', False),
+    ],
+)
+def test_a_commit_in_an_unresolvable_directory_is_not_a_commit_on_main(
+        commande, powershell, shared_checkout_on_main):
+    assert verdict(commande, powershell=powershell) is None
+
+
+def test_a_literal_git_c_directory_is_resolved(tmp_path, shared_checkout_on_main):
+    assert verdict(f'git -C "{tmp_path}" commit -m "fix: x"') is None
+    assert verdict('git commit -m "fix: x"')[0] == "deny"  # still refused in the shared checkout
+
+
+def test_az_in_a_commit_message_does_not_make_a_later_pipe_an_az_pipe(hors_main):
+    commande = 'git commit -m "fix: guard\n\naz containerapp update is escalated now" && git push | tail -3'
+    assert verdict(commande) is None
+
+
+# --- az rest: read-only POST APIs ---------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://management.azure.com/subscriptions/s/providers/Microsoft.CostManagement/query?api-version=2023-03-01",
+        "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2022-10-01",
+        "https://management.azure.com/subscriptions/s/resourceGroups/rg/validateMoveResources?api-version=2021-04-01",
+    ],
+)
+def test_read_only_post_apis_pass(url, hors_main):
+    assert verdict(f'az rest --method post --url "{url}" --body @q.json') is None
+
+
+def test_other_posts_still_escalate(hors_main):
+    v = verdict('az rest --method post --url "https://management.azure.com/subscriptions/s/resourceGroups/rg/moveResources?api-version=2021-04-01"')
+    assert v is not None and v[0] == "escalate"
+
+
+# --- gh pr merge: stacks and image-tag applies ------------------------------------------------
+
+@pytest.fixture
+def github(monkeypatch, hors_main):
+    """Canned `gh` answers: {args tuple prefix: json}."""
+    answers = {}
+
+    def fake(_cwd, *args):
+        for prefix, value in answers.items():
+            if args[: len(prefix)] == prefix:
+                return value
+        return None
+
+    monkeypatch.setattr(guard, "_gh", fake)
+    return answers
+
+
+def test_merge_with_delete_branch_under_a_stacked_pr_is_refused(github, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    github[("pr", "view", "504")] = {"headRefName": "feat/base", "files": [{"path": "a.tf"}]}
+    github[("pr", "list", "--base", "feat/base")] = [{"number": 508}]
+    v = verdict("gh pr merge 504 --squash --delete-branch")
+    assert v is not None and v[0] == "deny"
+    assert "#508" in v[1]
+
+
+def test_merge_with_delete_branch_and_no_stack_passes_on_a_trusted_workstation(github, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    github[("pr", "view", "504")] = {"headRefName": "feat/base", "files": [{"path": "a.tf"}]}
+    github[("pr", "list", "--base", "feat/base")] = []
+    assert verdict("gh pr merge 504 --squash --delete-branch") is None
+
+
+def test_merging_an_image_tag_file_escalates_even_on_a_trusted_workstation(github, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    github[("pr", "view", "511")] = {
+        "headRefName": "chore/bump", "files": [{"path": "environments/dev/pim-app-image.auto.tfvars"}]}
+    v = verdict("gh pr merge 511 --squash -R snetor/azure-landing-zone")
+    assert v is not None and v[0] == "escalate"
+    assert "whole of main" in v[1]
+
+
+def test_merge_checks_fail_open_when_gh_does_not_answer(github, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    assert verdict("gh pr merge 504 --squash --delete-branch") is None
