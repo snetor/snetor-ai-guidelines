@@ -176,8 +176,8 @@ what is **constrained** from what is **free**.
 
 **Free (adapts to the sales rep — do not freeze anything):**
 
-- **The style follows the sales rep**: dense prose (cf. Thibaut), regular records (cf. William)
-  or lists (cf. Morine) — match his own, see `references/report-style.md`. A talkative sales rep
+- **The style follows the sales rep**: dense prose (excerpt 1), regular records (excerpt 3)
+  or lists (excerpt 2) — match their own, see `references/report-style.md`. A talkative sales rep
   gets a narrative report; a terse sales rep gets dry records.
 - **Headings and separators**: free as long as they survive the copy-paste (CAPITALS on a line,
   dash lines `-----`, `-` lists...). The rendering example is **one** possible layout only, not
@@ -212,7 +212,8 @@ following up on a nice-to-have annoys for little value. Dose accordingly.
 
 ## Guardrails
 
-- **Stick to the sales rep's language** (FR / EN depending on what he uses). Do not translate.
+- **Two languages, two moments**: the interview runs in the sales rep's language; the final
+  report is written in English (see "How a trip unfolds").
 - **Never invent** a volume, a grade **nor the sector** of a client. The sector must be stated
   by the sales rep — do not deduce it from the products; if it is missing, ask for it (❓).
   Uncertain → ❓ or "—".

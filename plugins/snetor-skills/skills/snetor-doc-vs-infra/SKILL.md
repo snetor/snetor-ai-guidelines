@@ -35,15 +35,12 @@ measurement.
 
 ## What you need to know before starting
 
-- ⚠️ **This routine cannot be scheduled in the cloud.** The Entra token expires after ~2 h, and
-  delete operations require fresh MFA. Run it from the workstation, signed in.
-- **The first `az` call that fails after two hours of session is the token.** Do not look anywhere
-  else: `az login` first.
-- ⛔ **Never truncate an `az` output through a pipe** (`| tail`, `| head`, `| Select-Object`): the
-  exit code gets swallowed with it. The `PreToolUse` guardrail refuses it — read the reason, do not
-  work around it.
-- On a workstation tunnelled through Cato, outbound SQL (1433) is blocked: a data-plane check goes
-  through a job inside the VNet, not from the workstation.
+- ⚠️ **This routine cannot be scheduled in the cloud.** It needs an interactive, signed-in `az`
+  session. Run it from the workstation.
+- **The first `az` call that fails late in a long session is usually the expired token.** Run
+  `az login` before looking anywhere else.
+- A data-plane check (a database, a private endpoint) may not be reachable from the workstation:
+  run it through a job inside the network, and say so in the report.
 
 ## Sequence
 

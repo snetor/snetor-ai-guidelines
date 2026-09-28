@@ -300,7 +300,7 @@ class Scene:
         self.text(cx - 70, cy + logo_h / 2 + 8, label, size=size, color=color,
                   align="center", w=140)
 
-    def logo_strip(self, cx, y, entries, logo_h=40, gap=34, size=12, color=MUTED):
+    def logo_strip(self, cx, y, entries, logo_h=40, gap=34, size=14, color=MUTED):
         """Une rangee centree de logos legendes — les sources de donnees d'un schema.
         `entries` est une liste de (nom_de_logo, legende)."""
         dims = []
