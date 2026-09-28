@@ -1,7 +1,7 @@
 ---
 regime: live
 audience: [agent, dev, newcomer]
-reviewed: 2026-09-09
+reviewed: 2026-09-28
 ttl: 180d
 ---
 
@@ -159,6 +159,11 @@ fichier verrouillé, ou disparu entre le parcours et la lecture.
 
 Warning : document `live` dont le `ttl` est dépassé, document `dated` en
 `draft` ou `proposed` depuis plus de 90 jours.
+
+Warning since 2026-09-28: a root `CLAUDE.md` over 200 lines. It is reloaded on every turn of
+every session, so its size is paid again and again; explanations belong in `docs/live/`,
+path-specific rules in `.claude/rules/`. It becomes blocking once the known oversized files are
+split.
 
 On bloque sur ce qui est cassé, jamais sur ce qui est vieux. Une pull request
 de code refusée parce qu un runbook a quatre-vingt-dix jours, c est un check
