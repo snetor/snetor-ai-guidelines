@@ -378,6 +378,31 @@ def check_lessons(repo_root: Path) -> list[str]:
     return []
 
 
+CLAUDE_MD_MAX_LINES = 200
+
+
+def claude_md_warnings(repo_root: Path) -> list[str]:
+    """CLAUDE.md is reloaded on every turn of every session in the repo: its size is paid again
+    and again. Measured on 2026-09-28: azure-landing-zone's CLAUDE.md is 1 017 lines, and cache
+    reads dominated the cost of the PIM orchestration (3.6 B tokens for 11 sessions).
+
+    A warning, not an error: an error would turn every consumer repo red the day `v1` moves.
+    Make it blocking once the known oversized files are split."""
+    chemin = repo_root / "CLAUDE.md"
+    if not chemin.is_file():
+        return []
+    contenu, erreur = read_text_safe(chemin)
+    if erreur is not None:
+        return []
+    nb = len(contenu.splitlines())
+    if nb <= CLAUDE_MD_MAX_LINES:
+        return []
+    return [
+        f"CLAUDE.md is {nb} lines, ceiling {CLAUDE_MD_MAX_LINES}: it is reloaded on every turn. "
+        "Move explanations to docs/live/ and path-specific rules to .claude/rules/"
+    ]
+
+
 def check_docs_layout(repo_root: Path) -> list[str]:
     """Interdit tout markdown dans docs/ hors des emplacements prevus."""
     errors: list[str] = []
@@ -492,7 +517,7 @@ def run(
     errors += check_lessons(repo_root)
     errors += check_docs_layout(repo_root)
     errors += check_stale_specs(repo_root, today)
-    return errors, freshness_warnings(entries, today)
+    return errors, freshness_warnings(entries, today) + claude_md_warnings(repo_root)
 
 
 def main(argv=None) -> int:

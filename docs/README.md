@@ -9,7 +9,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 ### À jour
 
 - [Language in a repo](live/code-conventions.md) — revu le 2026-09-28
-- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-09
+- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-28
 
 ### Datés
 
@@ -22,7 +22,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 ### À jour
 
 - [Language in a repo](live/code-conventions.md) — revu le 2026-09-28
-- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-09
+- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-28
 
 ### Datés
 
@@ -35,7 +35,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### À jour
 
-- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-09
+- [Standard de documentation Snetor](live/documentation-standard.md) — revu le 2026-09-28
 
 ### Datés
 
