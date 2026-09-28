@@ -742,3 +742,29 @@ def test_merging_an_image_tag_file_escalates_even_on_a_trusted_workstation(githu
 def test_merge_checks_fail_open_when_gh_does_not_answer(github, hors_main, monkeypatch):
     monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
     assert verdict("gh pr merge 504 --squash --delete-branch") is None
+
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        # 2026-09-28: the `| head` of a later grep was read as a pipe after `gh pr checks`.
+        "gh pr checks 47 --json name,state; grep -n x scripts/a.ps1 | head",
+        "az account show; git log --oneline | head -5",
+        "gh pr checks 47 --json name,state && git log | tail -3",
+    ],
+)
+def test_a_pipe_after_a_separator_belongs_to_the_next_command(commande, hors_main):
+    assert verdict(commande) is None, f"false positive: {commande}"
+
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        "az acr build --registry r --image i:v1 . --no-logs 2>&1 | tail -20",
+        "gh pr checks 94 2>&1 | head -4",
+        "az account show; az containerapp job execution list -n caj-x | tail -5",
+    ],
+)
+def test_a_real_truncating_pipe_is_still_refused(commande, hors_main):
+    v = verdict(commande)
+    assert v is not None and v[0] == "deny", f"not caught: {commande}"

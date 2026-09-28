@@ -59,19 +59,20 @@ TRONQUE = r"(tail|head|Select-Object\s+-(First|Last))"
 # manque coute un pipe tronquant de plus, un refus a tort apprend a contourner le garde-fou.
 DEBUT_DE_COMMANDE = r"(?:^|[\n;&|(]+\s*)"
 
-# `[^|\n]*` and `QUOTED`: on 2026-09-28 an `az` line inside a multi-line `-m` message made the
-# `git push | tail` after it look like an az pipe (alz-security).
+# `[^|\n;&]*` and `QUOTED`: on 2026-09-28 an `az` line inside a multi-line `-m` message made the
+# `git push | tail` after it look like an az pipe (alz-security), and the `| head` of a grep after
+# a `;` was read as a pipe behind `gh pr checks`. A pipe belongs to the command it follows.
 QUOTED = re.compile(r"\"(?:[^\"\\]|\\.)*\"|'[^']*'")
 PIPE_QUI_AVALE = [
     (
-        re.compile(rf"{DEBUT_DE_COMMANDE}gh\s+pr\s+checks\b[^|\n]*\|\s*{TRONQUE}",
+        re.compile(rf"{DEBUT_DE_COMMANDE}gh\s+pr\s+checks\b[^|\n;&]*\|\s*{TRONQUE}",
                    re.IGNORECASE | re.MULTILINE),
         "Un pipe avale le code de sortie de `gh pr checks` : la commande rend vert meme quand un "
         "check est rouge. C'est ce qui a fait merger #95 et #136 sur du rouge.\n"
         "Faire : gh pr checks <n> --json name,state  puis LIRE chaque ligne.",
     ),
     (
-        re.compile(rf"{DEBUT_DE_COMMANDE}az(?:\.cmd)?\s+[^|\n]*\|\s*{TRONQUE}",
+        re.compile(rf"{DEBUT_DE_COMMANDE}az(?:\.cmd)?\s+[^|\n;&]*\|\s*{TRONQUE}",
                    re.IGNORECASE | re.MULTILINE),
         "Un pipe tronquant derriere `az` masque a la fois la fin de la sortie et le code de "
         "sortie. Incident : 20 minutes perdues sur un token expire invisible.\n"
@@ -507,7 +508,8 @@ def verifier_commande(commande: str, powershell: bool, cwd: str) -> tuple[str, s
     sans_heredoc = _sans_corps_heredoc(commande)
     # A pipe rule reads the command with quoted text blanked: a commit message line starting with
     # `az` is not an `az` call (2026-09-28). COMMANDES keep the quotes: the comma rule looks inside.
-    sans_citations = QUOTED.sub('""', sans_heredoc)
+    # `2>&1` is a redirection, not a separator: without this, `az ... 2>&1 | tail` would escape.
+    sans_citations = re.sub(r"\d*>&\d*", ">", QUOTED.sub('""', sans_heredoc))
     for motif, message in PIPE_QUI_AVALE:
         if motif.search(sans_citations):
             return "deny", message
