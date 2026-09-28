@@ -110,9 +110,9 @@ def test_un_message_de_commit_qui_cite_push_n_est_pas_un_push(monkeypatch, hors_
     monkeypatch.setattr(guard, "_branche_deja_mergee", lambda _cwd, _b=None: True)
     commande = (
         "cat > /tmp/msg.txt <<'EOF'\n"
-        "feat(pim): declarer le role\n"
+        "feat(pim): declare the role\n"
         "\n"
-        "Meme motif que `pim_acr_push` : le SP de CI ne peut pas ecrire de role assignment.\n"
+        "Same reason as `pim_acr_push`: the CI SP cannot write a role assignment.\n"
         "EOF\n"
         "git commit -F /tmp/msg.txt"
     )
@@ -453,7 +453,9 @@ def test_une_virgule_dans_command_de_containerapp_job_est_refusee(hors_main):
 )
 def test_les_commandes_az_legitimes_passent_toujours(commande, hors_main):
     """Un faux positif coute plus cher que le piege qu'il couvre : il apprend a contourner."""
-    assert verdict(commande) is None, f"faux positif : {commande}"
+    # Since 2026-09-28 an az write (`job start`) is handed back to the human: never refused here.
+    v = verdict(commande)
+    assert v is None or v[0] == "escalate", f"faux positif : {commande}"
 
 
 # --- quatrieme faux positif du garde-fou (2026-09-16) ----------------------------------------
@@ -462,14 +464,14 @@ def test_les_commandes_az_legitimes_passent_toujours(commande, hors_main):
     "commande",
     [
         # L'incident : creer la PR du hook de session Azure. `az` est DANS LE TITRE.
-        'gh pr create --title "garder la session az vivante, y compris en cours de sequence" '
+        'gh pr create --title "keep the az session alive, even mid-sequence" '
         "--body-file corps.md | tail -2",
         # Meme forme, sur un message de commit.
-        'git commit -m "documenter az login dans le runbook" | head -3',
+        'git commit -m "document az login in the runbook" | head -3',
         # Et sur une simple recherche de texte.
         "grep -rn 'az account show' docs/ | head -20",
         # La regle soeur portait le meme defaut : elle est resserree du meme geste.
-        'git commit -m "toujours lire gh pr checks ligne par ligne" | head -3',
+        'git commit -m "always read gh pr checks line by line" | head -3',
     ],
 )
 def test_le_mot_az_dans_un_argument_n_est_pas_une_commande_az(commande, hors_main):
@@ -506,3 +508,135 @@ def test_un_vrai_az_en_position_de_commande_reste_refuse(commande, hors_main):
     v = verdict(commande)
     assert v is not None, f"non attrape : {commande}"
     assert v[0] == "deny"
+
+
+# --- language: commit messages and PR titles in English (2026-09-28) -------------------------
+
+# Real subjects from this repo's history: the French ones were legitimate before 2026-09-28.
+FRENCH_SUBJECTS = [
+    "feat(guard): refuser les deux gestes qui ont coute la montee du fork Twenty",
+    "docs: convention de langue pour le code (identifiants en anglais)",
+    "fix(guard): le mot az dans un titre de PR n est pas une commande az",
+    "chore(deploy): imposer NX_DAEMON=false, le daemon bloquait le build sans un log",
+    "docs(cloture): la spec devient une decision, et le plan disparait",
+    "fix: typo dans le README",
+    "docs: mise à jour du runbook",
+]
+ENGLISH_SUBJECTS = [
+    "docs(workflow): streamline multi-session orchestration",
+    "docs: use English guidance and version-agnostic model advice",
+    "feat(guard): refuse French commit messages",
+    "fix: quote the `la session est expirée` error verbatim",  # French inside backticks
+    "fix(pim): de-duplicate the travel report import",
+]
+
+
+@pytest.mark.parametrize("subject", FRENCH_SUBJECTS)
+def test_a_french_commit_message_is_refused(subject, hors_main):
+    v = verdict(f'git commit -m "{subject}"')
+    assert v is not None and v[0] == "deny", f"not caught: {subject}"
+    assert "English" in v[1]
+
+
+@pytest.mark.parametrize("subject", FRENCH_SUBJECTS)
+def test_a_french_pr_title_is_refused(subject, hors_main):
+    v = verdict(f'gh pr create --title "{subject}" --body-file body.md')
+    assert v is not None and v[0] == "deny", f"not caught: {subject}"
+
+
+@pytest.mark.parametrize("subject", ENGLISH_SUBJECTS)
+def test_an_english_message_passes(subject, hors_main):
+    assert verdict(f'git commit -m "{subject}"') is None
+    assert verdict(f'gh pr create -t "{subject}" --body-file body.md') is None
+
+
+def test_the_claude_code_heredoc_form_is_read(hors_main):
+    commande = (
+        'git commit -m "$(cat <<\'EOF\'\n'
+        "feat: ajouter la regle de langue\n\n"
+        "Co-Authored-By: Claude <noreply@anthropic.com>\n"
+        "EOF\n"
+        ')"'
+    )
+    assert verdict(commande)[0] == "deny"
+
+
+def test_a_message_file_is_read(tmp_path, hors_main):
+    (tmp_path / "msg.txt").write_text("docs: réécrire la décision\n", encoding="utf-8")
+    assert verdict("git commit -F msg.txt", cwd=str(tmp_path))[0] == "deny"
+    (tmp_path / "msg.txt").write_text("docs: rewrite the decision\n", encoding="utf-8")
+    assert verdict("git commit -F msg.txt", cwd=str(tmp_path)) is None
+
+
+def test_a_french_doc_written_in_the_same_command_is_not_the_message(hors_main):
+    """The repo docs are still French: writing one next to an English commit is legitimate."""
+    commande = (
+        "cat > docs/live/note.md <<'EOF'\n"
+        "Une règle qui se déclenche à tort est une règle désactivée dans la semaine.\n"
+        "EOF\n"
+        'git add docs && git commit -m "docs: add the note"'
+    )
+    assert verdict(commande) is None
+
+
+def test_the_co_author_line_does_not_count(hors_main):
+    assert verdict('git commit -m "fix: guard\n\nCo-Authored-By: Clément <c@x.com>"') is None
+
+
+# --- az: read freely, a write goes back to the human (2026-09-28) -----------------------------
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        "az role assignment create --assignee x --role Reader --scope /subscriptions/s",
+        "az keyvault secret set --vault-name kv-x -n a --value b",
+        "az containerapp update -n ca-x -g rg-x --image acr/x:v2",
+        "az containerapp job delete -n caj-x -g rg-x --yes",
+        "az postgres flexible-server restore -g rg-x -n srv2 --source-server srv",
+        "az group create -n rg-x -l westeurope",
+        "az rest --method put --url https://management.azure.com/x --body @b.json",
+        "cd infra && az provider register --namespace Microsoft.App",
+    ],
+)
+def test_an_az_write_goes_back_to_the_human(commande, hors_main):
+    v = verdict(commande)
+    assert v is not None and v[0] == "escalate", f"not caught: {commande}"
+    assert "runbook" in v[1]
+
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        "az account show",
+        "az account set --subscription sub-dev",  # local CLI state, not Azure
+        "az login --tenant t",
+        "az extension add --name containerapp",
+        "az containerapp job execution list -n caj-x -g rg-x -o json",
+        "az keyvault secret show --vault-name kv-x -n a",
+        "az rest --method get --url https://management.azure.com/x",
+        "az acr build --registry r --image i:v1 . --no-logs",  # pushes an image, changes no resource
+        'gh pr create --title "document az role assignment create" --body-file b.md',
+    ],
+)
+def test_an_az_read_passes(commande, hors_main):
+    assert verdict(commande) is None, f"false positive: {commande}"
+
+
+@pytest.mark.parametrize(
+    "commande",
+    [
+        "gh workflow run tf-apply.yml --repo snetor/azure-landing-zone",
+        "gh workflow run tf-apply.yml -f confirm=yes",
+        "gh api -X POST repos/snetor/azure-landing-zone/actions/workflows/tf-apply.yml/dispatches -f ref=main",
+    ],
+)
+def test_triggering_tf_apply_goes_back_to_the_human_even_on_a_trusted_workstation(commande, hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    v = verdict(commande)
+    assert v is not None and v[0] == "escalate"
+    assert "tf-apply" in v[1]
+
+
+def test_reading_tf_apply_runs_passes(hors_main):
+    assert verdict("gh run list --workflow tf-apply.yml --limit 5") is None
+    assert verdict("gh workflow run tf-plan.yml") is None

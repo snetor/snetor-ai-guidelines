@@ -155,7 +155,131 @@ ESCALADE = [
         re.compile(r"\bgit\s+push\b.*(--force(?!-with-lease)|(^|\s)-f(\s|$))"),
         "`git push --force` reecrit l'historique distant.",
     ),
+    (
+        # Standing rule since 2026-09-28: tf-apply runs only on Clement's explicit go for THAT run.
+        # Deliberately not covered by SNETOR_GUARD_TRUST_MERGE: trusting a merge is not trusting
+        # an apply. `gh run rerun <id>` is not caught: a run id does not say which workflow it is.
+        re.compile(r"\bgh\s+(?:workflow\s+run\b[^\n;&|]*\btf-apply|api\b[^\n;&|]*tf-apply[^\n;&|]*/dispatches)",
+                   re.IGNORECASE),
+        "Triggering `tf-apply` changes the Azure infrastructure. It needs Clement's explicit go "
+        "for this specific run, after he has read the plan.",
+    ),
 ]
+
+# --- az: read freely, change only with a human go -----------------------------------------
+
+# `az` is logged in as an admin account on this workstation: every write goes straight to Azure.
+# Standing rule (2026-09-28): read with az; write only for a documented runbook step; any other
+# infrastructure change goes through a Terraform PR in azure-landing-zone. A program cannot tell
+# a runbook step from an improvised fix (the runbooks use `role assignment create`, `secret set`,
+# `job delete`, `restore`...), so a write is handed back to the human, never refused outright.
+AZ_INVOCATION = re.compile(rf"{DEBUT_DE_COMMANDE}az(?:\.cmd)?\s+([^\n;&|]*)", re.IGNORECASE | re.MULTILINE)
+AZ_WRITE_VERBS = frozenset(
+    "create delete update set add remove start stop restart assign import restore register "
+    "unregister purge recover deploy up apply reset renew rotate grant revoke attach detach "
+    "scale swap invoke upgrade".split()
+)
+# Local CLI state, not Azure resources: `az account set` picks a subscription, `az config set`
+# a default, `az extension add` a plugin.
+AZ_LOCAL_GROUPS = frozenset({"login", "logout", "account", "config", "extension", "cloud", "version"})
+AZ_REST_WRITE = re.compile(r"(?:--method|-m)\s+[\"']?(?:put|post|patch|delete)\b", re.IGNORECASE)
+
+
+def _az_write(commande: str) -> str | None:
+    """The first `az` invocation that changes Azure, or None."""
+    for m in AZ_INVOCATION.finditer(commande):
+        args = m.group(1)
+        positional = []
+        for token in args.split():
+            if token.startswith("-"):
+                break
+            positional.append(token.lower())
+        if not positional or positional[0] in AZ_LOCAL_GROUPS:
+            continue
+        if positional[0] == "rest":
+            if AZ_REST_WRITE.search(args):
+                return f"az {args.strip()}"
+            continue
+        if positional[-1] in AZ_WRITE_VERBS:
+            return f"az {' '.join(positional)}"
+    return None
+
+
+# --- language: everything written in a repo is in English (2026-09-28) ----------------------
+
+# ponytail: word-count heuristic, not language detection. Two French signals (a function word, an
+# elision, one accented letter) are enough; a French quote can be kept inside backticks. Upgrade to
+# a real detector only if false positives show up.
+FRENCH_WORDS = frozenset(
+    "le la les des de une est et pour avec dans sur pas qui que au aux ce cette sans à où".split()
+)
+FRENCH_ELISION = re.compile(r"^(?:l|d|n|qu|c|s|j)['’]")
+FRENCH_ACCENT = re.compile(r"[àâçéèêëîïôùûüœ]", re.IGNORECASE)
+WORD = re.compile(r"[a-zà-ÿœ]+(?:['’-][a-zà-ÿœ]+)*")
+CODE_SPAN = re.compile(r"`[^`\n]*`")
+
+
+def _looks_french(text: str) -> bool:
+    lines = [l for l in text.splitlines() if not l.strip().lower().startswith("co-authored-by:")]
+    text = CODE_SPAN.sub(" ", "\n".join(lines))
+    words = WORD.findall(text.lower())
+    score = sum(w in FRENCH_WORDS or bool(FRENCH_ELISION.match(w)) for w in words)
+    return score + bool(FRENCH_ACCENT.search(text)) >= 2
+
+
+_QUOTED = r"(?:\s+|=)(?:\"((?:[^\"\\]|\\.)*)\"|'([^']*)'|(\S+))"
+COMMIT = re.compile(r"\bgit\s+commit\b", re.IGNORECASE)
+COMMIT_MESSAGE = re.compile(rf"(?:^|\s)(?:-m|--message){_QUOTED}")
+COMMIT_FILE = re.compile(rf"(?:^|\s)(?:-F|--file){_QUOTED}")
+PR_TITLE_CMD = re.compile(r"\bgh\s+pr\s+(?:create|edit|merge)\b", re.IGNORECASE)
+PR_TITLE = re.compile(rf"(?:^|\s)(?:-t|--title|--subject){_QUOTED}")
+
+
+def _heredocs(commande: str) -> list[tuple[str, str]]:
+    """`(opening line, body)` of each heredoc — the counterpart of `_sans_corps_heredoc`."""
+    found, opening, body, marker = [], "", [], None
+    for ligne in commande.split("\n"):
+        if marker is not None:
+            if ligne.strip() == marker:
+                found.append((opening, "\n".join(body)))
+                marker = None
+            else:
+                body.append(ligne)
+            continue
+        m = _OUVRE_UN_HEREDOC.search(ligne)
+        if m:
+            opening, body, marker = ligne, [], m.group(1)
+    return found
+
+
+def _values(pattern: re.Pattern, text: str) -> list[str]:
+    return [next((g for g in m.groups() if g is not None), "") for m in pattern.finditer(text)]
+
+
+def _written_texts(commande: str, cwd: str) -> list[str]:
+    """Commit messages and PR titles this command is about to write."""
+    sans = _sans_corps_heredoc(commande)
+    heredocs = _heredocs(commande)
+    texts: list[str] = []
+    commit = COMMIT.search(sans)
+    if commit:
+        after = sans[commit.end():]
+        texts += _values(COMMIT_MESSAGE, after)
+        texts += [body for opening, body in heredocs if COMMIT.search(opening)]
+        for path in _values(COMMIT_FILE, after):
+            written_here = [body for opening, body in heredocs if path in opening]
+            if written_here or path == "-":
+                texts += written_here
+                continue
+            fichier = Path(path) if Path(path).is_absolute() else Path(_cwd_effectif(commande, cwd)) / path
+            try:
+                texts.append(fichier.read_text(encoding="utf-8", errors="ignore")[:65536])
+            except OSError:
+                pass  # missing file: git will say so itself
+    pr = PR_TITLE_CMD.search(sans)
+    if pr:
+        texts += _values(PR_TITLE, sans[pr.end():])
+    return texts
 
 # --- regles specifiques a PowerShell ------------------------------------------------------
 
@@ -345,11 +469,27 @@ def verifier_commande(commande: str, powershell: bool, cwd: str) -> tuple[str, s
                 "Faire : repartir d'une branche neuve depuis `origin/main`."
             )
 
+    if any(_looks_french(t) for t in _written_texts(commande, cwd)):
+        return "deny", (
+            "Commit message or PR title in French. Since 2026-09-28 everything written in a repo is "
+            "in English (snetor-ai-guidelines: docs/dated/decisions/2026-09-28-english-in-every-repo.md). "
+            "Existing French text is not translated.\n"
+            "Do: rewrite the message in English. A French quote can stay inside backticks."
+        )
+
     for motif, message in ESCALADE:
         if motif.search(commande):
             if motif is ESCALADE[0][0] and os.environ.get(CONFIANCE_MERGE) == "1":
                 continue
             return "escalate", message
+
+    az = _az_write(sans_heredoc)
+    if az:
+        return "escalate", (
+            f"`{az}` changes Azure with an admin account. Allowed only as a step of a documented "
+            "runbook; any other infrastructure change goes through a Terraform PR in "
+            "azure-landing-zone. Confirm which runbook step this is."
+        )
     return None
 
 

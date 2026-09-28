@@ -3,6 +3,13 @@
 Ce fichier porte les règles propres à Snetor. Il complète `workflow.md` et ne
 le remplace pas. Il est écrasé à chaque déploiement.
 
+# Language
+
+Since 2026-09-28, **everything written in a repo is in English**: code, comments, commits, PRs,
+`HANDOFF.md`, `docs/`, `tasks/`. Existing French text is not translated unless you rewrite it for
+another reason. Talk to the user in the user's language. Detail:
+`docs/live/code-conventions.md` in `snetor-ai-guidelines`.
+
 # Git Hygiene
 
 - **Une branche = une PR = un sujet** (`feat/`, `fix/`, `docs/`, `chore/` + kebab). Brancher depuis `origin/main` à jour.
@@ -119,6 +126,12 @@ contenu accentué, heredoc ou `git commit -m "…"` en PowerShell, pipe tronquan
 `gh pr checks` ou `az`. `gh pr merge` et `git push --force` remontent à l'humain — `gh pr merge`
 sauf sur un poste de l'équipe technique qui a posé la variable utilisateur Windows
 `SNETOR_GUARD_TRUST_MERGE=1` (`setx`, jamais par le déploiement) ; un power user ne la pose pas.
+
+Since 2026-09-28 it also refuses a French commit message or PR title, and hands back to the human
+every `az` command that changes Azure (`create`, `delete`, `set`, `start`, a non-GET `az rest`...)
+and every `tf-apply` trigger, even on a trusted workstation. `az` is logged in as an admin: read
+freely, write only as a documented runbook step, change infrastructure through a Terraform PR in
+`azure-landing-zone`.
 
 Il est déployé par `scripts/deploy-claude.ps1`, donc **actif sur tous les dépôts** ouverts avec
 Claude Code. Un dépôt qui a besoin d'une règle en propre pose son propre hook dans son
