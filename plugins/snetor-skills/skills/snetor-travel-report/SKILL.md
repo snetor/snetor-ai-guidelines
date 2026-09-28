@@ -176,8 +176,8 @@ what is **constrained** from what is **free**.
 
 **Free (adapts to the sales rep — do not freeze anything):**
 
-- **The style follows the sales rep**: dense prose (cf. Thibaut), regular records (cf. William)
-  or lists (cf. Morine) — match his own, see `references/report-style.md`. A talkative sales rep
+- **The style follows the sales rep**: dense prose (excerpt 1), regular records (excerpt 3)
+  or lists (excerpt 2) — match their own, see `references/report-style.md`. A talkative sales rep
   gets a narrative report; a terse sales rep gets dry records.
 - **Headings and separators**: free as long as they survive the copy-paste (CAPITALS on a line,
   dash lines `-----`, `-` lists...). The rendering example is **one** possible layout only, not
