@@ -742,3 +742,13 @@ def test_un_depot_minimal_sans_docs_est_conforme(tmp_path):
     (tmp_path / "README.md").write_text("# projet\n", encoding="utf-8")
     errors, _ = run(tmp_path, fix=False, today=AUJOURD_HUI)
     assert errors == [], errors
+
+
+def test_an_oversized_claude_md_is_a_warning_not_an_error(tmp_path):
+    _repo_conforme(tmp_path)
+    (tmp_path / "CLAUDE.md").write_text("line\n" * 201, encoding="utf-8")
+    errors, warnings = run(tmp_path, fix=False, today=AUJOURD_HUI)
+    assert errors == []
+    assert any("CLAUDE.md is 201 lines" in w for w in warnings)
+    (tmp_path / "CLAUDE.md").write_text("line\n" * 200, encoding="utf-8")
+    assert run(tmp_path, fix=False, today=AUJOURD_HUI)[1] == []
