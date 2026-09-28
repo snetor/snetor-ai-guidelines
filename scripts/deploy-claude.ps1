@@ -739,8 +739,18 @@ function Invoke-Phase5-Snetor {
     # et 2 est précisément le code qui BLOQUE l'appel d'outil — un poste sans le fichier ne
     # pourrait plus lancer une seule commande (rencontré le 2026-08-14). On teste la présence
     # avant d'exécuter, et on ne garde le code 2 que quand c'est le garde-fou qui le décide.
+    #
+    # `-I -S -X utf8`, measured on 2026-09-28. Without `-S`, every hook call pays for
+    # `pip_system_certs.pth`, which imports pip at startup: 0.9 s idle, over 10 s with five
+    # parallel sessions, and then Claude Code cancels the hook and the command runs UNGUARDED
+    # (32 `hook_cancelled` in the CRM run of 2026-09-24). The hooks use the stdlib only
+    # (`tests/test_deploy_claude.py` checks it). Without `-X utf8`, a hook writes cp1252 and
+    # every French message reaches the model as mojibake.
+    #
+    # Existing entries are REWRITTEN, not just detected: otherwise a fix to the command never
+    # reaches a workstation that already has the hook.
     $gardeCommande = @'
-python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/guard.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
+python -I -S -X utf8 -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/guard.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
 '@.Trim()
 
     if (-not ($cfg.PSObject.Properties.Name -contains 'hooks')) {
@@ -755,19 +765,23 @@ python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/guard.py')
     $dejaBranche = $false
     foreach ($entree in @($cfg.hooks.PreToolUse)) {
         foreach ($h in @($entree.hooks)) {
-            if ($h.command -and $h.command -match 'hooks[\\/]guard\.py') { $dejaBranche = $true }
+            if ($h.command -and $h.command -match 'hooks[\\/]guard\.py') {
+                $dejaBranche = $true
+                $h.command = $gardeCommande
+                $h | Add-Member -NotePropertyName timeout -NotePropertyValue 30 -Force
+            }
         }
     }
 
     if ($dejaBranche) {
-        Write-Info "Garde-fou déjà branché dans settings.json — inchangé"
+        Write-Info "Guard already wired in settings.json — command refreshed"
     } else {
         $entreeGarde = [PSCustomObject]@{
             matcher = 'Bash|PowerShell|Write|Edit|NotebookEdit'
             hooks   = @([PSCustomObject]@{
                 type    = 'command'
                 command = $gardeCommande
-                timeout = 10
+                timeout = 30
             })
         }
         $cfg.hooks.PreToolUse = @($cfg.hooks.PreToolUse) + $entreeGarde
@@ -785,7 +799,7 @@ python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/guard.py')
     # Même précaution `runpy` que pour le garde-fou : un poste sans le fichier ne doit pas voir
     # ses sessions échouer au démarrage.
     $memoireCommande = @'
-python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/worktree_memory.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
+python -I -S -X utf8 -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/worktree_memory.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
 '@.Trim()
 
     if (-not ($cfg.hooks.PSObject.Properties.Name -contains 'SessionStart')) {
@@ -795,12 +809,15 @@ python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/worktree_m
     $memoireDejaBranchee = $false
     foreach ($entree in @($cfg.hooks.SessionStart)) {
         foreach ($h in @($entree.hooks)) {
-            if ($h.command -and $h.command -match 'worktree_memory\.py') { $memoireDejaBranchee = $true }
+            if ($h.command -and $h.command -match 'worktree_memory\.py') {
+                $memoireDejaBranchee = $true
+                $h.command = $memoireCommande
+            }
         }
     }
 
     if ($memoireDejaBranchee) {
-        Write-Info "Mémoire de worktree déjà branchée dans settings.json — inchangé"
+        Write-Info "Worktree memory already wired in settings.json — command refreshed"
     } else {
         $entreeMemoire = [PSCustomObject]@{
             hooks = @([PSCustomObject]@{
@@ -828,18 +845,21 @@ python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/worktree_m
     # Même précaution `runpy` que pour les deux autres : un poste sans le fichier ne doit pas voir
     # ses sessions échouer au démarrage, ni ses commandes bloquées.
     $jetonCommande = @'
-python -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/az_ensure_login.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
+python -I -S -X utf8 -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/hooks/az_ensure_login.py'); sys.exit(runpy.run_path(p)['main']() if os.path.isfile(p) else 0)"
 '@.Trim()
 
     $jetonDejaBranche = $false
     foreach ($entree in @($cfg.hooks.SessionStart) + @($cfg.hooks.PreToolUse)) {
         foreach ($h in @($entree.hooks)) {
-            if ($h.command -and $h.command -match 'az_ensure_login\.py') { $jetonDejaBranche = $true }
+            if ($h.command -and $h.command -match 'az_ensure_login\.py') {
+                $jetonDejaBranche = $true
+                $h.command = $jetonCommande
+            }
         }
     }
 
     if ($jetonDejaBranche) {
-        Write-Info "Contrôle de session Azure déjà branché dans settings.json — inchangé"
+        Write-Info "Azure session check already wired in settings.json — command refreshed"
     } else {
         $cfg.hooks.SessionStart = @($cfg.hooks.SessionStart) + ([PSCustomObject]@{
             hooks = @([PSCustomObject]@{ type = 'command'; command = $jetonCommande; timeout = 90 })
