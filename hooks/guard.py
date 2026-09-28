@@ -33,6 +33,7 @@ Les motifs sont donc etroits, et chacun cite l'incident qui le justifie.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -126,6 +127,13 @@ COMMANDES = [
 
 # Ces trois-la ne sont pas des erreurs : ce sont des gestes difficilement reversibles, ou dont la
 # CONCLUSION est fausse. On rend la main a l'humain plutot que de bloquer.
+#
+# `gh pr merge` est le seul qu'un poste peut lever : variable d'environnement UTILISATEUR Windows
+# `SNETOR_GUARD_TRUST_MERGE=1`, posee a la main (`setx`), jamais par `deploy-claude.ps1`. Elle est
+# faite pour les postes de l'equipe technique, qui relisent le plan avant de merger. Un power user
+# ne la pose pas : chez lui, le merge reste rendu a l'humain. Hors du `settings.json` expres, pour
+# qu'un redeploiement ne l'efface pas. Le motif (lire les checks avant) reste la regle.
+CONFIANCE_MERGE = "SNETOR_GUARD_TRUST_MERGE"
 ESCALADE = [
     (
         re.compile(r"\bgh\s+pr\s+merge\b", re.IGNORECASE),
@@ -339,6 +347,8 @@ def verifier_commande(commande: str, powershell: bool, cwd: str) -> tuple[str, s
 
     for motif, message in ESCALADE:
         if motif.search(commande):
+            if motif is ESCALADE[0][0] and os.environ.get(CONFIANCE_MERGE) == "1":
+                continue
             return "escalate", message
     return None
 
