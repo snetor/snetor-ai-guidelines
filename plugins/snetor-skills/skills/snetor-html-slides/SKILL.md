@@ -27,6 +27,10 @@ A single self-contained `.html` file with:
 Saved to: `03-Outputs/slides/<YYYY-MM-DD> - <Title> - <Audience>.html`
 Assets copied to: `03-Outputs/assets/<deck-slug>/`
 
+These paths are the Snetor vault layout. Outside the vault (no `03-Outputs/` folder), ask the
+requester where to save, keep the same `slides/` + `assets/<deck-slug>/` pair, and skip the vault
+bookkeeping of Step 5 (wiki links, `log.md`, `index.md`).
+
 ---
 
 ## Step 0 — Read references before generating
@@ -289,7 +293,7 @@ A slide must breathe. Hard rules, applied to every generation:
 7. **No inline styles for layout** — use the documented CSS classes. Add inline style only for dynamic values like `--w: 72%` on bar fills, or logo background-image URLs.
 8. **Interactive check-cards** — use them on slides asking for validation (prerequisites, next steps). Pre-check items already confirmed in the vault.
 9. **Source attribution** — link external stats to their source URLs. Cite vault pages by their relative path in the `.sources` div.
-10. **Slide count** — 4–6 slides for COMEX decks; up to 8 for technical deep-dives. No padding slides.
+10. **Slide count** — 5–8 slides for a decision deck (see Default density); up to 8 for technical deep-dives. No padding slides.
 11. **Charts** — for any non-trivial quantitative comparison (multi-series, donut, line trend, radar, area), use `chart-card` from `references/charts.md`. Do NOT generate raw `<canvas>` or hand-coded SVG bars. The CSS-based `.stacked` and `.impact-bars` remain valid for simple single-row visualizations.
 12. **Counters** — for hero metrics on cover/dark slides or fact-cards, prefer `.metric.counter` with `data-target` over static text.
 13. **CDN libs** — only include Chart.js / jsvectormap when the deck actually uses them. Pin versions per `references/charts.md`. **In stand-alone mode every CDN is forbidden**: favour CSS visuals, vendor `chart.umd.min.js` into the deck assets if a chart is indispensable, and give up jsvectormap (its base map loads from the network). See `references/standalone.md` §6.
@@ -359,9 +363,9 @@ A slide must breathe. Hard rules, applied to every generation:
 
 ## Step 4.b — Check the rendering, do not assume it
 
-**A deck nobody has looked at is not finished.** Three defects from this session were invisible
-when reading the HTML and obvious on screen: white text on a white card, text broken word by word,
-a last calculation line that fell off the slide.
+**A deck nobody has looked at is not finished.** Some defects are invisible when reading the HTML
+and obvious on screen: white text on a white card, text broken word by word, a last calculation
+line that fell off the slide.
 
 Headless screenshots catch the animations **in flight**: a slide looks empty when it is simply at
 `opacity:0`. So go through a temporary copy whose animations are neutralised.
@@ -419,12 +423,11 @@ When the user asks to update or add slides to an existing HTML file:
 
 ## Self-improvement notes
 
-This skill improves over time. After generating a deck:
-- If a new component pattern was invented that worked well, add it to `references/components.md`.
-- If color or layout adjustments improve readability for a specific slide type, document them in `references/css-system.md` as an addendum.
-- If slide structure patterns emerge per audience type, add them to the plan-the-slide-structure section above.
-
-The skill maintainer (Clément Peponnet) can commit improvements back to `snetor-ai-guidelines/plugins/snetor-skills/` for the org.
+This skill improves over time, through the source repo only. The installed copy is overwritten at
+the next plugin update, and an edit there diverges from every other workstation. After a deck,
+tell the requester what is worth keeping — a new component pattern (`references/components.md`),
+a readability fix (`references/css-system.md`), a structure per audience (Step 2) — so the skill
+maintainer (Clément Peponnet) can commit it to `snetor-ai-guidelines/plugins/snetor-skills/`.
 
 ---
 
