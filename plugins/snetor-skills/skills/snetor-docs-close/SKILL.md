@@ -74,8 +74,12 @@ later. Follow the format already in place in the file. Record only what lasts: a
 symptom, its cause, the rule that prevents a repeat. No session narrative.
 
 **Append only.** `tasks/` is gitignored in some repos: an entry rewritten or
-reordered there is lost for good. Never reword, merge or delete an existing
-entry.
+reordered there is lost for good. Never reword or merge an existing entry.
+
+The one move allowed is the rollover: when `tasks/lessons.md` passes 300 lines
+(`check_docs.py` blocks on it), move the closed sessions verbatim to
+`tasks/lessons/YYYY-MM.md`. Show the user the entries about to move and wait for
+approval, as for the todo.
 
 ## Step 4 — clean up the todo
 
