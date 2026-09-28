@@ -116,7 +116,9 @@ garde-fou : c est la trace de l erreur qui empêche de la refaire.
 `~/.claude/hooks/guard.py` refuse, avant exécution, les gestes qui ont déjà coûté quelque chose :
 commit ou écriture sur `main`, push sur une branche dont la PR est mergée, `Set-Content` sur du
 contenu accentué, heredoc ou `git commit -m "…"` en PowerShell, pipe tronquant derrière
-`gh pr checks` ou `az`. `gh pr merge` et `git push --force` remontent à l'humain.
+`gh pr checks` ou `az`. `gh pr merge` et `git push --force` remontent à l'humain — `gh pr merge`
+sauf sur un poste de l'équipe technique qui a posé la variable utilisateur Windows
+`SNETOR_GUARD_TRUST_MERGE=1` (`setx`, jamais par le déploiement) ; un power user ne la pose pas.
 
 Il est déployé par `scripts/deploy-claude.ps1`, donc **actif sur tous les dépôts** ouverts avec
 Claude Code. Un dépôt qui a besoin d'une règle en propre pose son propre hook dans son

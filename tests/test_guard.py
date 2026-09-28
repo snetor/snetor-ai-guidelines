@@ -216,9 +216,24 @@ def test_ecriture_sur_main_est_refusee(monkeypatch, tmp_path):
         "gh pr checks 166 --watch",      # sorti en 0 avec un check rouge, le 14/08
     ],
 )
-def test_les_gestes_difficilement_reversibles_remontent_a_l_humain(commande, hors_main):
+def test_les_gestes_difficilement_reversibles_remontent_a_l_humain(commande, hors_main, monkeypatch):
+    monkeypatch.delenv(guard.CONFIANCE_MERGE, raising=False)  # le poste qui lance les tests peut l'avoir
     v = verdict(commande)
     assert v is not None and v[0] == "escalate", f"attendu escalate pour : {commande}"
+
+
+def test_un_poste_de_confiance_merge_sans_escalade(hors_main, monkeypatch):
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "1")
+    assert verdict("gh pr merge 161 --squash") is None
+    # la confiance ne couvre que le merge : le reste remonte toujours
+    assert verdict("git push --force origin main")[0] == "escalate"
+
+
+def test_sans_la_variable_le_merge_remonte_toujours(hors_main, monkeypatch):
+    monkeypatch.delenv(guard.CONFIANCE_MERGE, raising=False)
+    assert verdict("gh pr merge 161 --squash")[0] == "escalate"
+    monkeypatch.setenv(guard.CONFIANCE_MERGE, "true")  # seule la valeur exacte "1" compte
+    assert verdict("gh pr merge 161 --squash")[0] == "escalate"
 
 
 def test_un_heredoc_en_powershell_est_refuse(hors_main):
