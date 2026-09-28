@@ -874,6 +874,32 @@ python -I -S -X utf8 -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/ho
     Set-JsonFile -Object $cfg -Path $settingsPath
     Write-Ok "settings.json configuré (plugins Snetor activés)"
 
+    # 3b. Refresh the Snetor plugin, then say which version is really installed.
+    #
+    # The marketplace has `autoUpdate: true`, and that was not enough: on 2026-09-28 the author's
+    # workstation still ran snetor-skills 1.11.0 (installed 2026-09-21) while main shipped 1.13.0 —
+    # the marketplace clone had not been refreshed since 2026-09-23. `enabledPlugins` enables a
+    # plugin, it never updates one. `$env:USERPROFILE` already points at the target profile here.
+    if (Get-Command claude -ErrorAction SilentlyContinue) {
+        & claude plugin marketplace update snetor-ai-guidelines
+        if ($LASTEXITCODE -ne 0) { Write-Warn "Marketplace refresh failed (exit $LASTEXITCODE)" }
+        & claude plugin update snetor-skills@snetor-ai-guidelines
+        if ($LASTEXITCODE -ne 0) { Write-Warn "snetor-skills update failed (exit $LASTEXITCODE)" }
+    } else {
+        Write-Warn "claude CLI not found — snetor-skills not refreshed"
+    }
+    try {
+        $expected  = (Get-Content (Join-Path $repoDir 'plugins\snetor-skills\.claude-plugin\plugin.json') -Raw -Encoding UTF8 | ConvertFrom-Json).version
+        $installed = @((Get-Content "$claudeDir\plugins\installed_plugins.json" -Raw -Encoding UTF8 | ConvertFrom-Json).plugins.'snetor-skills@snetor-ai-guidelines')[0].version
+        if ($installed -eq $expected) {
+            Write-Ok "snetor-skills $installed installed (= repo). Restart Claude Code to load it."
+        } else {
+            Write-Warn "snetor-skills installed: $installed, repo: $expected — the workstation runs an old version"
+        }
+    } catch {
+        Write-Warn "Could not compare the snetor-skills versions: $_"
+    }
+
     # 4. Status line
     $statuslineScript = Join-Path $repoDir 'statusline\install.ps1'
     if (Test-Path $statuslineScript) {

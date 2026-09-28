@@ -186,3 +186,11 @@ def test_the_guard_runs_with_the_deployed_flags():
         input=event, capture_output=True, text=True, timeout=30,
     )
     assert r.returncode == 0, r.stderr
+
+
+def test_the_deployer_refreshes_the_plugin_and_reports_its_version(source):
+    """`enabledPlugins` enables a plugin, it never updates one: on 2026-09-28 the author's
+    workstation ran 1.11.0 while main shipped 1.13.0, despite `autoUpdate: true`."""
+    assert "claude plugin marketplace update snetor-ai-guidelines" in source
+    assert "claude plugin update snetor-skills@snetor-ai-guidelines" in source
+    assert "installed_plugins.json" in source, "the installed version is never compared to the repo"
