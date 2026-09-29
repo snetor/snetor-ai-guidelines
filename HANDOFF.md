@@ -1,6 +1,6 @@
 # HANDOFF — snetor-ai-guidelines
 
-**Dernière révision :** 2026-09-28
+**Dernière révision :** 2026-09-29
 
 Routeur d état, pas un journal. L historique vit dans `git log`.
 
@@ -43,6 +43,7 @@ de ce dépôt, qui est public.
 | Règles de travail propres à ce repo | `CLAUDE.md` |
 | Statusline | `statusline/README.md` |
 | Skills Snetor | `plugins/snetor-skills/README.md` |
+| Charte Snetor d un deck (Brand Book 2025 : tokens, dégradé, graisses, logo) | `plugins/snetor-skills/skills/snetor-html-slides/references/css-system.md` -> Color Tokens, règles 42-47 du `SKILL.md` |
 | Couleurs et lisibilité d un deck sur fond foncé | `plugins/snetor-skills/skills/snetor-html-slides/references/css-system.md` -> Lisibilité sur fond foncé |
 | Index complet de la documentation | `docs/README.md` |
 | Migrer un repo vers le standard | `docs/dated/decisions/2026-08-10-regles-de-migration-d-un-repo.md` |

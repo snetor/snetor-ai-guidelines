@@ -8,44 +8,81 @@ each deck by `scripts/inline_deck.py`, which also fills in the asset paths.
 
 ## Color Tokens
 
+Canonical source: the Snetor design system published at
+<https://claude.ai/artifact/3KP5MLUABUrR5gXhBa4Tzb>, built from marketing's
+`colors_and_type.css`. The deck tokens below are its short names; when they disagree, the
+published page wins and `assets/deck/snetor-deck.css` is fixed.
+
 ```
---green: #007D36         primary brand green
---green-dark: #006028    darker green for hover/depth
---green-20: #CCE0CD      green 20% tint (borders, accents)
---green-10: #E5EFE5      green 10% tint (card backgrounds)
---green-05: #F2F7F2      green 5% tint (subtle fills)
---navy: #152B47          primary dark (headlines, dark slides)
---blue-gray: #293F52     mid dark
---blue-green: #2A5458    teal dark (gradients)
---emerald: #168C74       teal accent
---pastel: #8CCAAE        light green (dark-slide accents)
---midnight: #1E1B2F      deep dark (rarely used)
+--green: #007D36         primary brand green (Pantone 356)
+--green-80: #339153      tint steps (Brand Book p.25)
+--green-60: #66A87B
+--green-40: #99C2A3
+--green-20: #CCE0CD      borders, accents
+--green-10: #E5EFE5      card backgrounds
+--green-05: #F2F7F2      subtle fills
+--green-dark: #006028    link hover ONLY — not a palette colour
+--navy: #152B47          primary dark, all text (Pantone 540C)
+--navy-80: #455570
+--navy-60: #737F94
+--navy-40: #A1AAB8
+--navy-10: #E7E9ED
+--blue-gray: #293F52     mid dark (Pantone 548)
+--blue-green: #2A5458    teal dark, start of the brand gradient (Pantone 5473)
+--emerald: #168C74       teal accent (Pantone 562)
+--emerald-80: #45A38C
+--emerald-20: #D0E8E1
+--pastel: #8CCAAE        light green, accents on dark (Pantone 337)
+--pastel-60: #B7DCC8
+--pastel-30: #DCEEE2
+--midnight: #1E1B2F      deep dark (Pantone 539C)
 --white: #FFFFFF
 --muted: #4A5A6E         body text on light
 --subtle: #7E8A9A        captions, small labels
 --border: #E0E5DF        card borders
+--border-strong: #C7CFC9 table rules, stronger separators
+--bg-muted: #F4F7F4      faint green-tinted neutral background
+--warning: #C77E0A       semantic
+--danger: #B0301F        semantic (findings, loss, paused timer)
+--accent-office: #F2B53D map pin — offices
+--accent-warehouse: #3FA3E0 map pin — warehouses
+--gradient-brand: linear-gradient(90deg, #2A5458, #007D36)
+--gradient-band: linear-gradient(90deg, #007D36, #168C74)   data bars
 ```
+
+### Gradient and shapes (Brand Book p.32-33)
+
+The brand gradient is **horizontal, blue-green to green**. It fills brand rectangles — `big-message`,
+`foundation`, `service-chip.primary`, `readiness-rail span.on`, `reveal-back` — and the cover
+overlay. Only **white** text goes on it: at its green end, pastel reads 2.80:1 and
+`rgba(255,255,255,.78)` 3.82:1, both below their floor. The eyebrow of `foundation` is therefore
+white `.82`, not pastel.
+
+Brand rectangles are square-cornered (`border-radius:0`): the Brand Book allows rectangles, straight
+lines and right angles, and forbids circle and arch image frames. No gradient outside the two tokens
+above.
 
 ---
 
 ## Type Scale (Snetor brand guidelines — Brand Book p. 29-30)
 
-A single typeface: **Raleway**. Four weights only — the ones actually loaded:
+A single typeface: **Raleway**, loaded from `300` to `900` (`wght@300..900`; in stand-alone mode,
+one `Raleway-<Weight>.ttf` per weight in `assets/fonts/`).
 
 | Weight | Raleway face | Role | Examples |
 |---|---|---|---|
+| `300` | Light | the thin line of the signature only | `.closing-signature .sig` |
 | `400` | Regular | body text | `p`, `li`, `.sources`, captions |
 | `500` | Medium | subheadings | `.lead`, `.sd-sub` |
 | `600` | SemiBold | headings | `h1`, `h2`, `.statement`, `.closing-title`, `.sd-title`, `blockquote` |
 | `700` | Bold | accents, micro-labels, figures | `h3`, `.eyebrow`, `.metric`, `.pill`, `.g-head`, `.annex-tag`… |
+| `800` | ExtraBold | key figures, a title used alone | `.metric`, `.bn-metric` when the figure is the message |
+| `900` | Black | a title used alone, sparingly | section divider |
 
-**Hard rule: no `font-weight` outside `400 / 500 / 600 / 700`.**
-A `font-weight:800` (ExtraBold) or `900` (Black) is not loaded — neither by the Google Fonts `<link>`
-(`wght@400;500;600;700`), nor by the four `@font-face` rules of stand-alone mode. The browser then
-falls back to 700 and applies **synthetic bold** to it: the glyphs are thickened by the rendering
-engine, not drawn by the type designer. That is no longer Raleway. If an ExtraBold ever becomes
-necessary, you must first add `800` to the Google Fonts URL **and** ship `Raleway-ExtraBold.ttf`
-in `assets/fonts/` — never declare the weight on its own.
+The Brand Book sets titles "from Medium to Black" and shows ExtraBold at 30 pt. Body text stays
+Regular. Keep title / body contrast moderate: a huge title over tiny text is a p.32 restriction.
+A weight is only declared if its file is loaded — otherwise the browser thickens the nearest one into
+**synthetic bold**, which is no longer Raleway.
 
 Text color: **navy `#152B47`**, never black (brand rule). No `#000` anywhere in the
 system; `--muted` / `--subtle` are navy derivatives for secondary text.
