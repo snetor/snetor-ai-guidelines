@@ -34,7 +34,7 @@ When in doubt, ask the question in Step 1 of the wizard (see `SKILL.md`, questio
 | **L2 — single file** | Everything is `base64`-encoded **inside** the HTML. One file, nothing around it. | Sending by e-mail, uploading to a tool that accepts a single file only. |
 
 **L1 is the default.** Only go to L2 if the user explicitly asks for *one single file*.
-L2 inflates the HTML by roughly +33 % of the asset weight (the 4 fonts alone weigh ~740 kB in
+L2 inflates the HTML by roughly +33 % of the asset weight (the 7 fonts alone weigh ~1.3 MB in
 base64): past ~5 MB the file becomes painful to open and to send.
 
 ---

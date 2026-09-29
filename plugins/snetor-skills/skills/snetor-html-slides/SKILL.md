@@ -2,7 +2,7 @@
 name: snetor-html-slides
 description: >
   Generate Snetor-branded animated HTML presentation decks using the official Snetor design system
-  (Raleway 400/500/600/700, green/navy palette, animated components, logos, hero imagery).
+  (Raleway 300-900, green/navy palette, animated components, logos, hero imagery).
   USE THIS SKILL whenever someone asks for: slides, a presentation deck, a COMEX deck,
   a stakeholder presentation, a pitch deck, a slide on [any topic] for Snetor,
   or any request that would result in a set of slides or a presentation.
@@ -171,14 +171,16 @@ And the primary component:
 2. Create the output assets folder: `03-Outputs/assets/<deck-slug>/`
 3. Copy from the skill's `assets/` folder:
    - Always: `snetor_full_logo.png`, `snetor_full_logo_reversed.png`, `Hero-banner-abstrait.jpg`
-   - Topic-specific: relevant tech logos from `assets/logos/`
+   - Topic-specific: relevant tech logos from `assets/logos/`; `snetor-ai-logo.png` for a deck
+     about Snetor.ai; `snetor-green-logo.png` / `snetor-green-logo-inverse.png` for Snetor Green;
+     `snetor-globe.png` only as a location pin on a map (rule 46)
 
 **Path convention:** The HTML file is at `03-Outputs/slides/<file>.html`.
 Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 
 **In stand-alone mode**, the assets folder sits **next to the HTML**
 (`<deck folder>/assets/<deck-slug>/`) and paths become `assets/<deck-slug>/…`. Also copy the
-**4 font files** from the skill's `assets/fonts/`. Full detail: `references/standalone.md`.
+**7 font files** from the skill's `assets/fonts/`. Full detail: `references/standalone.md`.
 
 ---
 
@@ -197,7 +199,7 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
        @font-face rules are injected with the CSS (inline_deck.py --standalone). -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300..900&display=swap" rel="stylesheet">
   <style>/* @snetor-css */</style>
 </head>
 <body>
@@ -325,7 +327,7 @@ A slide must breathe. Hard rules, applied to every generation:
 29. **Cost / TCO** — for an executive cost slide, prefer `macro cost-code` (CSS bars coloured per macro-component + large total, ≤ 3-4 semantic colour codes) over a stacked multi-series chart. Stacked multi-series stays for a deep-dive. See `references/components.md`.
 30. **Scope ribbon** — when a costing or a decision covers several deliverables, or a scope that is not obvious, restate the scope with a `scope-ribbon` under the title, repeated on the cost / programme / decision slides.
 31. **Stand-alone (on request)** — when the deck must be self-contained / offline, apply `references/standalone.md` **in full**: embedded `Raleway` fonts (the 3 Google Fonts `<link>` tags removed), assets in a folder **next to** the HTML, zero CDN, no `world-map`. **The 3-check verification is mandatory** (no residual network reference, every asset present on disk, real rendering checked) — a stand-alone deck is not assumed, it is verified. Do not turn this mode on by default: it makes the package heavier and rules out Chart.js charts.
-32. **Font weights (brand guidelines)** — use only `400` (Regular, body), `500` (Medium, subtitles), `600` (SemiBold, headings) and `700` (Bold, accents / micro-labels / figures). **Never `800` or `900`**: those weights are not loaded (`wght@400;500;600;700`), so the browser thickens the 700 into **synthetic bold** — that is no longer Raleway. See `references/css-system.md` → Type Scale. Text is navy `#152B47`, never black.
+32. **Font weights (Brand Book p.30)** — `400` (Regular) for body text; `500` to `900` (Medium to Black) for titles and subtitles; `800` (ExtraBold) allowed for key figures (`.metric`, `.bn-metric`); `300` (Light) only for the thin line of the signature (rule 42). Every weight from `300` to `900` is loaded (`wght@300..900`, and one `Raleway-<Weight>.ttf` per weight in stand-alone mode), so none of them is synthetic bold. Keep the contrast between title and body moderate: a huge title over tiny body text is a Brand Book p.32 restriction. Text is navy `#152B47`, never black. See `references/css-system.md` → Type Scale.
 33. **Colours on dark backgrounds (brand guidelines)** — `.cover`, a `.dark` accent slide and a `theme-dark` deck slide are the same background, and a colour rule written for one of the three must be written for the other two. The shipped CSS carries that layer: **do not rewrite a light colour by hand on a dark slide**, and do not invent an inline variant. Mappings: `--navy` → `white`, `--muted` → `rgba(255,255,255,.78)`, `--subtle` → `rgba(255,255,255,.72)`, `--green` → `var(--pastel)`, `--border` → `rgba(255,255,255,.24)`. A component that carries its own light background (`card`, `check-card`, `chart-card`, `agenda-item`, `brick`, `mini-table`) needs no variant at all. **If a new component puts text directly on the slide background, its dark variant is added in `assets/deck/snetor-deck.css` → « COUCHE FONCÉE COMMUNE », with both selectors on the same rule** — not in the deck. Detail and rationale: `references/css-system.md` → Legibility on a dark background.
 
 34. **Scale relative to the screen — never go back to pixels.** The shipped CSS carries
@@ -368,6 +370,43 @@ A slide must breathe. Hard rules, applied to every generation:
     not actionable and ends in "sort that out between yourselves". If the requester does not want a
     decision slide, the closing carries the ask in one line and the prerequisites in a `statement`
     — not nothing.
+
+42. **End every deck on the signature, with the logo (Brand Book p.21).** The last slide is a
+    `closing` carrying a `closing-signature`: the logo followed by `SNETOR GROUP — PROGRESS
+    PROVIDER` (`SNETOR GROUP` in Light, `PROGRESS PROVIDER` in Bold, all caps). The signature
+    never appears without the logo at the end of a presentation, and the logo + signature block
+    is never recoloured, offset, or placed above the wordmark (p.22).
+
+43. **Logo: clear space, size, background (Brand Book p.18, p.26).** Around the logo, keep an empty
+    margin at least the height of the "S" of the wordmark — no text, icon or card edge inside it.
+    Never display it narrower than **20 mm** (~`76px`). **White logo** (`snetor_full_logo_reversed.png`)
+    on green, emerald, blue-green, blue-gray, navy and midnight; **green logo**
+    (`snetor_full_logo.png`) on white and pastel green. On a photo: green logo if light, white if
+    dark or busy (p.27). Never crop it, recolour it or rotate it (p.19).
+
+44. **Shapes: rectangles and right angles (Brand Book p.32-33).** Brand-colour fills (`big-message`,
+    `foundation`, `brick`, `bento-cell.dark`, `service-chip.primary`, `readiness-rail span.on`) are
+    square-cornered rectangles; the shipped CSS already sets `border-radius:0` on them — do not
+    round them inline. **Never frame an image in a circle or an arch** (rounded top). Pills and
+    small dots remain UI marks, not brand shapes.
+
+45. **Gradients: the brand gradient only (Brand Book p.32-33).** The brand gradient is
+    `var(--gradient-brand)` = `linear-gradient(90deg, #2A5458, #007D36)`: horizontal, blue-green to
+    green, with **white text only** on it (pastel on the green end is 2.8:1, below the 3:1 floor).
+    `var(--gradient-band)` (green to emerald) is for data bars. Never write a gradient in a deck:
+    use the ones the shipped CSS carries, and never an off-palette or garish combination (p.32).
+
+46. **Sub-brand and globe assets.** `snetor-ai-logo.png` is the Snetor.ai mark (not in the Brand
+    Book, supplied by marketing): use it only on a deck about Snetor.ai, next to the Snetor logo,
+    never in its place. `snetor-green-logo.png` (dark on white) / `snetor-green-logo-inverse.png`
+    (white on photo or dark) are the Snetor Green wordmark (p.17), never on a green background
+    (p.19). `snetor-globe.png` — the globe alone — is allowed **only as a location pin on a map**
+    (p.20): never as a decoration, a bullet or a standalone mark.
+
+47. **Canonical token source.** The Snetor design system is published at
+    <https://claude.ai/artifact/3KP5MLUABUrR5gXhBa4Tzb> (built from marketing's
+    `colors_and_type.css`). When a token here and there disagree, that page wins: fix
+    `assets/deck/snetor-deck.css` through the source repo.
 
 ---
 
@@ -446,9 +485,11 @@ maintainer (Clément Peponnet) can commit it to `snetor-ai-guidelines/plugins/sn
 **Branding** (always copy to deck assets folder):
 `snetor_full_logo.png` · `snetor_full_logo_reversed.png` · `Hero-banner-abstrait.jpg`
 
-> **Brand rule:** the Snetor globe is **never** used on its own. It is part of the logotype and must
-> not be cut out as a standalone mark or as decoration. Use `snetor_full_logo.png` (or its reversed
-> version on a dark background). No globe asset ships with this skill.
+`snetor-ai-logo.png` · `snetor-green-logo.png` · `snetor-green-logo-inverse.png` · `snetor-globe.png` (topic-specific, rule 46)
+
+> **Brand rule:** the Snetor globe is **never** used on its own as a mark or a decoration: it is
+> part of the logotype. The single exception is the location pin on a map (Brand Book p.20), and
+> that is the only use of `snetor-globe.png`.
 `snetor_shapes.png` (optional — decorative backdrop for the `foundation` band; copy when used)
 
 > ⚠️ **`snetor_shapes.png` is not a texture, it is a brand-guidelines plate** — a map, blocks of
@@ -463,11 +504,9 @@ maintainer (Clément Peponnet) can commit it to `snetor-ai-guidelines/plugins/sn
 `sap.png` · `sap-b1.png` · `sap-concur.png` · `s4-hana.png` · `opentext.png`
 `kantox.png` · `xeneta.png` · `buyco.png` · `datasur.png` · `alpega-tms.png`
 
-**Fonts** (stand-alone mode only, in `assets/fonts/`):
-`Raleway-Regular.ttf` (400, body) · `Raleway-Medium.ttf` (500, subtitles) ·
-`Raleway-SemiBold.ttf` (600, headings) · `Raleway-Bold.ttf` (700, accents and micro-labels).
-In connected mode, do not copy them: Google Fonts does the job.
-**These four weights are the only ones available** — no `font-weight:800/900` (rule 32).
+**Fonts** (stand-alone mode only, in `assets/fonts/`): `Raleway-<Weight>.ttf` for every weight
+from `Light` (300) to `Black` (900) — see `assets/fonts/README.md` for the role of each.
+In connected mode, do not copy them: Google Fonts does the job (rule 32).
 
 **Iconography:** use [Phosphor Icons](https://phosphoricons.com) via CDN — see `references/external-libs.md` for the recommended icon set per topic and weight variants. No copy needed; the script tag pulls all weights. *(Unavailable in stand-alone mode — see `references/standalone.md` §5.)*
 

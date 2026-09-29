@@ -1,19 +1,23 @@
 # Raleway fonts — stand-alone mode
 
-These four files are used **only in stand-alone mode** (`references/standalone.md`).
-In connected mode the deck loads Raleway from Google Fonts and these files are not copied.
+These files are used **only in stand-alone mode** (`references/standalone.md`).
+In connected mode the deck loads Raleway from Google Fonts (`wght@300..900`) and these files are not
+copied. `scripts/inline_deck.py --standalone` declares one `@font-face` per `Raleway-<Weight>.ttf`
+found here: adding a weight means adding its file, nothing else.
 
 | File | Weight | Use in the design system |
 |---|---|---|
+| `Raleway-Light.ttf` | 300 | the thin line of the closing signature |
 | `Raleway-Regular.ttf` | 400 | body text (`p`, `li`, `.sources`, captions) |
 | `Raleway-Medium.ttf` | 500 | subtitles (`.lead`, `.sd-sub`), tooltips |
 | `Raleway-SemiBold.ttf` | 600 | headings (`h1`, `h2`, `.statement`, `.closing-title`) |
 | `Raleway-Bold.ttf` | 700 | accents, micro-labels, figures (`h3`, `.eyebrow`, `.metric`, `.pill`) |
+| `Raleway-ExtraBold.ttf` | 800 | key figures, a title used alone |
+| `Raleway-Black.ttf` | 900 | a title used alone, sparingly |
 
-These four weights are the **only** ones the design system allows, in stand-alone mode as well as in
-connected mode. A `font-weight:800` / `900` has no matching font file: the browser thickens the 700
-into synthetic bold and the result is no longer Raleway. Adding an ExtraBold requires the font file
-**and** the `800` in the Google Fonts URL — see `references/css-system.md` → Type Scale.
+A weight declared in the CSS without its file here is rendered as synthetic bold in stand-alone mode:
+the browser thickens the nearest weight and the result is no longer Raleway. See
+`references/css-system.md` → Type Scale.
 
 ## Provenance and licence
 
