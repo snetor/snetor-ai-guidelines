@@ -24,14 +24,15 @@ the browser thickens the nearest weight and the result is no longer Raleway. See
 - **Font**: Raleway, version `4.026`
 - **Copyright**: "Copyright 2010 The Raleway Project Authors (impallari@gmail.com)"
 - **Licence**: SIL Open Font License 1.1 — <https://openfontlicense.org>
-- **Upstream project**: <https://github.com/impallari/Raleway>
+- **Upstream project**: <https://github.com/theleagueof/raleway>
+- **Source of these files**: `ofl/raleway/Raleway[wght].ttf` in <https://github.com/google/fonts>,
+  version `4.026`. That repository only ships the variable font; each static file here is one
+  instance of it (`fontTools.varLib.instancer`, `wght` = 300 … 900). The seven files share the same
+  version, the same 936 glyphs (Latin Extended included) and the same vertical metrics.
 
 The font ships under the OFL, so it can be redistributed with the skill. That licence is **distinct
-from the repository's MIT licence**: it applies only to the files in this folder.
-
-> ⚠️ **To be completed**: the OFL requires the full licence text to accompany redistributed font
-> files. Fetch `OFL.txt` from the official Raleway release and drop it here.
-> Do not retype it from memory — it is a legal text and must be copied verbatim.
+from the repository's MIT licence**: it applies only to the files in this folder. Its full text is
+`OFL.txt`, copied verbatim from the same `google/fonts` folder.
 
 ## Checking a font file
 
