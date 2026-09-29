@@ -16,6 +16,12 @@ sans dresser la carte. Le standard impose un routeur à la racine de tout repo :
 dans un repo public, ce routeur est lu par n importe qui. Cela vaut aussi pour
 `README.md` et les fichiers de `docs/`.
 
+It applies to every file, skills and tests included, and it also covers: names of people,
+customers or suppliers tied to Snetor; real business figures (budgets, TCO, volumes, vendor
+scores); real Azure resource names; details of the identity or security setup. Examples use
+fictitious values (`rg-app`, `Solution A`). Measured on 2026-09-29: a skill reference held real
+travel reports, and test data held real resource names — the history had to be rewritten.
+
 ## Ce qui est distribué et comment
 
 | Artefact | Destination sur le poste | Vecteur |

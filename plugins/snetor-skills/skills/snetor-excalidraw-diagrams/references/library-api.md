@@ -85,7 +85,7 @@ s.rect(330,480, 860,280, fill=GREEN10, stroke=NAVY)                 # band 2: ap
 x,y,w,h = 352,556,240,262
 s.rect(x,y,w,h, fill=GREEN10, stroke=EMERALD)
 s.image(x+w/2, y+58, 50, "twenty.png")
-s.text(x+6, y+104, "rg-twenty-dev", size=15, color=NAVY, align="center", w=w-12)
+s.text(x+6, y+104, "rg-app", size=15, color=NAVY, align="center", w=w-12)
 s.icon_row(x+w/2, y+h-30, ["azure-aca.png","postgresql.png","redis.png","azure-acr.png"], ih=26)
 ```
 

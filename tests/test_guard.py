@@ -35,8 +35,8 @@ def verdict(commande, powershell=False, cwd="."):
     [
         "gh pr checks 94 | tail -4",
         "gh pr checks 136 --watch | head -20",
-        "az containerapp job execution list -n caj-pim-migrate-dev | tail -5",
-        "az acr build --registry acrpimdeva6cc --image pim-worker:v3 ingestion/",
+        "az containerapp job execution list -n caj-app-migrate | tail -5",
+        "az acr build --registry acrexample01 --image pim-worker:v3 ingestion/",
         "az containerapp job update -n caj --image x ; az containerapp job start -n caj",
     ],
 )
@@ -257,8 +257,8 @@ def test_un_init_sous_un_repertoire_de_tests_est_refuse(tmp_path):
     "commande",
     [
         "gh pr checks 161 --json name,state",
-        "az acr build --no-logs --registry acrpimdeva6cc --image pim-worker:v3 ingestion/",
-        "az containerapp job execution list -n caj-pim-migrate-dev -o json",
+        "az acr build --no-logs --registry acrexample01 --image pim-worker:v3 ingestion/",
+        "az containerapp job execution list -n caj-app-migrate -o json",
         "az account show | ConvertFrom-Json",           # pipe non tronquant
         "git push -u origin feat/alignement-metier",
         "git commit -F message.txt",
@@ -401,7 +401,7 @@ def test_le_corps_d_un_heredoc_est_bien_retire_de_la_commande():
 @pytest.mark.parametrize(
     "commande",
     [
-        'az postgres flexible-server parameter set -g rg-twenty-dev -s psql-twenty-dev '
+        'az postgres flexible-server parameter set -g rg-app -s psql-app '
         '-n azure.extensions -v "uuid-ossp,unaccent,citext"',
         "az mysql flexible-server parameter set -n sql_mode -v ANSI --resource-group rg-x "
         "--server-name srv-x",
@@ -430,7 +430,7 @@ def test_une_virgule_dans_command_de_containerapp_job_est_refusee(hors_main):
     Le shape fautif est la virgule ENTRE DEUX VALEURS CITEES — une liste ecrite comme en Python.
     """
     v = verdict(
-        'az containerapp job start -n caj-twenty-migrate-dev -g rg-twenty-dev '
+        'az containerapp job start -n caj-app-migrate -g rg-app '
         '--command "/bin/sh","-c","yarn command:prod upgrade"'
     )
     assert v is not None, "non attrape"
@@ -447,7 +447,7 @@ def test_une_virgule_dans_command_de_containerapp_job_est_refusee(hors_main):
         # UNE valeur, meme si elle contient une virgule a l'interieur des memes guillemets.
         'az containerapp job start -n caj-x -g rg-x --command "/bin/sh -c \'echo a,b\'"',
         # Un `start` sans `--command` n'a aucun moyen de porter le defaut.
-        "az containerapp job start -n caj-twenty-migrate-dev -g rg-twenty-dev",
+        "az containerapp job start -n caj-app-migrate -g rg-app",
         # Une autre commande `az` qui porte une liste separee par des virgules, legitimement.
         'az containerapp job start -n caj-x -g rg-x --env-vars "A=1,B=2"',
     ],
@@ -498,7 +498,7 @@ def test_le_mot_az_dans_un_argument_n_est_pas_une_commande_az(commande, hors_mai
 @pytest.mark.parametrize(
     "commande",
     [
-        "az containerapp job execution list -n caj-pim-migrate-dev | tail -5",
+        "az containerapp job execution list -n caj-app-migrate | tail -5",
         "cd \"C:/Users/x/depot\" && az acr task list-runs --registry acrx | head -3",
         "terraform plan ; az account show | tail -1",
         "$(az account show) | head -2",
