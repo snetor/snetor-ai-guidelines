@@ -160,7 +160,7 @@ That is the defect that forced two reworks of the `calc` component.
 Class breakdown:
 - `ph` — base class (required, regular weight by default)
 - `ph-<name>` — icon name (e.g. `ph-trophy`, `ph-shield-check`)
-- `ph-icon` — Snetor sizing/color override (defined in `css-system.md`)
+- `ph-icon` — Snetor sizing/color override (defined in `assets/deck/snetor-deck.css`)
 
 **Tone variants** (mix across a deck for visual rhythm):
 - default (green) — growth, KPIs, finance

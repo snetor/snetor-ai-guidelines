@@ -85,6 +85,8 @@ snetor-skills/
 │   ├── snetor-html-slides/          ← animated HTML decks
 │   │   ├── SKILL.md
 │   │   ├── assets/{branding,logos}/     ← shared brand assets (source of truth)
+│   │   ├── assets/deck/                 ← design-system CSS + navigation JS
+│   │   ├── scripts/inline_deck.py       ← injects them into a deck
 │   │   └── references/
 │   ├── snetor-excalidraw-diagrams/  ← architecture diagrams
 │   │   ├── SKILL.md
