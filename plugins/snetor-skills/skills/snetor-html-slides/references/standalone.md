@@ -55,34 +55,24 @@ In stand-alone mode the assets folder sits **next to the HTML**, not in the shar
         └── Raleway-*.ttf
 ```
 
-In the CSS, paths therefore become `assets/<deck-slug>/…` (and not `../assets/<deck-slug>/…`):
-
-```css
---logo: url("assets/<deck-slug>/snetor_full_logo.png");
---logo-reversed: url("assets/<deck-slug>/snetor_full_logo_reversed.png");
---hero: url("assets/<deck-slug>/Hero-banner-abstrait.jpg");
-```
+In the CSS, paths therefore become `assets/<deck-slug>/…` (and not `../assets/<deck-slug>/…`).
+`inline_deck.py --standalone` writes them that way; paths you write in the slide markup (logos,
+screenshots) follow the same rule by hand.
 
 ---
 
 ## 4. Fonts — replacing Google Fonts
 
-**Delete** the three Google Fonts `<link>` tags from the `<head>`. **Copy** the four files from the
-skill's `assets/fonts/` into the deck's assets folder, and **declare** the `@font-face` rules at the
-top of the `<style>` block, before the `:root`:
+**Delete** the three Google Fonts `<link>` tags from the `<head>`, and **copy** the `Raleway-*.ttf`
+files from the skill's `assets/fonts/` into the deck's assets folder. `inline_deck.py --standalone`
+then declares one `@font-face` per shipped file, before the `:root`, pointing at
+`assets/<deck-slug>/Raleway-<Weight>.ttf`. The rest of the CSS is unchanged:
+`font-family: "Raleway", system-ui, …` keeps working.
 
-```css
-@font-face { font-family:"Raleway"; src:url("assets/<deck-slug>/Raleway-Regular.ttf")  format("truetype"); font-weight:400; font-display:swap; }
-@font-face { font-family:"Raleway"; src:url("assets/<deck-slug>/Raleway-Medium.ttf")   format("truetype"); font-weight:500; font-display:swap; }
-@font-face { font-family:"Raleway"; src:url("assets/<deck-slug>/Raleway-SemiBold.ttf") format("truetype"); font-weight:600; font-display:swap; }
-@font-face { font-family:"Raleway"; src:url("assets/<deck-slug>/Raleway-Bold.ttf")     format("truetype"); font-weight:700; font-display:swap; }
-```
-
-The rest of the CSS is unchanged: `font-family: "Raleway", system-ui, …` keeps working.
-
-> **Verified trap**: never remove the Google Fonts `<link>` without having declared the
-> `@font-face` rules first. The deck silently falls back to a system font and nobody notices it
-> before the meeting.
+> **Verified trap**: a deck with neither the Google Fonts `<link>` nor the `@font-face` rules
+> silently falls back to a system font, and nobody notices it before the meeting. The script
+> refuses a stand-alone deck that still links Google Fonts; the mandatory verification (§8) catches
+> the font files missing from disk.
 
 ---
 

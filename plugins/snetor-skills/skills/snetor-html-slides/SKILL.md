@@ -36,11 +36,13 @@ bookkeeping of Step 5 (wiki links, `log.md`, `index.md`).
 ## Step 0 — Read references before generating
 
 Before writing any HTML, read:
-- `references/css-system.md` — full CSS + color tokens + navigation JS (copy verbatim)
+- `references/css-system.md` — color tokens, type scale, themes, legibility on dark backgrounds
 - `references/components.md` — HTML patterns for every component type
 - `references/standalone.md` — **only if the deck must be stand-alone / offline** (see Step 1, question 5)
 
-You need the CSS from `css-system.md` to produce correct output. Do not reconstruct it from memory.
+Do not read or copy the CSS itself (`assets/deck/snetor-deck.css`, ~78,000 characters): you write
+the slides with two markers, and `scripts/inline_deck.py` injects the CSS and the navigation JS
+(Step 4 → Inject the design system).
 
 ---
 
@@ -191,15 +193,12 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DECK TITLE</title>
-  <!-- Connected mode (default). In stand-alone mode: DELETE these 3 <link> tags and declare
-       4 local @font-face rules at the top of the <style> — see references/standalone.md §4. -->
+  <!-- Connected mode (default). In stand-alone mode: DELETE these 3 <link> tags; the
+       @font-face rules are injected with the CSS (inline_deck.py --standalone). -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* === FULL CSS FROM references/css-system.md === */
-    /* Replace DECK_NAME in CSS variable URLs with the actual deck slug */
-  </style>
+  <style>/* @snetor-css */</style>
 </head>
 <body>
   <main class="deck theme-light"><!-- theme-light (default) | theme-dark -->
@@ -238,9 +237,8 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
   <div class="timer-display" id="timer-display" aria-hidden="true">00:00</div>
 
   <script>
-    /* === NAVIGATION JS FROM references/css-system.md === */
-    /* Replace DECK_TITLE with the actual title string */
-    /* Append in this order after navigation JS: */
+    /* @snetor-nav-js */
+    /* Append in this order after the marker: */
     /* 1. Interactivity bootstrap from references/interactivity.md (always) */
     /* 2. Chart.js bootstrap from references/charts.md (only if deck uses charts) */
     /* 3. Counter animation from references/charts.md (only if deck uses .counter) */
@@ -250,6 +248,18 @@ Asset paths from the HTML file: `../assets/<deck-slug>/filename.png`
 </body>
 </html>
 ```
+
+### Inject the design system
+
+Once the slides are written, run the script from this skill — it fills both markers in place:
+
+```bash
+python <THIS-SKILL>/scripts/inline_deck.py "<deck>.html" --slug <deck-slug> --title "<deck title>"
+# stand-alone deck: add --standalone (local asset paths + one @font-face per shipped Raleway file)
+```
+
+It refuses a deck with a missing or doubled marker, and a stand-alone deck that still links Google
+Fonts. Run it once per generation; when updating an existing deck, the CSS is already in the file.
 
 ### Default density = airy (explicit preference of the Snetor CEO)
 
@@ -284,7 +294,7 @@ A slide must breathe. Hard rules, applied to every generation:
 
 ### Non-negotiable rules
 
-1. **Copy the CSS verbatim** from `references/css-system.md`. Do not paraphrase, shorten, or reconstruct from memory. Replace `DECK_NAME` with the actual folder name.
+1. **The design system is injected, never typed.** Write the two markers of the template and run `scripts/inline_deck.py` (see "Inject the design system"). A rule the deck needs that the CSS lacks goes into `assets/deck/snetor-deck.css` through the source repo, not into the deck.
 2. **Language detection** — detect deck language from the request following `references/i18n.md` rules (FR/EN/ES priority, others best-effort). Set `<html lang="...">` to ISO code. Use the i18n dictionary for UI chrome strings (check-card labels, nav aria-labels, "Sources" footer).
 3. **One cover slide** — always `class="slide cover active"`. Subsequent slides have no `cover` class and no `active` class (JS adds it).
 4. **Eyebrow labels in headers** — every content slide header gets an `<div class="eyebrow">` with a 2–3 word section label.
@@ -316,7 +326,7 @@ A slide must breathe. Hard rules, applied to every generation:
 30. **Scope ribbon** — when a costing or a decision covers several deliverables, or a scope that is not obvious, restate the scope with a `scope-ribbon` under the title, repeated on the cost / programme / decision slides.
 31. **Stand-alone (on request)** — when the deck must be self-contained / offline, apply `references/standalone.md` **in full**: embedded `Raleway` fonts (the 3 Google Fonts `<link>` tags removed), assets in a folder **next to** the HTML, zero CDN, no `world-map`. **The 3-check verification is mandatory** (no residual network reference, every asset present on disk, real rendering checked) — a stand-alone deck is not assumed, it is verified. Do not turn this mode on by default: it makes the package heavier and rules out Chart.js charts.
 32. **Font weights (brand guidelines)** — use only `400` (Regular, body), `500` (Medium, subtitles), `600` (SemiBold, headings) and `700` (Bold, accents / micro-labels / figures). **Never `800` or `900`**: those weights are not loaded (`wght@400;500;600;700`), so the browser thickens the 700 into **synthetic bold** — that is no longer Raleway. See `references/css-system.md` → Type Scale. Text is navy `#152B47`, never black.
-33. **Colours on dark backgrounds (brand guidelines)** — `.cover`, a `.dark` accent slide and a `theme-dark` deck slide are the same background, and a colour rule written for one of the three must be written for the other two. The shipped CSS carries that layer: **do not rewrite a light colour by hand on a dark slide**, and do not invent an inline variant. Mappings: `--navy` → `white`, `--muted` → `rgba(255,255,255,.78)`, `--subtle` → `rgba(255,255,255,.72)`, `--green` → `var(--pastel)`, `--border` → `rgba(255,255,255,.24)`. A component that carries its own light background (`card`, `check-card`, `chart-card`, `agenda-item`, `brick`, `mini-table`) needs no variant at all. **If a new component puts text directly on the slide background, its dark variant is added in `references/css-system.md` → « COUCHE FONCÉE COMMUNE », with both selectors on the same rule** — not in the deck. Detail and rationale: `references/css-system.md` → Legibility on a dark background.
+33. **Colours on dark backgrounds (brand guidelines)** — `.cover`, a `.dark` accent slide and a `theme-dark` deck slide are the same background, and a colour rule written for one of the three must be written for the other two. The shipped CSS carries that layer: **do not rewrite a light colour by hand on a dark slide**, and do not invent an inline variant. Mappings: `--navy` → `white`, `--muted` → `rgba(255,255,255,.78)`, `--subtle` → `rgba(255,255,255,.72)`, `--green` → `var(--pastel)`, `--border` → `rgba(255,255,255,.24)`. A component that carries its own light background (`card`, `check-card`, `chart-card`, `agenda-item`, `brick`, `mini-table`) needs no variant at all. **If a new component puts text directly on the slide background, its dark variant is added in `assets/deck/snetor-deck.css` → « COUCHE FONCÉE COMMUNE », with both selectors on the same rule** — not in the deck. Detail and rationale: `references/css-system.md` → Legibility on a dark background.
 
 34. **Scale relative to the screen — never go back to pixels.** The shipped CSS carries
     `html { font-size: clamp(10px, min(1.15vw, 1.85vh), 26px) }` and expresses everything in `rem`,
@@ -426,7 +436,7 @@ When the user asks to update or add slides to an existing HTML file:
 This skill improves over time, through the source repo only. The installed copy is overwritten at
 the next plugin update, and an edit there diverges from every other workstation. After a deck,
 tell the requester what is worth keeping — a new component pattern (`references/components.md`),
-a readability fix (`references/css-system.md`), a structure per audience (Step 2) — so the skill
+a readability fix (`assets/deck/snetor-deck.css`), a structure per audience (Step 2) — so the skill
 maintainer (Clément Peponnet) can commit it to `snetor-ai-guidelines/plugins/snetor-skills/`.
 
 ---
