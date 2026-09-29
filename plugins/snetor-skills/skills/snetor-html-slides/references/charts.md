@@ -372,10 +372,10 @@ Several cost lines stacked per candidate, with a **footer showing the total**. A
 
 ```javascript
 const TCO = { // k€, per candidate
-  'Akeneo':    { build: 62, lic: 68,  staff: 75.75, infra: 32 },
-  'Home-made': { build: 20, lic: 0,   staff: 124.5, infra: 44 }
+  'Solution A': { build: 60, lic: 70, staff: 70,  infra: 30 },
+  'Solution B': { build: 20, lic: 0,  staff: 120, infra: 40 }
 };
-const order = ['Home-made','Akeneo'];
+const order = ['Solution B','Solution A'];
 const total = (c) => { const t = TCO[c]; return t.build + (t.lic + t.staff + t.infra) * 3; };
 function buildStackedTco(canvasId) {
   if (!window.Chart) return;
@@ -404,14 +404,14 @@ Two datasets on one radar to compare two finalists axis-by-axis (mirror profiles
 
 ```javascript
 const DIMS = ['Couverture','UX / adoption','Time-to-value','TCO / run','Pérennisation','Fondation data'];
-const NOTES = { 'Full custom':[5,5,3.75,4,3,4.5], 'Akeneo':[4.9,4,4.5,3.75,5,4] };
+const NOTES = { 'Solution B':[5,4.5,3.5,4,3,4.5], 'Solution A':[4.5,4,4.5,3.5,5,4] };
 function buildRadarFinalists(canvasId) {
   if (!window.Chart) return;
   return new Chart(document.getElementById(canvasId), {
     type: 'radar',
     data: { labels: DIMS, datasets: [
-      { label:'Full custom', data: NOTES['Full custom'], borderColor:'#007D36', backgroundColor:'rgba(0,125,54,.14)', borderWidth:2.5, pointRadius:2.5, pointBackgroundColor:'#007D36' },
-      { label:'Akeneo',      data: NOTES['Akeneo'],      borderColor:'#152B47', backgroundColor:'rgba(21,43,71,.12)', borderWidth:2.5, pointRadius:2.5, pointBackgroundColor:'#152B47' }
+      { label:'Solution B', data: NOTES['Solution B'], borderColor:'#007D36', backgroundColor:'rgba(0,125,54,.14)', borderWidth:2.5, pointRadius:2.5, pointBackgroundColor:'#007D36' },
+      { label:'Solution A', data: NOTES['Solution A'],  borderColor:'#152B47', backgroundColor:'rgba(21,43,71,.12)', borderWidth:2.5, pointRadius:2.5, pointBackgroundColor:'#152B47' }
     ] },
     options: { animation: false, /* see tooltip gotcha */ responsive: true, maintainAspectRatio: false,
       plugins: { legend: { position:'bottom', labels:{ usePointStyle:true, padding:14, font:{family:'Raleway',weight:'600'} } },

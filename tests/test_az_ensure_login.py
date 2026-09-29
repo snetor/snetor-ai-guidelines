@@ -2,8 +2,8 @@
 
 Deux incidents le justifient, et ils ne disent pas la meme chose.
 
-**Le 2026-09-15**, pendant la montee du fork Twenty, la session `az` a expire DEUX FOIS en pleine
-sequence (`AADSTS70043`, duree de vie 7200 s imposee par le controle de frequence de connexion).
+**On 2026-09-15**, during a fork upgrade, the `az` session expired TWICE in the middle of a
+sequence (`AADSTS70043`, session lifetime set by policy).
 L'owner a ete interrompu chaque fois. La regle existait pourtant depuis L41 : c'est une recidive,
 et une recidive demande un mecanisme, pas une phrase de plus.
 
@@ -13,11 +13,9 @@ lit `~/.azure-claude/sp.env`, un fichier qui N'A JAMAIS EXISTE sur ce poste. Il 
 « `az login` manuel requis » et sortait en 0 — depuis le 2026-08-30. De plus il ne se declenchait
 qu'au demarrage de session, alors que l'incident est une expiration EN COURS de sequence.
 
-**Le 2026-09-17**, le repli lui-meme a ete instruit puis ABANDONNE. L identite `sp-claude-code-dev`
-n existait dans Entra sous aucune forme, et la creer aurait remplace une cle qui se perime toutes
-les deux heures par une cle valable jusqu en 2027, posee en clair sur le poste. C est exactement
-l ecart que le controle de frequence de connexion existe pour supprimer, et
-`azure-landing-zone/CLAUDE.md` avait deja tranche : « Pour un acces local, `az login` interactif. »
+**On 2026-09-17**, the fallback itself was examined and DROPPED. Its service principal never
+existed, and creating one would have put a long-lived credential on the workstation, bypassing the
+short session lifetime the policy sets on purpose. Interactive `az login` is the only local path.
 Ce hook previent donc au bon moment, et ne repare rien — deux tests epinglent le fait que ni le
 message ni le code ne promettent le contraire.
 
@@ -138,15 +136,9 @@ def test_un_cache_qui_expire_bientot_relance_la_verification(monkeypatch):
 def test_jeton_mort_previent_sans_promettre_de_repli(monkeypatch, capsys):
     """Le repli par service principal a ete instruit le 2026-09-17, puis ABANDONNE.
 
-    L identite `sp-claude-code-dev` n existait pas dans Entra : ni service principal, ni
-    application, rien dans les `deletedItems`, et l empreinte du certificat ne figurait dans
-    AUCUNE des 141 app registrations du tenant. Le script PowerShell d origine promettait donc
-    depuis six semaines une reconnexion qui ne pouvait pas avoir lieu.
-
-    La creer aurait remplace une cle qui se perime toutes les deux heures par une cle valable
-    jusqu en 2027, posee en clair sur le poste — exactement l ecart que le controle de frequence
-    de connexion existe pour supprimer. `azure-landing-zone/CLAUDE.md` tranche deja :
-    « Pour un acces local, `az login` interactif. »
+    The service principal never existed, so the original PowerShell script had promised for six
+    weeks a re-login that could not happen. Creating it would have put a long-lived credential on
+    the workstation, bypassing the session lifetime the policy sets on purpose.
 
     Ce test epingle la consequence : le message dit quoi faire, et ne promet rien d automatique.
     """
@@ -156,7 +148,7 @@ def test_jeton_mort_previent_sans_promettre_de_repli(monkeypatch, capsys):
     sortie = capsys.readouterr().out
     assert "az login" in sortie
     assert "AADSTS70043" in sortie, "le motif doit nommer l erreur qu on verra vraiment"
-    for promesse in ("sp.env", "service principal sp-claude", "reconnecte"):
+    for promesse in ("sp.env", "service principal", "reconnecte", "logs back in"):
         assert promesse not in sortie, (
             f"le message promet encore un repli automatique ({promesse!r}) : il n existe pas, "
             "et l avoir cru a coute six semaines de fausse securite"

@@ -2,10 +2,9 @@
 
 ## Pourquoi ce hook existe
 
-Le 2026-09-15, pendant la montée du fork Twenty, la session `az` a expiré **deux fois en pleine
-séquence** : `AADSTS70043`, durée de vie 7200 secondes imposée par le contrôle de fréquence de
-connexion de l'accès conditionnel. Chaque expiration a interrompu l'owner au milieu d'un
-enchaînement de commandes, et il a fallu tout reprendre.
+On 2026-09-15, during a fork upgrade, the `az` session expired **twice in the middle of a
+sequence** (`AADSTS70043`: the session lifetime is set by policy). Each expiry interrupted the
+owner halfway through a chain of commands, and everything had to be restarted.
 
 La règle « la session `az` expire après ~2 h, écrire des scripts courts et reprenables » était
 écrite depuis L41. Elle s'est répétée quand même. Une leçon qu'on répète est une leçon qui demande
@@ -23,28 +22,12 @@ mesurés le 2026-09-16 :
    doctrine reproche justement à `memory/`.
 3. **Son repli automatique ne pouvait pas fonctionner**, et personne ne le savait. Voir ci-dessous.
 
-## Le repli par service principal : instruit, puis abandonné
+## Why there is no automatic re-login
 
-Le script d'origine prétendait se reconnecter seul via un service principal à certificat. Il lisait
-`~/.azure-claude/sp.env` pour y trouver `AZURE_CLIENT_ID` et `AZURE_TENANT_ID` — un fichier qui n'a
-jamais existé. Le certificat `sp-claude-code-dev.pem` était bien là, l'identité non.
-
-**Vérifié dans Entra le 2026-09-17, de trois façons :** aucun service principal ni application
-nommés `sp-claude-*`, rien dans les `deletedItems` récupérables, et l'empreinte du certificat
-(`06:FB:61:86:…:D0:73`) ne figure dans les `keyCredentials` d'**aucune** des 141 app registrations
-du tenant, dont 76 en portent au moins un. L'identité n'a jamais été créée.
-
-**Décision du 2026-09-17 : on ne la crée pas**, et le repli automatique est retiré de ce hook.
-
-Le motif est écrit dans `azure-landing-zone/CLAUDE.md` : *« Ne pas chercher à leur créer un secret
-pour "débloquer" un usage local — Entra refusera, et c'est voulu. Pour un accès local, `az login`
-interactif. »* Et l'audit `docs/dated/security-audit-ia-2026-09-14.md` classe 🟢 SOLIDE le fait que
-les identités de CI n'aient **aucun credential**, 🟠 FRAGILE les applications daemon qui portent des
-secrets longs.
-
-Le fond, en une phrase : la session `az` dure deux heures parce qu'une politique d'accès
-conditionnel l'a décidé. Un certificat posé sur le poste aurait ouvert la même porte **jusqu'en
-2027** — il aurait supprimé précisément l'écart que cette fenêtre existe pour créer.
+The original script claimed to log back in on its own with a service principal. That identity
+never existed, so the fallback could never work. On 2026-09-17 we decided not to create it: a
+long-lived credential stored on the workstation would bypass the short session lifetime that the
+policy sets on purpose. Interactive `az login` is the only local path.
 
 Ce hook fait donc ce qu'il peut faire sans rien affaiblir : **il prévient au bon moment**.
 
@@ -95,13 +78,11 @@ _COMMANDE_AZ = re.compile(r"(?:^|[\s;&|(=])az(?:\.cmd)?(?=\s)", re.MULTILINE)
 _OUTILS_SHELL = ("Bash", "PowerShell")
 
 MESSAGE = (
-    "az : la session est expirée (AADSTS70043 — durée de vie 7200 s, imposée par le contrôle de "
-    "fréquence de connexion).\n"
-    "Faire : `az login`, avant d'engager une séquence longue. Le 2026-09-15, deux expirations en "
-    "pleine montée du fork Twenty ont coûté une reprise complète.\n"
-    "Il n'y a pas de reconnexion automatique, et c'est délibéré : un certificat sur le poste "
-    "ouvrirait la même porte jusqu'en 2027, là où cette fenêtre de deux heures existe pour l'en "
-    "empêcher (décision du 2026-09-17)."
+    "az: the session has expired (AADSTS70043).\n"
+    "Do: `az login` before starting a long sequence. On 2026-09-15, two expiries in the middle of "
+    "a fork upgrade cost a full restart.\n"
+    "There is no automatic re-login, on purpose: a credential stored on the workstation would "
+    "bypass the session lifetime set by policy (decision of 2026-09-17)."
 )
 
 

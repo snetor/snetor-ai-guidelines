@@ -809,26 +809,26 @@ States in one line the scope of a cost or decision slide — useful when the cos
   </div>
   <div class="cost-rows animate d3">
     <div class="cost-row">
-      <div class="cr-label"><b>Akeneo</b><span>acheter</span></div>
+      <div class="cr-label"><b>Solution A</b><span>acheter</span></div>
       <div class="cr-bar-wrap">
         <div class="macro-bar" style="width:100%;">
-          <div class="seg intern" style="width:37.1%;">227</div>
-          <div class="seg buy" style="width:44.0%;">270</div>
-          <div class="seg base" style="width:18.9%;">116</div>
+          <div class="seg intern" style="width:33.3%;">200</div>
+          <div class="seg buy" style="width:50.0%;">300</div>
+          <div class="seg base" style="width:16.7%;">100</div>
         </div>
       </div>
-      <div class="cr-total"><b>613 k€</b><span>sur 3 ans</span></div>
+      <div class="cr-total"><b>600 k€</b><span>sur 3 ans</span></div>
     </div>
     <div class="cost-row">
-      <div class="cr-label"><b>Home-made</b><span>construire</span></div>
+      <div class="cr-label"><b>Solution B</b><span>construire</span></div>
       <div class="cr-bar-wrap">
-        <div class="macro-bar" style="width:89.6%;">
-          <div class="seg intern" style="width:68.0%;">374</div>
-          <div class="seg buy" style="width:4.4%;"></div>
-          <div class="seg base" style="width:27.6%;">152</div>
+        <div class="macro-bar" style="width:90.0%;">
+          <div class="seg intern" style="width:70.4%;">380</div>
+          <div class="seg buy" style="width:3.7%;"></div>
+          <div class="seg base" style="width:25.9%;">140</div>
         </div>
       </div>
-      <div class="cr-total"><b>549 k€</b><span>sur 3 ans</span></div>
+      <div class="cr-total"><b>540 k€</b><span>sur 3 ans</span></div>
     </div>
   </div>
   <div class="big-message animate d4">La composition raconte l'histoire : plus de vert = plus internalisé.</div>
@@ -858,12 +858,12 @@ Two options side by side, one highlighted in green (`.good`), the other flagged 
 <div class="tradeoff-grid animate d2">
   <article class="tradeoff-card">
     <i class="ph ph-shopping-cart-simple ph-icon navy" style="margin-bottom:14px;"></i>
-    <h3>Acheter — Akeneo <small style="color:var(--subtle);font-weight:700;">· score 87</small></h3>
+    <h3>Acheter — Solution A <small style="color:var(--subtle);font-weight:700;">· score 85</small></h3>
     <p>Importer la maturité : couverture native, pérennisation, support éditeur.</p>
   </article>
   <article class="tradeoff-card good">
     <i class="ph ph-wrench ph-icon" style="margin-bottom:14px;"></i>
-    <h3>Construire — full custom <small style="color:var(--subtle);font-weight:700;">· score 86</small></h3>
+    <h3>Construire — Solution B <small style="color:var(--subtle);font-weight:700;">· score 84</small></h3>
     <p>Internaliser la compétence : adoption, fondation data, autonomie.</p>
   </article>
 </div>

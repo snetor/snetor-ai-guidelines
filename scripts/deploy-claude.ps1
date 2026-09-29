@@ -832,10 +832,10 @@ python -I -S -X utf8 -c "import os,sys,runpy; p=os.path.expanduser('~/.claude/ho
 
     # Brancher le contrôle de session Azure, en SessionStart ET en PreToolUse.
     #
-    # Le 2026-09-15, pendant la montée du fork Twenty, la session `az` a expiré **deux fois en
-    # pleine séquence** (`AADSTS70043`, durée de vie 7200 s imposée par le contrôle de fréquence de
-    # connexion). Chaque expiration a interrompu l'owner au milieu d'un enchaînement. La règle
-    # « la session `az` expire après ~2 h » était écrite depuis L41 : c'est une récidive.
+    # On 2026-09-15, during a fork upgrade, the `az` session expired **twice in the middle of a
+    # sequence** (`AADSTS70043`, session lifetime set by policy). Each expiry interrupted the owner
+    # halfway through a chain of commands. The rule "the `az` session expires after about 2 h" had
+    # been written down since L41: a repeat offence.
     #
     # ⚠️ Les DEUX branchements comptent, et le second est celui qui traite l'incident. Au démarrage
     # de session, le jeton était vivant les deux fois — c'est en cours de séquence qu'il est tombé.
