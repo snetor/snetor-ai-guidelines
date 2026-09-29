@@ -944,11 +944,12 @@ Wrap items in `<a class="agenda-item" href="?slide=N">` to jump to a slide; use 
 
 ```html
 <section class="slide closing dark">
-  <header class="brand animate"><div class="logo" aria-label="Snetor"></div><div class="eyebrow">Prochaines étapes</div></header>
+  <header class="brand animate"><div class="eyebrow">Prochaines étapes</div></header>
   <div class="body">
     <h2 class="closing-title animate d1">Ce qu'on retient, et la suite.</h2>
     <div class="closing-steps pill-row animate d2"><span class="pill">Valider le périmètre</span><span class="pill">Lancer le pilote</span><span class="pill">Point à J+30</span></div>
     <div class="closing-contact animate d3"><i class="ph ph-envelope-simple"></i> c.peponnet@snetor.com</div>
+    <div class="closing-signature animate d4"><div class="logo" aria-label="Snetor"></div><span class="sig">SNETOR GROUP — <strong>PROGRESS PROVIDER</strong></span></div>
   </div>
   <div class="deco-shapes" aria-hidden="true"></div>
   <footer class="footer"><div class="sources"></div><div class="progress" aria-hidden="true"></div></footer>
