@@ -55,6 +55,7 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ## READMEs techniques (hors docs/)
 
+- [snetor-dev](../plugins/snetor-dev/README.md)
 - [snetor-skills](../plugins/snetor-skills/README.md)
 - [Raleway fonts — stand-alone mode](../plugins/snetor-skills/skills/snetor-html-slides/assets/fonts/README.md)
 - [deploy-claude.ps1 — Déploiement Claude DSI Snetor](../scripts/README.md)
