@@ -62,16 +62,15 @@ One UAC prompt. Everything else is automatic. See [`scripts/README.md`](scripts/
 
 ### Plugin snetor-skills
 
-Five skills for Snetor teams: **`snetor-html-slides`** (animated HTML decks) and
+Three skills for everyone at Snetor: **`snetor-html-slides`** (animated HTML decks) and
 **`snetor-excalidraw-diagrams`** (architecture diagrams with embedded service icons) for branded
-visuals, **`snetor-travel-report`** — helps sales reps dictate client-visit reports (in any
-language) and drafts them in English, Outlook-ready — **`snetor-docs-close`**, which closes a
-branch against the Snetor documentation standard: plan purge, spec arbitration, lessons, todo
-cleanup, `HANDOFF.md` rewrite, then index regeneration and verification — and
-**`snetor-deploy-artefact`**, which ships a business artifact (a power user's standalone HTML page)
-onto an internal container platform: auditing what a new version quietly re-embeds, moving personal
-data out of the image and into shared state, wiring identity onto the platform's own sign-in, and
-proving the result runs before it is published.
+visuals, and **`snetor-travel-report`**, which helps sales reps dictate client-visit reports (in any
+language) and drafts them in English, Outlook-ready.
+
+The tech team's routines — branch closing against the documentation standard, lessons into
+guardrails, dead-test removal, shipping a business artifact onto the internal container platform —
+are in a second plugin, **`snetor-dev`**, installed on developer workstations only:
+`claude plugin install snetor-dev@snetor-ai-guidelines`. See `plugins/snetor-dev/README.md`.
 
 #### Via the marketplace (recommended)
 

@@ -6,11 +6,12 @@ Routeur d état, pas un journal. L historique vit dans `git log`.
 
 ## Où on en est
 
-Le repo distribue la configuration Claude Code de Snetor : les règles d équipe
-de `claude-config/`, importées dans chaque session depuis le `CLAUDE.md`
-personnel du poste, un style de sortie, un statusline, un script de déploiement
-poste, et le plugin `snetor-skills` (huit skills) via le marketplace Claude
-Code.
+The repo distributes Snetor's Claude Code configuration: the team rules of
+`claude-config/`, imported into every session from the workstation's personal
+`CLAUDE.md`, an output style, a status line, a workstation deployment script,
+and two plugins through the Claude Code marketplace — `snetor-skills` (three
+skills for everyone, enabled on every workstation) and `snetor-dev` (four
+developer routines, installed by hand on the tech team's workstations).
 
 Le standard de documentation est livré et appliqué à ce repo : `docs/live/`,
 `docs/dated/`, index généré, vérificateur en CI.
@@ -34,7 +35,7 @@ de ce dépôt, qui est public.
 | Besoin | Fichier |
 |---|---|
 | Comprendre le standard de documentation | `docs/live/documentation-standard.md` |
-| Clôturer une branche proprement | skill `snetor-docs-close` |
+| Clôturer une branche proprement | skill `snetor-docs-close` (plugin `snetor-dev`) |
 | Vérifier la documentation d un repo | `scripts/check_docs.py` |
 | Brancher un repo sur la CI documentaire | `.github/workflows/check-docs.yml` |
 | Installer le poste d un nouveau développeur | `README.md`, `scripts/README.md` |
@@ -42,7 +43,7 @@ de ce dépôt, qui est public.
 | Règles d équipe chargées dans chaque session | `claude-config/snetor-guidelines.md` |
 | Règles de travail propres à ce repo | `CLAUDE.md` |
 | Statusline | `statusline/README.md` |
-| Skills Snetor | `plugins/snetor-skills/README.md` |
+| Skills Snetor | `plugins/snetor-skills/README.md`, `plugins/snetor-dev/README.md` |
 | Charte Snetor d un deck (Brand Book 2025 : tokens, dégradé, graisses, logo) | `plugins/snetor-skills/skills/snetor-html-slides/references/css-system.md` -> Color Tokens, règles 42-47 du `SKILL.md` |
 | Couleurs et lisibilité d un deck sur fond foncé | `plugins/snetor-skills/skills/snetor-html-slides/references/css-system.md` -> Lisibilité sur fond foncé |
 | Index complet de la documentation | `docs/README.md` |

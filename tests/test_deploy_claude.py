@@ -192,5 +192,15 @@ def test_the_deployer_refreshes_the_plugin_and_reports_its_version(source):
     """`enabledPlugins` enables a plugin, it never updates one: on 2026-09-28 the author's
     workstation ran 1.11.0 while main shipped 1.13.0, despite `autoUpdate: true`."""
     assert "claude plugin marketplace update snetor-ai-guidelines" in source
-    assert "claude plugin update snetor-skills@snetor-ai-guidelines" in source
+    assert "$refreshed = @('snetor-skills')" in source
+    assert 'claude plugin update "$p@snetor-ai-guidelines"' in source
     assert "installed_plugins.json" in source, "the installed version is never compared to the repo"
+
+
+def test_the_deployer_never_enables_the_tech_team_plugin(source):
+    """`snetor-dev` is for developer workstations only: the deployer refreshes it where a
+    developer installed it, and must never put it in the list it enables for everyone."""
+    enabled = re.search(r"\$snetorPlugins\s*=\s*\[ordered\]@\{(.*?)\}", source, re.S).group(1)
+    assert "snetor-skills@snetor-ai-guidelines" in enabled
+    assert "snetor-dev" not in enabled
+    assert "-contains 'snetor-dev@snetor-ai-guidelines'" in source
