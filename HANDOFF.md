@@ -9,7 +9,7 @@ Routeur d état, pas un journal. L historique vit dans `git log`.
 The repo distributes Snetor's Claude Code configuration: the team rules of
 `claude-config/`, imported into every session from the workstation's personal
 `CLAUDE.md`, an output style, a status line, a workstation deployment script,
-and two plugins through the Claude Code marketplace — `snetor-skills` (three
+and two plugins through the Claude Code marketplace — `snetor-skills` (four
 skills for everyone, enabled on every workstation) and `snetor-dev` (four
 developer routines, installed by hand on the tech team's workstations).
 
@@ -54,9 +54,9 @@ de ce dépôt, qui est public.
 
 ## Décisions en attente
 
-Le skill `snetor-artifact-to-app` reste une proposition : voir
-`docs/dated/decisions/2026-08-04-skill-artifact-to-app.md`. Il attend le
-runtime partagé des applications internes.
+The business app contract (`snetor-app-artefact`) ships its phase 1; phases 2 (slim down
+`snetor-deploy-artefact`) and 3 (an app repo template) are pending:
+`docs/dated/decisions/2026-10-01-business-app-contract.md`.
 
 ## Pièges du poste
 

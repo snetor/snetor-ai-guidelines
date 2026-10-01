@@ -1,6 +1,6 @@
 {
   "name": "snetor-dev",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Snetor skills for the tech team working in Snetor repos with Claude Code: branch closing against the documentation standard, turning repeated lessons into executable guardrails, dead-test removal, and shipping a business artifact onto the internal container platform. Not meant for business users: install it on developer workstations only.",
   "author": {
     "name": "Snetor",

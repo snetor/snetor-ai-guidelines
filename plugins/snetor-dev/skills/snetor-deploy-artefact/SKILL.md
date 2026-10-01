@@ -38,13 +38,17 @@ back the three names taken out a month earlier, plus a hundred more addresses.
 
 ## Step 1 — Audit, before any plan
 
+An artifact built with `snetor-app-artefact` carries its own check: run
+`check_artefact.py --deploy` from that skill first. It covers the four axes below, and it is the
+gate before the build.
+
 Plan nothing before comparing the new artifact to the one running, on **four
 axes**. They regress together, because they all come from the same local file.
 
 | Axis | What to count | What it means |
 |---|---|---|
 | Personal data | names, email addresses, phone numbers, identifiers | must be 0, apart from a named exception |
-| Persistence | `localStorage`, `sessionStorage`, `indexedDB` | must be 0: the state is shared or it does not exist |
+| Persistence | `localStorage`, `sessionStorage`, `indexedDB` | must be 0 outside the `snetor-store` block: the state is shared or it does not exist |
 | Authentication | passwords, hashes, `crypto.subtle`, login screens | must be 0: that is Easy Auth |
 | Distribution | regenerating the file, "download and replace" | the image replaces the file, not the other way round |
 

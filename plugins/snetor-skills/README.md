@@ -1,8 +1,9 @@
 # snetor-skills
 
-Snetor skills for everyone at Snetor, whatever their job: three skills a colleague outside the tech
+Snetor skills for everyone at Snetor, whatever their job: four skills a colleague outside the tech
 team can use. Two **branded-visual generators** share the same brand assets (Raleway font,
-green/navy palette, logos, service icons); one **business assistant** serves the sales reps.
+green/navy palette, logos, service icons); one **business assistant** serves the sales reps; one
+**app builder** helps a power user build a tool the tech team can deploy as is.
 
 Developer routines (branch closing, lessons into guardrails, dead tests, artifact deployment) live
 in the separate [`snetor-dev`](../snetor-dev/README.md) plugin, installed on developer workstations
@@ -20,6 +21,12 @@ only.
 | Skill | Produces | Triggers on |
 |---|---|---|
 | **`snetor-travel-report`** | An English, Outlook-ready travel report drafted from a sales rep's dictation (any language) | travel report, rapport de voyage, compte rendu de visite, "today I visited…" |
+
+### App builder
+
+| Skill | Produces | Triggers on |
+|---|---|---|
+| **`snetor-app-artefact`** | A one-file business tool built to the platform contract (shared state, Entra identity, no personal data), its `app.json`, and the check that proves it | "outil métier", "app pour l'équipe", "dashboard partagé", "v2 of my tool" |
 
 ## Installation
 
