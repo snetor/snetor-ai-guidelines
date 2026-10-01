@@ -15,7 +15,7 @@
       "name": "snetor-dev",
       "source": "./plugins/snetor-dev",
       "description": "Snetor skills for the tech team: branch closing, lessons into guardrails, dead tests, shipping a business artifact",
-      "version": "1.0.0"
+      "version": "1.0.1"
     }
   ]
 }
