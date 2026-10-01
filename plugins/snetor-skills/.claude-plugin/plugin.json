@@ -1,7 +1,7 @@
 {
   "name": "snetor-skills",
-  "version": "2.0.0",
-  "description": "Snetor skills for everyone at Snetor: branded visuals using the official Snetor design system (animated HTML presentation decks and Excalidraw architecture diagrams with embedded service icons) and a travel-report assistant for sales reps. Developer routines live in the separate snetor-dev plugin.",
+  "version": "2.1.0",
+  "description": "Snetor skills for everyone at Snetor: branded visuals using the official Snetor design system (animated HTML presentation decks and Excalidraw architecture diagrams with embedded service icons) a travel-report assistant for sales reps, and an app builder that keeps a business tool deployable. Developer routines live in the separate snetor-dev plugin.",
   "author": {
     "name": "Snetor",
     "email": "c.peponnet@snetor.com",
@@ -20,6 +20,8 @@
     "design-system",
     "travel-report",
     "sales",
-    "crm"
+    "crm",
+    "app",
+    "power-user"
   ]
 }

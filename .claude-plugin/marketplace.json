@@ -8,8 +8,8 @@
     {
       "name": "snetor-skills",
       "source": "./plugins/snetor-skills",
-      "description": "Snetor skills for everyone: branded visuals (HTML decks, Excalidraw diagrams) and a travel-report assistant for sales reps",
-      "version": "2.0.0"
+      "description": "Snetor skills for everyone: branded visuals (HTML decks, Excalidraw diagrams) a travel-report assistant, and an app builder for power users",
+      "version": "2.1.0"
     },
     {
       "name": "snetor-dev",

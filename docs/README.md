@@ -26,10 +26,11 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### Datés
 
+- [Business app contract: build deployable, instead of fixing at deployment](dated/decisions/2026-10-01-business-app-contract.md) — 2026-10-01, decided
 - [Everything written in a repo is in English](dated/decisions/2026-09-28-english-in-every-repo.md) — 2026-09-28, decided
 - [Outiller les montées de version d'un fork — ce que la première a coûté](dated/decisions/2026-09-17-outillage-des-montees-twenty.md) — 2026-09-17, applied
 - [Règles de migration d'un repo vers le standard de documentation](dated/decisions/2026-08-10-regles-de-migration-d-un-repo.md) — 2026-08-10, decided
-- [Skill de conversion d un artefact HTML en application interne](dated/decisions/2026-08-04-skill-artifact-to-app.md) — 2026-08-04, proposed
+- [Skill de conversion d un artefact HTML en application interne](dated/decisions/2026-08-04-skill-artifact-to-app.md) — 2026-08-04, superseded
 
 ## newcomer
 
@@ -51,7 +52,8 @@ Généré depuis les frontmatters de `docs/live/` et `docs/dated/`. Toute modifi
 
 ### Datés
 
-- [Skill de conversion d un artefact HTML en application interne](dated/decisions/2026-08-04-skill-artifact-to-app.md) — 2026-08-04, proposed
+- [Business app contract: build deployable, instead of fixing at deployment](dated/decisions/2026-10-01-business-app-contract.md) — 2026-10-01, decided
+- [Skill de conversion d un artefact HTML en application interne](dated/decisions/2026-08-04-skill-artifact-to-app.md) — 2026-08-04, superseded
 
 ## READMEs techniques (hors docs/)
 

@@ -2,7 +2,8 @@
 regime: dated
 audience: [dev, business]
 date: 2026-08-04
-status: proposed
+status: superseded
+superseded_by: docs/dated/decisions/2026-10-01-business-app-contract.md
 ---
 
 # Skill de conversion d un artefact HTML en application interne
